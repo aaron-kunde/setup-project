@@ -1,0 +1,5 @@
+* To create symbolic links for each setup-file in a target directory
+#+BEGIN_SRC 
+foreach ($file in Get-ChildItem PROJECT_DIR\setup-*.* | Where-Object { ! ($_.Name -match ".
+~") }) { $fname = $file.Name; New-Item -Path TARGET_DIR\$fname -ItemType SymbolicLink -Value $file}
+#+END_SRC
