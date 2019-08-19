@@ -1,10 +1,7 @@
 #!/bin/sh
 
 MVN_VERSION=3.5.4
-. $HOME/bin/setup-java.sh -s
-# logout
-# echo "Moin"
-# #JAVA_HOME="$HOME/opt/jdk-8u92-windows-x64"
+test $JAVA_HOME || . $HOME/bin/setup-java.sh -i
 
 while getopts sv:j: opt; do
     case $opt in
