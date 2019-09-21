@@ -66,7 +66,7 @@ adoptopenjdk_install_jdk() {
     if [ ! -d $JAVA_HOME ]; then
 	short_version=${version/-/}
 	download_dir=$HOME/Downloads
-	install_file=OpenJDK8U-jdk_x64_windows_hotspot_$short_version.zip
+	install_file=$download_dir/OpenJDK8U-jdk_x64_windows_hotspot_$short_version.zip
 	install_sha256_file=$install_file.sha256
 	url=https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk$version
 	if [ ! -f $download_dir/$install_file ]; then
