@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=3.5.4
+VERSION=3.6.3
 test $JAVA_HOME || . $HOME/bin/setup-java.sh -i
 
 while getopts sv:j: opt; do
