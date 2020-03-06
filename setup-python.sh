@@ -36,7 +36,8 @@ else
     PATH=$PATH:$PYTHON_INSTALL_DIR
     
     echo "Adding user specific scripts to PATH"
-    PATH=$PATH:$HOME/AppData/Roaming/Python/Scripts
+    export PATH=$PATH:$HOME/AppData/Roaming/Python/Scripts
+    export ORIGINAL_PATH="${PATH}"
 fi
 
 echo "Step2: Checking pip installing"
