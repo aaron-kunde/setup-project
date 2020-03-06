@@ -5,3 +5,7 @@ following command in a PowerShell, which has been started as Administrator:
 foreach ($file in Get-ChildItem PROJECT_DIR\setup-*.* | Where-Object { ! ($_.Name -match ".
 ~") }) { $fname = $file.Name; New-Item -Path TARGET_DIR\$fname -ItemType SymbolicLink -Value $file -Force}
 #+END_SRC
+
+* Common Lisp in Emacs
+1. Installation des clisp Interpreters
+2. Setzen der Variabinferior-lisp-program "C:/Users/aaron/opt/clisp-2.49/clisp.exe"
