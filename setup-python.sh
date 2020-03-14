@@ -36,11 +36,13 @@ install_python() {
 	echo "ERROR: Installation file; $trgt_msi_file still not found. Something went wrong!"
 	exit -1
     fi
-    trgt_msi_file_suffix=${trgt_msi_file:2}
-    python_install_dir_suffix=${python_install_dir:2}
-    msiexec //a "${trgt_msi_file:1:1}:${trgt_msi_file_suffix////\\\\}" \
-	    //qb targetdir="${python_install_dir:1:1}:${python_install_dir_suffix////\\}"
 
+    trgt_msi_file_suffix=${trgt_msi_file:2}
+    python_install_dir=$(python_install_dir)
+    python_install_dir_suffix=${python_install_dir:2}
+
+    msiexec //a "${trgt_msi_file:1:1}:${trgt_msi_file_suffix////\\\\}" \
+ 	    //qb targetdir="${python_install_dir:1:1}:${python_install_dir_suffix////\\}"
 }
 
 setup_python() {
