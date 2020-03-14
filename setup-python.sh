@@ -27,14 +27,20 @@ install_python() {
     
     trgt_msi_file=$HOME/Downloads/$msi_file
     if [ ! -f $trgt_msi_file ]; then
-	curl https://www.python.org/ftp/python/$VERSION/$msi_file \
-	     -o $trgt_msi_file
+	echo "Installation file; $trgt_msi_file not found. Fetching new one"
+	url=https://www.python.org/ftp/python/$VERSION/$msi_file
+	curl -sIf $url && curl $url -o $trgt_msi_file
     fi
-    
+
+    if [ ! -f $trgt_msi_file ]; then
+	echo "ERROR: Installation file; $trgt_msi_file still not found. Something went wrong!"
+	exit -1
+    fi
     trgt_msi_file_suffix=${trgt_msi_file:2}
     python_install_dir_suffix=${python_install_dir:2}
     msiexec //a "${trgt_msi_file:1:1}:${trgt_msi_file_suffix////\\\\}" \
 	    //qb targetdir="${python_install_dir:1:1}:${python_install_dir_suffix////\\}"
+
 }
 
 setup_python() {
