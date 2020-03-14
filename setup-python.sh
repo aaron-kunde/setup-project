@@ -3,10 +3,12 @@
 PYTHON_VERSION=2.7.11
 PYTHON_INSTALL_DIR=$HOME/opt/python-$PYTHON_VERSION
 
-echo "Step 1: Checking Python installation"
-python --version 2>/dev/null
+is_python_installed() {
+    python --version 2>/dev/null
+    test $? -eq 0
+}
 
-if [ $? -eq 0 ]; then  
+if is_python_installed; then  
     echo "Python already installed"
 else
     if [ ! -d $PYTHON_INSTALL_DIR ]; then
