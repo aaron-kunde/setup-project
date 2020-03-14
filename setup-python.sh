@@ -42,10 +42,12 @@ else
     export ORIGINAL_PATH="${PATH}"
 fi
 
-echo "Step2: Checking pip installing"
-pip --version 2>/dev/null
+is_pip_installed() {
+    pip --version 2>/dev/null
+    test $? -eq 0
+}
 
-if [ $? -eq 0 ]; then
+if is_pip_installed; then
     echo "pip already installed"
 else
     echo "No installation of pip found"
