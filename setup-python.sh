@@ -1,42 +1,51 @@
 #!/bin/sh
 
-PYTHON_VERSION=2.7.11
-PYTHON_INSTALL_DIR=$HOME/opt/python-$PYTHON_VERSION
+VERSION=2.7.11
+
+print_usage() {
+    echo "${0} [-v VERSION]"
+    echo "  -v VERSION Version of the JDK"
+    echo "     Default: $default_version"
+}
+
+python_install_dir() {
+    echo $HOME/opt/python-$VERSION
+}
 
 is_python_installed() {
     python --version 2>/dev/null &&
-	(python --version 2>&1 | grep -q $PYTHON_VERSION)
+	(python --version 2>&1 | grep $VERSION)
 }
 
 install_python() {
-    echo "Install new python version: $PYTHON_VERSION"
-    msi_file=python-$PYTHON_VERSION.msi
+    echo "Install new python version: $VERSION"
+    msi_file=python-$VERSION.msi
     
     if [ $PROCESSOR_ARCHITECTURE = "AMD64" ]; then
-	msi_file=python-$PYTHON_VERSION.amd64.msi
+	msi_file=python-$VERSION.amd64.msi
     fi
     
     trgt_msi_file=$HOME/Downloads/$msi_file
     if [ ! -f $trgt_msi_file ]; then
-	curl https://www.python.org/ftp/python/$PYTHON_VERSION/$msi_file \
+	curl https://www.python.org/ftp/python/$VERSION/$msi_file \
 	     -o $trgt_msi_file
     fi
     
     trgt_msi_file_suffix=${trgt_msi_file:2}
-    python_install_dir_suffix=${PYTHON_INSTALL_DIR:2}
+    python_install_dir_suffix=${python_install_dir:2}
     msiexec //a "${trgt_msi_file:1:1}:${trgt_msi_file_suffix////\\\\}" \
-	    //qb targetdir="${PYTHON_INSTALL_DIR:1:1}:${python_install_dir_suffix////\\}"
+	    //qb targetdir="${python_install_dir:1:1}:${python_install_dir_suffix////\\}"
 }
 
 setup_python() {
-    if [ ! -d $PYTHON_INSTALL_DIR ]; then
+    if [ ! -d $(python_install_dir) ]; then
 	echo "No Python installation found."
 	install_python
     fi
     
-    echo "Adding python installation $PYTHON_INSTALL_DIR to PATH"
-    PATH=$PATH:$PYTHON_INSTALL_DIR
-    
+    echo "Adding python installation $(python_install_dir) to PATH"
+    PATH=$PATH:$(python_install_dir)
+
     echo "Adding user specific scripts to PATH"
     export PATH=$PATH:$HOME/AppData/Roaming/Python/Scripts
     export ORIGINAL_PATH="${PATH}"
@@ -58,6 +67,12 @@ install_and_setup_pip() {
     python $TRGT_PIP_INSTALL_FILE --user
 }
 
+while getopts v: opt; do
+    case $opt in
+	v) VERSION=$OPTARG
+	   ;;
+    esac
+done
 
 if is_python_installed; then
     echo "Python already installed"
