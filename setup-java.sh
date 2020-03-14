@@ -7,7 +7,7 @@ default_provider=adoptopenjdk
 
 
 print_usage() {
-    echo "${0} [-p PROVIDER] [-v VERSION] [-s]"
+    echo "${0} [-p PROVIDER] [-v VERSION] [-i]"
     echo "  -p PROVIDER Provider for JDK binaries"
     echo "     Possible values are: oracle or adoptopenjdk"
     echo "     Default: $default_provider"
