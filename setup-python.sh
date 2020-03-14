@@ -8,30 +8,32 @@ is_python_installed() {
     test $? -eq 0
 }
 
-if is_python_installed; then  
+install_python() {
+    echo "Install new python version: $PYTHON_VERSION"
+    msi_file=python-$PYTHON_VERSION.msi
+    
+    if [ $PROCESSOR_ARCHITECTURE = "AMD64" ]; then
+	msi_file=python-$PYTHON_VERSION.amd64.msi
+    fi
+    
+    trgt_msi_file=$HOME/Downloads/$msi_file
+    if [ ! -f $trgt_msi_file ]; then
+	curl https://www.python.org/ftp/python/$PYTHON_VERSION/$msi_file \
+	     -o $trgt_msi_file
+    fi
+    
+    trgt_msi_file_suffix=${trgt_msi_file:2}
+    python_install_dir_suffix=${PYTHON_INSTALL_DIR:2}
+    msiexec //a "${trgt_msi_file:1:1}:${trgt_msi_file_suffix////\\\\}" \
+	    //qb targetdir="${PYTHON_INSTALL_DIR:1:1}:${python_install_dir_suffix////\\}"
+}
+
+if is_python_installed; then
     echo "Python already installed"
 else
     if [ ! -d $PYTHON_INSTALL_DIR ]; then
 	echo "No Python installation found."
-	echo "Install new python version: $PYTHON_VERSION"
-	MSI_FILE=python-$PYTHON_VERSION.msi
-	MSI_MD5=241bf8e097ab4e1047d9bb4f59602095
-    
-	if [ $PROCESSOR_ARCHITECTURE = "AMD64" ]; then
-	    MSI_FILE=python-$PYTHON_VERSION.amd64.msi
-	    MSI_MD5=25acca42662d4b02682eee0df3f3446d
-	fi
-    
-	TRGT_MSI_FILE=$HOME/Downloads/$MSI_FILE
-	md5sum $TRGT_MSI_FILE | grep -qe $MSI_MD5 || 
-	    curl https://www.python.org/ftp/python/$PYTHON_VERSION/$MSI_FILE \
-		 -o $TRGT_MSI_FILE &&
-		md5sum $TRGT_MSI_FILE | grep -qe $MSI_MD5
-	
-	TRGT_MSI_FILE_SUFFIX=${TRGT_MSI_FILE:2}
-	PYTHON_INSTALL_DIR_SUFFIX=${PYTHON_INSTALL_DIR:2}
-	msiexec //a "${TRGT_MSI_FILE:1:1}:${TRGT_MSI_FILE_SUFFIX////\\\\}" \
-		//qb TARGETDIR="${PYTHON_INSTALL_DIR:1:1}:${PYTHON_INSTALL_DIR_SUFFIX////\\}"
+	install_python
     fi
 
     echo "Adding python installation $PYTHON_INSTALL_DIR to PATH"
