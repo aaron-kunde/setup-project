@@ -28,33 +28,28 @@ install_python() {
 	    //qb targetdir="${PYTHON_INSTALL_DIR:1:1}:${python_install_dir_suffix////\\}"
 }
 
-if is_python_installed; then
-    echo "Python already installed"
-else
+setup_python() {
     if [ ! -d $PYTHON_INSTALL_DIR ]; then
 	echo "No Python installation found."
 	install_python
     fi
-
+    
     echo "Adding python installation $PYTHON_INSTALL_DIR to PATH"
     PATH=$PATH:$PYTHON_INSTALL_DIR
     
     echo "Adding user specific scripts to PATH"
     export PATH=$PATH:$HOME/AppData/Roaming/Python/Scripts
     export ORIGINAL_PATH="${PATH}"
-fi
+}
 
 is_pip_installed() {
     pip --version 2>/dev/null
     test $? -eq 0
 }
 
-if is_pip_installed; then
-    echo "pip already installed"
-else
-    echo "No installation of pip found"
+install_and_setup_pip() {
     TRGT_PIP_INSTALL_FILE=$HOME/Downloads/get-pip.py
-
+    
     if [ ! -f $TRGT_PIP_INSTALL_FILE ]; then
 	echo "Getting installation for pip"
 	curl https://bootstrap.pypa.io/get-pip.py > $TRGT_PIP_INSTALL_FILE
@@ -62,6 +57,21 @@ else
     
     echo "(Re-)Installing or updating pip user wide"
     python $TRGT_PIP_INSTALL_FILE --user
+}
+
+
+if is_python_installed; then
+    echo "Python already installed"
+else
+    echo "Python not configured"
+    setup_python
+fi
+
+if is_pip_installed; then
+    echo "pip already installed"
+else
+    echo "pip not configured"
+    install_and_setup_pip
 fi
 
 exec "$BASH" --login
