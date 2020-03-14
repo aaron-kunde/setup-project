@@ -4,8 +4,8 @@ PYTHON_VERSION=2.7.11
 PYTHON_INSTALL_DIR=$HOME/opt/python-$PYTHON_VERSION
 
 is_python_installed() {
-    python --version 2>/dev/null
-    test $? -eq 0
+    python --version 2>/dev/null &&
+	(python --version 2>&1 | grep -q $PYTHON_VERSION)
 }
 
 install_python() {
@@ -44,7 +44,6 @@ setup_python() {
 
 is_pip_installed() {
     pip --version 2>/dev/null
-    test $? -eq 0
 }
 
 install_and_setup_pip() {
