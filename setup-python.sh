@@ -4,7 +4,7 @@ VERSION=3.8.2
 
 print_usage() {
     echo "${0} [-v VERSION]"
-    echo "  -v VERSION Version of the JDK"
+    echo "  -v VERSION Version of Python"
     echo "     Default: $default_version"
 }
 
