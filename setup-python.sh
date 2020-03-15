@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=2.7.11
+VERSION=3.2.8
 
 print_usage() {
     echo "${0} [-v VERSION]"
