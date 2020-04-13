@@ -2,7 +2,7 @@
 
 set -e
 
-DEFAULT_VERSION=8u222-b10
+DEFAULT_VERSION=11.0.6+10
 DEFAULT_PROVIDER=adoptopenjdk
 
 
@@ -34,7 +34,7 @@ oracle_check_install_file() {
     filename=${1}
     
     if [ ! -f $filename ]; then
-	echo "Please download $(basename $filename) from to $HOME/Downloads: "
+	echo "Please download $(basename $filename) from URL to $HOME/Downloads: "
 	echo -e "\nhttps://www.oracle.com/technetwork/java/javase/archive-139210.html"
 	exit -1
     fi
@@ -88,25 +88,42 @@ adoptopenjdk_export_variables() {
 
 adoptopenjdk_short_version() {
     version=${1}
-    echo ${version/-/}
+    short_version=${version/-/}
+
+    if [ $major_version -gt 8 ]; then
+	short_version=${version/+/_}
+    fi
+    echo $short_version
+}
+
+adoptopenjdk_download_url() {
+    version="${1}"
+    major_version=$(adoptopenjdk_major_version $version)
+    base_url=https://github.com/AdoptOpenJDK/openjdk$major_version-binaries/releases/download
+    url=$base_url/jdk$version
+    
+    if [ $major_version -gt 8 ]; then
+	url=$base_url/jdk-$version
+    fi
+    echo $url
 }
 
 adoptopenjdk_install_jdk() {
     version=${1}
 
-    if [ ! -d $JAVA_HOME ]; then
+    if [ ! -d $JAVA_HOME ]; then       
 	short_version=$(adoptopenjdk_short_version $version)
 	download_dir=$HOME/Downloads
-	install_file=$download_dir/OpenJDK8U-jdk_x64_windows_hotspot_$short_version.zip
+	install_file=OpenJDK11U-jdk_x64_windows_hotspot_$short_version.zip
 	install_sha256_file=$install_file.sha256
-	url=https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk$version
+	url=$(adoptopenjdk_download_url $version)
 	if [ ! -f $download_dir/$install_file ]; then
-	    echo curl -L $url/$install_file -o $install_file
+	    curl -L $url/$install_file -o $download_dir/$install_file
 	fi
 	if [ ! -f $download_dir/$install_sha256_file ]; then
-	    echo curl -L $url/$install_sha256_file.txt -o $install_sha256_file
+	    curl -L $url/$install_sha256_file.txt -o $download_dir/$install_sha256_file
 	fi
-	pushd $HOME/Downloads
+	pushd $download_dir
 	sha256sum -c $install_sha256_file
 	popd
 	
