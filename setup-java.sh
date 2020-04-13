@@ -107,7 +107,7 @@ case ${provider:-$default_provider} in
 	java -version
 	;;
     adoptopenjdk)
-	version=$default_version
+	version=${version:-$default_version}
 	echo "Setup AdoptOpenJDK $version"
 	export_variables
 	adoptopenjdk_install_jdk
