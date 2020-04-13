@@ -17,7 +17,7 @@ print_usage() {
     echo "     this script in other scripts"
 }
 
-export_variables() {
+oracle_export_variables() {
     export JAVA_HOME="$HOME/opt/jdk$version"
     export PATH="$PATH:$JAVA_HOME/bin"
     export ORIGINAL_PATH="${PATH}"
@@ -62,6 +62,23 @@ oracle_install_jdk() {
     fi
 }
 
+
+adoptopenjdk_major_version() {
+    echo "${1}" | sed -ne "s/^\([0-9]\+\).*/\1/p" 
+}
+
+adoptopenjdk_export_variables() {
+    major_version=$(adoptopenjdk_major_version $version)
+    if [ $major_version -gt 8 ]; then
+	export JAVA_HOME="$HOME/opt/jdk-$version"
+    else
+	export JAVA_HOME="$HOME/opt/jdk$version"
+    fi
+
+    export PATH="$PATH:$JAVA_HOME/bin"
+    export ORIGINAL_PATH="${PATH}"
+}
+
 adoptopenjdk_install_jdk() {
     if [ ! -d $JAVA_HOME ]; then
 	short_version=${version/-/}
@@ -102,14 +119,14 @@ case ${provider:-$default_provider} in
 	default_version=1.8.0_92-b14	
 	version=${version:-$default_version}
 	echo "Setup Oracle JDK $version"
-	export_variables
+	oracle_export_variables
 	oracle_install_jdk
 	java -version
 	;;
     adoptopenjdk)
 	version=${version:-$default_version}
 	echo "Setup AdoptOpenJDK $version"
-	export_variables
+	adoptopenjdk_export_variables
 	adoptopenjdk_install_jdk
 	java -version
 	;;
