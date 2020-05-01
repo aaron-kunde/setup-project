@@ -55,7 +55,8 @@ install_python_exe() {
 	exit -1
     fi
      
-    $trgt_exe_file /quiet SimpleInstall=1 Shortcuts=0 TargetDir=$(trgt_python_install_dir)
+    $trgt_exe_file /quiet SimpleInstall=1 InstallLauncherAllUsers=0 \
+		   Shortcuts=0 TargetDir=$(trgt_python_install_dir)
 }
 
 file_exists_local() {
