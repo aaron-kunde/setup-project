@@ -9,7 +9,7 @@ DEFAULT_PROVIDER=adoptopenjdk
 print_usage() {
     echo "${0} [-p PROVIDER] [-v VERSION] [-i]"
     echo "  -p PROVIDER Provider for JDK binaries"
-    echo "     Possible values are: oracle or adoptopenjdk"
+    echo "     Possible values are: oracle, openjdk or adoptopenjdk"
     echo "     Default: $DEFAULT_PROVIDER"
     echo "  -v VERSION Version of the JDK"
     echo "     Default: $DEFAULT_VERSION"
@@ -121,7 +121,8 @@ adoptopenjdk_install_jdk() {
 	    curl -L $url/$install_file -o $download_dir/$install_file
 	fi
 	if [ ! -f $download_dir/$install_sha256_file ]; then
-	    curl -L $url/$install_sha256_file.txt -o $download_dir/$install_sha256_file
+	    curl -L $url/$install_sha256_file.txt \
+		 -o $download_dir/$install_sha256_file
 	fi
 	pushd $download_dir
 	sha256sum -c $install_sha256_file
@@ -133,6 +134,76 @@ adoptopenjdk_install_jdk() {
 	echo "Directory $JAVA_HOME already exists. Skipping installation"
     fi
 }
+
+openjdk_export_variables() {
+    # TODO
+    # version=${1}
+    # major_version=$(adoptopenjdk_major_version $version)
+
+    # if [ $major_version -gt 8 ]; then
+    # 	export JAVA_HOME="$HOME/opt/jdk-$version"
+    # else
+    # 	export JAVA_HOME="$HOME/opt/jdk$version"
+    # fi
+    export JAVA_HOME="$HOME/opt/java-1.8.0-openjdk-1.8.0.151-1.b12.ojdkbuild.windows.x86_64"
+    export PATH="$PATH:$JAVA_HOME/bin"
+    export ORIGINAL_PATH="${PATH}"
+}
+
+openjdk_download_url() {
+    # TODO
+    # version="${1}"
+    # major_version=$(openjdk_major_version $version)
+    # base_url=https://github.com/AdoptOpenJDK/openjdk$major_version-binaries/releases/download
+    # url=$base_url/jdk$version
+    
+    # if [ $major_version -gt 8 ]; then
+    # 	url=$base_url/jdk-$version
+    # fi
+    # echo $url
+    echo https://github.com/ojdkbuild/ojdkbuild/releases/download/1.8.0.151-1/
+}
+
+openjdk_short_version() {
+    version=${1}
+    short_version=${version/-/}
+
+    if [ $major_version -gt 8 ]; then
+	short_version=${version/+/_}
+    fi
+    echo $short_version
+}
+
+
+openjdk_install_jdk() {
+    version=${1}
+
+    if [ ! -d $JAVA_HOME ]; then       
+	short_version=$(openjdk_short_version $version)
+	download_dir=$HOME/Downloads
+	# TODO: install_file=OpenJDK11U-jdk_x64_windows_hotspot_$short_version.zip
+	install_file=java-1.8.0-openjdk-1.8.0.151-1.b12.ojdkbuild.windows.x86_64.zip
+	install_sha256_file=$install_file.sha256
+	url=$(openjdk_download_url $version)
+	if [ ! -f $download_dir/$install_file ]; then
+	    curl -L $url/$install_file -o $download_dir/$install_file
+	fi
+	if [ ! -f $download_dir/$install_sha256_file ]; then
+	    # curl -L $url/$install_sha256_file.txt \
+		# 	 -o $download_dir/$install_sha256_file
+	    echo "1905ea74b79d6d1d2ea2b2b6887c14770f090fbb8b46e7e1bfb56e92845e9cf2 *$install_file" >  $download_dir/$install_sha256_file
+	fi
+	pushd $download_dir
+	sha256sum -c $install_sha256_file
+	popd
+	
+	# Installing binaries
+	unzip $download_dir/$install_file -d $(dirname $JAVA_HOME)
+    else
+	echo "Directory $JAVA_HOME already exists. Skipping installation"
+    fi
+}
+
 
 while getopts iv:p: opt; do
     case $opt in
@@ -159,6 +230,14 @@ case ${provider:-$DEFAULT_PROVIDER} in
 	echo "Setup AdoptOpenJDK $version"
 	adoptopenjdk_export_variables $version
 	adoptopenjdk_install_jdk $version
+	java -version
+	;;
+    openjdk)
+	DEFAULT_VERSION=1.8.0_151-1.b12
+	version=${version:-$DEFAULT_VERSION}
+	echo "Setup OpenJDK  $version"
+	openjdk_export_variables $version
+	openjdk_install_jdk $version
 	java -version
 	;;
     *)
