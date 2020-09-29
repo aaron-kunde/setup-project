@@ -87,7 +87,7 @@ adoptopenjdk_export_variables() {
 }
 
 adoptopenjdk_short_version() {
-    version=${1}
+    version=${1}    
     short_version=${version/-/}
 
     if [ $major_version -gt 8 ]; then
@@ -136,42 +136,61 @@ adoptopenjdk_install_jdk() {
 }
 
 openjdk_export_variables() {
-    # TODO
-    # version=${1}
-    # major_version=$(adoptopenjdk_major_version $version)
+    version=${1}
+    version_number=$(openjdk_version_number $version)
+    version_number=$(java_version_number $version)
+    version_short=$(openjdk_version_short $version)
 
-    # if [ $major_version -gt 8 ]; then
-    # 	export JAVA_HOME="$HOME/opt/jdk-$version"
-    # else
-    # 	export JAVA_HOME="$HOME/opt/jdk$version"
-    # fi
-    export JAVA_HOME="$HOME/opt/java-1.8.0-openjdk-1.8.0.151-1.b12.ojdkbuild.windows.x86_64"
+    export JAVA_HOME="$HOME/opt/java-$version_number-openjdk-$version_short.ojdkbuild.windows.x86_64"
     export PATH="$PATH:$JAVA_HOME/bin"
     export ORIGINAL_PATH="${PATH}"
 }
 
-openjdk_download_url() {
-    # TODO
-    # version="${1}"
-    # major_version=$(openjdk_major_version $version)
-    # base_url=https://github.com/AdoptOpenJDK/openjdk$major_version-binaries/releases/download
-    # url=$base_url/jdk$version
-    
-    # if [ $major_version -gt 8 ]; then
-    # 	url=$base_url/jdk-$version
-    # fi
-    # echo $url
-    echo https://github.com/ojdkbuild/ojdkbuild/releases/download/1.8.0.151-1/
+openjdk_version_number() {
+    version=${1}
+    echo $version | sed -ne 's/\(\([0-9]\+\.\?\)\+\).*/\1/p'
 }
 
-openjdk_short_version() {
+java_version_number() {
     version=${1}
-    short_version=${version/-/}
 
-    if [ $major_version -gt 8 ]; then
-	short_version=${version/+/_}
-    fi
-    echo $short_version
+    echo $version | sed -ne 's/\([0-9]\+\.[0-9]\.[0-9]\).*/\1/p'
+}
+
+openjdk_version_short() {
+    version=${1}
+
+    echo $version | sed -ne 's/_/./g;s/-ojdkbuild-/./p'
+}
+
+openjdk_install_file() {
+    version=${1}
+    version_number=$(java_version_number $version)
+    version_short=$(openjdk_version_short $version)
+
+    echo java-$version_number-openjdk-$version_short.ojdkbuild.windows.x86_64.zip
+}
+
+openjdk_install_dir() {
+    version=${1}
+    version_number=$(java_version_number $version)
+    version_short=$(openjdk_version_short $version)
+
+    echo java-$version_number-openjdk-$version_short.ojdkbuild.windows.x86_64
+}
+
+
+openjdk_java_version_short() {
+    version=${1}
+    
+    echo $version | sed -ne 's/\(.*\)-ojdkbuild-.*/\1/p'
+}
+
+openjdk_download_url() {
+    version="${1}"
+
+    java_version=$(openjdk_java_version_short $version)
+    echo https://github.com/ojdkbuild/ojdkbuild/releases/download/$java_version/
 }
 
 
@@ -179,18 +198,17 @@ openjdk_install_jdk() {
     version=${1}
 
     if [ ! -d $JAVA_HOME ]; then       
-	short_version=$(openjdk_short_version $version)
+	version_number=$(openjdk_version_number $version)
 	download_dir=$HOME/Downloads
-	# TODO: install_file=OpenJDK11U-jdk_x64_windows_hotspot_$short_version.zip
-	install_file=java-1.8.0-openjdk-1.8.0.151-1.b12.ojdkbuild.windows.x86_64.zip
+
+	install_file=$(openjdk_install_file $version)
 	install_sha256_file=$install_file.sha256
 	url=$(openjdk_download_url $version)
+
 	if [ ! -f $download_dir/$install_file ]; then
-	    curl -L $url/$install_file -o $download_dir/$install_file
+	    curl -v -L $url/$install_file -o $download_dir/$install_file
 	fi
 	if [ ! -f $download_dir/$install_sha256_file ]; then
-	    # curl -L $url/$install_sha256_file.txt \
-		# 	 -o $download_dir/$install_sha256_file
 	    echo "1905ea74b79d6d1d2ea2b2b6887c14770f090fbb8b46e7e1bfb56e92845e9cf2 *$install_file" >  $download_dir/$install_sha256_file
 	fi
 	pushd $download_dir
@@ -233,7 +251,7 @@ case ${provider:-$DEFAULT_PROVIDER} in
 	java -version
 	;;
     openjdk)
-	DEFAULT_VERSION=1.8.0_151-1.b12
+	DEFAULT_VERSION=1.8.0_151-1-ojdkbuild-b12
 	version=${version:-$DEFAULT_VERSION}
 	echo "Setup OpenJDK  $version"
 	openjdk_export_variables $version
