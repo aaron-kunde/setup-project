@@ -73,63 +73,94 @@ adoptopenjdk_major_version() {
 }
 
 adoptopenjdk_export_variables() {
-    version=${1}
-    major_version=$(adoptopenjdk_major_version $version)
+    local version=${1}
+    local major_version=$(adoptopenjdk_major_version $version)
 
     if [ $major_version -gt 8 ]; then
 	export JAVA_HOME="$HOME/opt/jdk-$version"
     else
 	export JAVA_HOME="$HOME/opt/jdk$version"
     fi
-
     export PATH="$PATH:$JAVA_HOME/bin"
     export ORIGINAL_PATH="${PATH}"
 }
 
 adoptopenjdk_short_version() {
-    version=${1}    
-    short_version=${version/-/}
+    local version=${1}
+    local major_version=$(adoptopenjdk_major_version $version)
 
     if [ $major_version -gt 8 ]; then
-	short_version=${version/+/_}
-    fi
-    echo $short_version
+	echo $version | sed -ne 's/\+/_/gp'
+    else
+	echo $version | tr -d '-'
+    fi 
 }
 
 adoptopenjdk_download_url() {
-    version="${1}"
-    major_version=$(adoptopenjdk_major_version $version)
-    base_url=https://github.com/AdoptOpenJDK/openjdk$major_version-binaries/releases/download
-    url=$base_url/jdk$version
+    local version=${1}
+    local major_version=$(adoptopenjdk_major_version $version)
+    local base_url=https://github.com/AdoptOpenJDK/openjdk$major_version-binaries/releases/download
     
     if [ $major_version -gt 8 ]; then
-	url=$base_url/jdk-$version
+	echo $base_url/jdk-$version
+    else
+	echo $base_url/jdk$version
     fi
-    echo $url
+}
+
+adoptopenjdk_install_file() {
+    local version=${1}
+    local short_version=$(adoptopenjdk_short_version $version)       
+
+    case "$(uname -s)" in
+	CYGWIN*|MINGW*|MSYS*)
+	    echo OpenJDK11U-jdk_x64_windows_hotspot_$short_version.zip
+	    ;;
+	*)
+	    echo OpenJDK11U-jdk_x64_linux_hotspot_$short_version.tar.gz
+	    ;;
+    esac
+}
+
+adoptopenjdk_install_binaries() {
+    local install_file=${1}
+    mkdir -p $JAVA_HOME
+    
+    case "$(uname -s)" in
+	CYGWIN*|MINGW*|MSYS*)
+	    unzip $install_file -d $(dirname $JAVA_HOME)
+	    ;;
+	*)
+	    tar zxf $install_file -C $(dirname $JAVA_HOME)
+	    ;;
+    esac
+
+
 }
 
 adoptopenjdk_install_jdk() {
-    version=${1}
+    local version=${1}
 
     if [ ! -d $JAVA_HOME ]; then       
-	short_version=$(adoptopenjdk_short_version $version)
-	download_dir=$HOME/Downloads
-	install_file=OpenJDK11U-jdk_x64_windows_hotspot_$short_version.zip
-	install_sha256_file=$install_file.sha256
-	url=$(adoptopenjdk_download_url $version)
-	if [ ! -f $download_dir/$install_file ]; then
-	    curl -L $url/$install_file -o $download_dir/$install_file
+	local short_version=$(adoptopenjdk_short_version $version)       
+	local install_file=$(adoptopenjdk_install_file $version)
+	local install_sha256_file=$install_file.sha256
+	local url=$(adoptopenjdk_download_url $version)
+
+	if [ ! -f /tmp/$install_file ]; then
+	    curl -L $url/$install_file -o /tmp/$install_file
 	fi
-	if [ ! -f $download_dir/$install_sha256_file ]; then
+	if [ ! -f /tmp/$install_sha256_file ]; then
 	    curl -L $url/$install_sha256_file.txt \
-		 -o $download_dir/$install_sha256_file
+		 -o /tmp/$install_sha256_file
 	fi
-	pushd $download_dir
+	local pwd=$PWD
+	cd /tmp
 	sha256sum -c $install_sha256_file
-	popd
+	cd $pwd
 	
-	# Installing binaries
-	unzip $download_dir/$install_file -d $(dirname $JAVA_HOME)
+	adoptopenjdk_install_binaries /tmp/$install_file
+	
     else
 	echo "Directory $JAVA_HOME already exists. Skipping installation"
     fi
@@ -147,18 +178,19 @@ openjdk_export_variables() {
 }
 
 openjdk_version_number() {
-    version=${1}
+    local version=${1}
+
     echo $version | sed -ne 's/\(\([0-9]\+\.\?\)\+\).*/\1/p'
 }
 
 java_version_number() {
-    version=${1}
+    local version=${1}
 
     echo $version | sed -ne 's/\([0-9]\+\.[0-9]\.[0-9]\).*/\1/p'
 }
 
 openjdk_version_short() {
-    version=${1}
+    local version=${1}
 
     echo $version | sed -ne 's/_/./g;s/-ojdkbuild-/./p'
 }
@@ -264,9 +296,6 @@ case ${provider:-$DEFAULT_PROVIDER} in
 	exit -1
 esac
     
-
-
 if [ ! $skip_exec_bash ]; then
     exec "$BASH" --login -i
 fi
-
