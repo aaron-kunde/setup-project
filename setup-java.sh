@@ -2,7 +2,7 @@
 
 set -e
 
-DEFAULT_VERSION=11.0.6+10
+DEFAULT_VERSION=11.0.9.1+1
 DEFAULT_PROVIDER=adoptopenjdk
 
 
