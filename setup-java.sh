@@ -2,36 +2,34 @@
 
 set -e
 
-DEFAULT_VERSION=11.0.9.1+1
-DEFAULT_PROVIDER=adoptopenjdk
+default_version=11.0.9.1+1
+default_provider=adoptopenjdk
 
 
 print_usage() {
-    echo "${0} [-p PROVIDER] [-v VERSION] [-i]"
+    echo "${0} [-p PROVIDER] [-v VERSION]"
     echo "  -p PROVIDER Provider for JDK binaries"
     echo "     Possible values are: oracle, openjdk or adoptopenjdk"
-    echo "     Default: $DEFAULT_PROVIDER"
+    echo "     Default: $default_provider"
     echo "  -v VERSION Version of the JDK"
-    echo "     Default: $DEFAULT_VERSION"
-    echo "  -i Does not execute a new login shell. This can be used, to import"
-    echo "     this script in other scripts"
+    echo "     Default: $default_version"
 }
 
 oracle_export_variables() {
-    version=${1}
+    local version=${1}
     export JAVA_HOME="$HOME/opt/jdk$version"
     export PATH="$PATH:$JAVA_HOME/bin"
     export ORIGINAL_PATH="${PATH}"
 }
 
 oracle_short_version() {
-    version=${1}
-    tmp=${version:2:-4}
+    local version=${1}
+    local tmp=${version:2:-4}
     echo ${tmp/.0_/u}
 }
 
 oracle_check_install_file() {
-    filename=${1}
+    local filename=${1}
     
     if [ ! -f $filename ]; then
 	echo "Please download $(basename $filename) from URL to $HOME/Downloads: "
@@ -41,19 +39,19 @@ oracle_check_install_file() {
 }    
 
 oracle_install_jdk() {
-    version=${1}
+    local version=${1}
     
     if [ ! -d $JAVA_HOME ]; then
-	short_version=$(oracle_short_version $version)
-	download_dir=$HOME/Downloads
-    	install_file=$download_dir/jdk-$short_version-windows-x64.exe
+	local short_version=$(oracle_short_version $version)
+	local download_dir=$HOME/Downloads
+    	local install_file=$download_dir/jdk-$short_version-windows-x64.exe
     	oracle_check_install_file $install_file
 	
-    	sdk_src_file=$download_dir/jdk-$short_version-linux-x64.tar.gz
+    	local sdk_src_file=$download_dir/jdk-$short_version-linux-x64.tar.gz
     	oracle_check_install_file $sdk_src_file
 	
 	# Installing binaries
-	tmp_dir=$(mktemp -d)
+	local tmp_dir=$(mktemp -d)
 	7z -o$tmp_dir x $install_file
 	unzip $tmp_dir/tools.zip -d $JAVA_HOME
 	rm -rf $tmp_dir
@@ -68,7 +66,7 @@ oracle_install_jdk() {
 
 
 adoptopenjdk_major_version() {
-    version=${1}
+    local version=${1}
     echo $version | sed -ne "s/^\([0-9]\+\).*/\1/p" 
 }
 
@@ -167,10 +165,10 @@ adoptopenjdk_install_jdk() {
 }
 
 openjdk_export_variables() {
-    version=${1}
-    version_number=$(openjdk_version_number $version)
-    version_number=$(java_version_number $version)
-    version_short=$(openjdk_version_short $version)
+    local version=${1}
+    local version_number=$(openjdk_version_number $version)
+    local version_number=$(java_version_number $version)
+    local version_short=$(openjdk_version_short $version)
 
     export JAVA_HOME="$HOME/opt/java-$version_number-openjdk-$version_short.ojdkbuild.windows.x86_64"
     export PATH="$PATH:$JAVA_HOME/bin"
@@ -196,46 +194,46 @@ openjdk_version_short() {
 }
 
 openjdk_install_file() {
-    version=${1}
-    version_number=$(java_version_number $version)
-    version_short=$(openjdk_version_short $version)
+    local version=${1}
+    local version_number=$(java_version_number $version)
+    local version_short=$(openjdk_version_short $version)
 
     echo java-$version_number-openjdk-$version_short.ojdkbuild.windows.x86_64.zip
 }
 
 openjdk_install_dir() {
-    version=${1}
-    version_number=$(java_version_number $version)
-    version_short=$(openjdk_version_short $version)
+    local version=${1}
+    local version_number=$(java_version_number $version)
+    local version_short=$(openjdk_version_short $version)
 
     echo java-$version_number-openjdk-$version_short.ojdkbuild.windows.x86_64
 }
 
 
 openjdk_java_version_short() {
-    version=${1}
+    local version=${1}
     
     echo $version | sed -ne 's/\(.*\)-ojdkbuild-.*/\1/p'
 }
 
 openjdk_download_url() {
-    version="${1}"
+    local version="${1}"
+    local java_version=$(openjdk_java_version_short $version)
 
-    java_version=$(openjdk_java_version_short $version)
     echo https://github.com/ojdkbuild/ojdkbuild/releases/download/$java_version/
 }
 
 
 openjdk_install_jdk() {
-    version=${1}
+    local version=${1}
 
     if [ ! -d $JAVA_HOME ]; then       
-	version_number=$(openjdk_version_number $version)
-	download_dir=$HOME/Downloads
+	local version_number=$(openjdk_version_number $version)
+	local download_dir=$HOME/Downloads
 
-	install_file=$(openjdk_install_file $version)
-	install_sha256_file=$install_file.sha256
-	url=$(openjdk_download_url $version)
+	local install_file=$(openjdk_install_file $version)
+	local install_sha256_file=$install_file.sha256
+	local url=$(openjdk_download_url $version)
 
 	if [ ! -f $download_dir/$install_file ]; then
 	    curl -v -L $url/$install_file -o $download_dir/$install_file
@@ -255,10 +253,8 @@ openjdk_install_jdk() {
 }
 
 
-while getopts iv:p: opt; do
+while getopts v:p: opt; do
     case $opt in
-	i) skip_exec_bash=true
-	   ;;
 	v) version=$OPTARG
 	   ;;
 	p) provider=$OPTARG
@@ -266,25 +262,25 @@ while getopts iv:p: opt; do
     esac
 done
 
-case ${provider:-$DEFAULT_PROVIDER} in
+case ${provider:-$default_provider} in
     oracle)
-	DEFAULT_VERSION=1.8.0_92-b14	
-	version=${version:-$DEFAULT_VERSION}
+	default_version=1.8.0_92-b14
+	version=${version:-$default_version}
 	echo "Setup Oracle JDK $version"
 	oracle_export_variables $version
 	oracle_install_jdk $version
 	java -version
 	;;
     adoptopenjdk)
-	version=${version:-$DEFAULT_VERSION}
+	version=${version:-$default_version}
 	echo "Setup AdoptOpenJDK $version"
 	adoptopenjdk_export_variables $version
 	adoptopenjdk_install_jdk $version
 	java -version
 	;;
     openjdk)
-	DEFAULT_VERSION=1.8.0_151-1-ojdkbuild-b12
-	version=${version:-$DEFAULT_VERSION}
+	default_version=1.8.0_151-1-ojdkbuild-b12
+	version=${version:-$default_version}
 	echo "Setup OpenJDK  $version"
 	openjdk_export_variables $version
 	openjdk_install_jdk $version
@@ -295,7 +291,3 @@ case ${provider:-$DEFAULT_PROVIDER} in
 	print_usage
 	exit -1
 esac
-    
-if [ ! $skip_exec_bash ]; then
-    exec "$BASH" --login -i
-fi
