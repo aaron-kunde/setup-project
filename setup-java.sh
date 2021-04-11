@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -e
-
 default_version=11.0.9.1+1
 default_provider=adoptopenjdk
 
