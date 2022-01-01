@@ -1,10 +1,104 @@
-* Create symbolic links in MS Windows
-To create symbolic links for each setup-file in a target directory, execute the
-following command in a PowerShell, which has been started as Administrator:
-#+BEGIN_SRC 
-foreach ($file in Get-ChildItem PROJECT_DIR\setup-*.* | Where-Object { ! ($_.Name -match ".~") }) { $fname = $file.Name; New-Item -Path TARGET_DIR\$fname -ItemType SymbolicLink -Value $file -Force}
-#+END_SRC
+* General
+** Bash
+   The scripts shall be usable from an interactive shell and as a
+   dependent script for other scripts. The following methods of using
+   the scripts have been evaluated:
+   - Execution in shell :: Just executing the script in a shell does
+     not export variables in the current shell, because variables are
+     only exported in SubShells. See:
+     https://tldp.org/LDP/abs/html/gotchas.html#PARCHILDPROBREF
+   - Inclusion in shell :: Include the scritp into the current shell,
+     using ~source~ or ~.~ exposes all variables into the current
+     script (or shell), because they are no subprocesses. It also
+     closes the shell, if the bash option ~-e~ is set in the script or
+     its dependencies. Inclusion of other scripts doesn't work with
+     relative paths, because ~dirname $0~ in a shell points to the
+     directory of the shell executable (e.g. ~bin/bash~). Furhtermore
+     ~getopts~ doesn't work properly for repeated calls with inclusion
+     of dependent scripts
+   - Using as init file :: ~bash --init-file .. [-i]~ sets variables
+     regardless of exports. It also ignores the file ~~/.bashrc~.
+     
+   To be able to use the scripts as well from an interactive shell and
+   as an included dependency the following template for a script with
+   dependencies is used:
+   #+BEGIN_SRC bash
+     #!/bin/sh
 
-* Common List in Emacs
+     # Include dependencies / parents. Should be the first entries, to prevent,
+     # that includes overwrite declarations
+     . $(dirname ${0})/setup-parent.sh
+
+     set -e
+
+     VERSION=child_default
+     PARENT_VERSION=parent_from_child_default
+
+     print_usage() { ... }
+
+     # Method name should be unique through all used scripts
+     child_stuff() { ... }
+
+     options() {
+	 while getopts hv:p: opt; do
+		     case $opt in
+		 h) print_usage
+		    ;;
+		 v) VERSION=$OPTARG
+		    ;;
+		 p) PARENT_VERSION=$OPTARG
+		    ;;
+		 ...
+	     esac	
+	 done
+     }
+
+     ...
+
+     # EOF: Handles calling from interactive login shell or as inclusion
+     if [ $(caller | cut -d' ' -f2) == "NULL" ]; then
+	 # Was called from interactive login shell
+	 options ${@}
+	 parent_stuff $PARENT_VERSION # Defined in setup-parent.sh
+	 child_stuff $VERSION 
+	 ...
+	 /bin/bash --login -i
+     else
+	 # Was called from inclusion. Usually do nothing
+     fi
+   #+END_SRC
+
+** Default version 
+   For each Script, a default version ~VERSION~ is defined, which is
+   set after the last needed version.
+
+** Removing the MAX_PATH limitation in MS Windoes
+   Followin the intructions from the [[https://docs.python.org/3/using/windows.html#removing-the-max-path-limitation][Python documentation]], set the
+   registry key of
+   ~HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled~
+   to ~1~.
+
+** Create symbolic links in MS Windows
+   To create symbolic links for each setup-file in a target directory,
+   execute the following command in a PowerShell, which has been
+   started as Administrator:
+   #+BEGIN_SRC
+     foreach ($file in Get-ChildItem PROJECT_DIR\setup-*.* | Where-Object { ! ($_.Name -match ".~") }) { $fname = $file.Name; New-Item -Path TARGET_DIR\$fname -ItemType SymbolicLink -Value $file -Force}
+   #+END_SRC
+
+* Common Lisp in Emacs
 1. Installation des clisp Interpreters
 2. Setzen der Variabinferior-lisp-program "C:/Users/aaron/opt/clisp-2.49/clisp.exe"
+
+* Python
+  https://docs.python.org/3/using/windows.html
+  
+  Windows versions of Python are fetched from https://www.python.org/downloads.
+
+  Older version (pre 3.5) use MSI-Installer, while newer versions use
+  EXE-Installer. Therefore, the schript first tries to use the MSI-Installer
+  and then the EXE-Installer
+
+** Unistall
+   Use Installer to complete Uninstall, since /Apps and Features/
+   under Windowa doesn't work always properly
