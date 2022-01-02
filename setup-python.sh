@@ -17,9 +17,12 @@ options() {
 }
 
 print_usage() {
-    echo "${0} [-v VERSION]"
-    echo "  -v VERSION Version of Python"
-    echo "     Default: $default_version"
+    cat <<End-of-usage
+${0} [-h] [-v VERSION]"
+    -h Print this message
+    -v VERSION Version  of Python
+       Default: $VERSION"
+End-of-usage
 }
 
 python_install_dir() {
