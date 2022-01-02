@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 VERSION=3.8.2
 
 options() {
