@@ -30,8 +30,7 @@ python_install_dir() {
 }
 
 is_python_installed() {
-    python --version 2>/dev/null &&
-	(python --version 2>&1 | grep $VERSION)
+    python --version 2>/dev/null && (python --version 2>&1 | grep $VERSION)
 }
 
 installer_url() {
