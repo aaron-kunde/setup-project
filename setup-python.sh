@@ -177,4 +177,8 @@ else
     install_and_setup_pip
 fi
 
-exec "$BASH" --login
+if [ $(caller | cut -d' ' -f2) == "NULL" ]; then
+    options ${@}
+    setup_python $VERSION
+    /bin/bash --login -i
+fi
