@@ -2,6 +2,18 @@
 
 VERSION=3.8.2
 
+options() {
+    while getopts hv:p: opt; do
+	case $opt in
+	    h) print_usage
+	       exit 0
+	       ;;
+	    v) VERSION=$OPTARG
+	       ;;
+	esac	
+    done
+}
+
 print_usage() {
     echo "${0} [-v VERSION]"
     echo "  -v VERSION Version of Python"

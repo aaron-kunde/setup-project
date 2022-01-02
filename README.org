@@ -41,8 +41,9 @@
 
      options() {
 	 while getopts hv:p: opt; do
-		     case $opt in
+	     case $opt in
 		 h) print_usage
+		    exit 0
 		    ;;
 		 v) VERSION=$OPTARG
 		    ;;
