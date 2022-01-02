@@ -34,7 +34,9 @@ is_python_installed() {
 }
 
 installer_url() {
-    echo https://www.python.org/ftp/python/$VERSION/${1}
+    local filename=${1}
+
+    echo https://www.python.org/ftp/python/$VERSION/$filename
 }
 
 trgt_installer_file() {
@@ -42,29 +44,30 @@ trgt_installer_file() {
 }
 
 install_python_msi() {
-    msi_file=${1}
-    trgt_msi_file=$(trgt_installer_file $msi_file)
+    local msi_file=${1}
+    local trgt_msi_file=$(trgt_installer_file $msi_file)
 
     if [ ! -f $trgt_msi_file ]; then
 	echo "ERROR: Installation file; $trgt_msi_file still not found. Something went wrong!"
 	exit -1
     fi
     
-    trgt_msi_file_suffix=${trgt_msi_file:2}
+    local trgt_msi_file_suffix=${trgt_msi_file:2}
 
     msiexec //a "${trgt_msi_file:1:1}:${trgt_msi_file_suffix////\\\\}" \
  	    //qb targetdir=$(trgt_python_install_dir)
 }
 
 trgt_python_install_dir() {
-    python_install_dir=$(python_install_dir)
-    python_install_dir_suffix=${python_install_dir:2}
+    local python_install_dir=$(python_install_dir)
+    local python_install_dir_suffix=${python_install_dir:2}
+
     echo "${python_install_dir:1:1}:${python_install_dir_suffix////\\}"
 }
 
 install_python_exe() {
-    exe_file=${1}
-    trgt_exe_file=$(trgt_installer_file $exe_file)
+    local exe_file=${1}
+    local trgt_exe_file=$(trgt_installer_file $exe_file)
 
     if [ ! -f $trgt_exe_file ]; then
 	echo "ERROR: Installation file; $trgt_exe_file still not found. Something went wrong!"
@@ -80,11 +83,13 @@ file_exists_local() {
 }
 
 file_exists_remote() {
-    curl -sIf $(installer_url ${1}) >/dev/null
+    local filename=${1}
+    curl -sIf $(installer_url ${filename}) >/dev/null
 }
 
 download_file() {
-    curl $(installer_url ${1}) -o $(trgt_installer_file ${1})
+    local filename=${1}
+    curl $(installer_url ${filename}) -o $(trgt_installer_file ${filename})
 }
     
 install_python() {
