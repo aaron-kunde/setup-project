@@ -140,6 +140,15 @@ install_and_setup_python() {
     export ORIGINAL_PATH="${PATH}"
 }
 
+setup_python() {
+    if is_python_installed; then
+	echo "Python already installed"
+    else
+	echo "Python not configured"
+	install_and_setup_python
+    fi
+}
+
 while getopts v: opt; do
     case $opt in
 	v) VERSION=$OPTARG
@@ -147,15 +156,9 @@ while getopts v: opt; do
     esac
 done
 
-if is_python_installed; then
-    echo "Python already installed"
-else
-    echo "Python not configured"
-    install_and_setup_python
-fi
 
 if [ $(caller | cut -d' ' -f2) == "NULL" ]; then
     options ${@}
-    setup_python $VERSION
+    setup_python
     /bin/bash --login -i
 fi
