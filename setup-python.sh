@@ -140,22 +140,6 @@ install_and_setup_python() {
     export ORIGINAL_PATH="${PATH}"
 }
 
-is_pip_installed() {
-    pip --version 2>/dev/null
-}
-
-install_and_setup_pip() {
-    TRGT_PIP_INSTALL_FILE=$HOME/Downloads/get-pip.py
-    
-    if [ ! -f $TRGT_PIP_INSTALL_FILE ]; then
-	echo "Getting installation for pip"
-	curl https://bootstrap.pypa.io/get-pip.py > $TRGT_PIP_INSTALL_FILE
-    fi
-    
-    echo "(Re-)Installing or updating pip user wide"
-    python $TRGT_PIP_INSTALL_FILE --user
-}
-
 while getopts v: opt; do
     case $opt in
 	v) VERSION=$OPTARG
@@ -168,13 +152,6 @@ if is_python_installed; then
 else
     echo "Python not configured"
     install_and_setup_python
-fi
-
-if is_pip_installed; then
-    echo "pip already installed"
-else
-    echo "pip not configured"
-    install_and_setup_pip
 fi
 
 if [ $(caller | cut -d' ' -f2) == "NULL" ]; then
