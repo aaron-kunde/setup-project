@@ -1,16 +1,16 @@
 #!/bin/sh
 
-default_version=11.0.9.1+1
-default_provider=adoptopenjdk
+default_jdk_version=11.0.9.1+1
+default_jdk_provider=adoptopenjdk
 
 
 print_usage() {
     echo "${0} [-p PROVIDER] [-v VERSION]"
     echo "  -p PROVIDER Provider for JDK binaries"
     echo "     Possible values are: oracle, openjdk or adoptopenjdk"
-    echo "     Default: $default_provider"
+    echo "     Default: $default_jdk_provider"
     echo "  -v VERSION Version of the JDK"
-    echo "     Default: $default_version"
+    echo "     Default: $default_jdk_version"
 }
 
 oracle_export_variables() {
@@ -260,25 +260,25 @@ while getopts v:p: opt; do
     esac
 done
 
-case ${provider:-$default_provider} in
+case ${provider:-$default_jdk_provider} in
     oracle)
-	default_version=1.8.0_92-b14
-	version=${version:-$default_version}
+	default_jdk_version=1.8.0_92-b14
+	version=${version:-$default_jdk_version}
 	echo "Setup Oracle JDK $version"
 	oracle_export_variables $version
 	oracle_install_jdk $version
 	java -version
 	;;
     adoptopenjdk)
-	version=${version:-$default_version}
+	version=${version:-$default_jdk_version}
 	echo "Setup AdoptOpenJDK $version"
 	adoptopenjdk_export_variables $version
 	adoptopenjdk_install_jdk $version
 	java -version
 	;;
     openjdk)
-	default_version=1.8.0_151-1-ojdkbuild-b12
-	version=${version:-$default_version}
+	default_jdk_version=1.8.0_151-1-ojdkbuild-b12
+	version=${version:-$default_jdk_version}
 	echo "Setup OpenJDK  $version"
 	openjdk_export_variables $version
 	openjdk_install_jdk $version
