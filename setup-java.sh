@@ -1,28 +1,43 @@
 #!/bin/sh
 
-default_jdk_version=11.0.9.1+1
-default_jdk_provider=adoptopenjdk
-
+DEFAULT_JDK_VERSION=11.0.9.1+1
+DEFAULT_JDK_PROVIDER=adoptopenjdk
 
 print_usage() {
     echo "${0} [-p PROVIDER] [-v VERSION]"
     echo "  -p PROVIDER Provider for JDK binaries"
     echo "     Possible values are: oracle, openjdk or adoptopenjdk"
-    echo "     Default: $default_jdk_provider"
+    echo "     Default: $DEFAULT_JDK_PROVIDER"
     echo "  -v VERSION Version of the JDK"
-    echo "     Default: $default_jdk_version"
+    echo "     Default: $DEFAULT_JDK_VERSION"
+}
+
+cleanup_vars() {
+    unset DEFAULT_JDK_VERSION
+    unset JDK_VERSION
+    unset DEFAULT_JDK_PROVIDER
+    unset JDK_PROVIDER
+    OPTIND=1
+
+    if [ -v SETUP_JAVA_ORIGINAL_PATH ]; then
+	export PATH="${SETUP_JAVA_ORIGINAL_PATH}"
+	unset SETUP_JAVA_ORIGINAL_PATH
+    fi
+}
+
+abort() {
+    cleanup_vars
+    return -1
 }
 
 oracle_export_variables() {
-    local version=${1}
-    export JAVA_HOME="$HOME/opt/jdk$version"
+    export JAVA_HOME="$HOME/opt/jdk$JDK_VERSION"
     export PATH="$PATH:$JAVA_HOME/bin"
-    export ORIGINAL_PATH="${PATH}"
+    SETUP_JAVA_ORIGINAL_PATH="${PATH}"
 }
 
 oracle_short_version() {
-    local version=${1}
-    local tmp=${version:2:-4}
+    local tmp=${JDK_VERSION:2:-4}
     echo ${tmp/.0_/u}
 }
 
@@ -32,15 +47,13 @@ oracle_check_install_file() {
     if [ ! -f $filename ]; then
 	echo "Please download $(basename $filename) from URL to $HOME/Downloads: "
 	echo -e "\nhttps://www.oracle.com/technetwork/java/javase/archive-139210.html"
-	return -1
+	abort
     fi
 }    
 
 oracle_install_jdk() {
-    local version=${1}
-    
     if [ ! -d $JAVA_HOME ]; then
-	local short_version=$(oracle_short_version $version)
+	local short_version=$(oracle_short_version)
 	local download_dir=$HOME/Downloads
     	local install_file=$download_dir/jdk-$short_version-windows-x64.exe
     	oracle_check_install_file $install_file
@@ -64,49 +77,44 @@ oracle_install_jdk() {
 
 
 adoptopenjdk_major_version() {
-    local version=${1}
-    echo $version | sed -ne "s/^\([0-9]\+\).*/\1/p" 
+    echo $JDK_VERSION | sed -ne "s/^\([0-9]\+\).*/\1/p" 
 }
 
 adoptopenjdk_export_variables() {
-    local version=${1}
-    local major_version=$(adoptopenjdk_major_version $version)
+    local major_version=$(adoptopenjdk_major_version)
 
     if [ $major_version -gt 8 ]; then
-	export JAVA_HOME="$HOME/opt/jdk-$version"
+	export JAVA_HOME="$HOME/opt/jdk-$JDK_VERSION"
     else
-	export JAVA_HOME="$HOME/opt/jdk$version"
+	export JAVA_HOME="$HOME/opt/jdk$JDK_VERSION"
     fi
     export PATH="$PATH:$JAVA_HOME/bin"
-    export ORIGINAL_PATH="${PATH}"
+    SETUP_JAVA_ORIGINAL_PATH="${PATH}"
 }
 
 adoptopenjdk_short_version() {
-    local version=${1}
-    local major_version=$(adoptopenjdk_major_version $version)
+    local major_version=$(adoptopenjdk_major_version)
 
     if [ $major_version -gt 8 ]; then
-	echo $version | sed -ne 's/\+/_/gp'
+	echo $JDK_VERSION | sed -ne 's/\+/_/gp'
     else
-	echo $version | tr -d '-'
+	echo $JDK_VERSION | tr -d '-'
     fi 
 }
 
 adoptopenjdk_download_url() {
-    local version=${1}
-    local major_version=$(adoptopenjdk_major_version $version)
+    local major_version=$(adoptopenjdk_major_version)
     local base_url=https://github.com/AdoptOpenJDK/openjdk$major_version-binaries/releases/download
     
     if [ $major_version -gt 8 ]; then
-	echo $base_url/jdk-$version
+	echo $base_url/jdk-$JDK_VERSION
     else
-	echo $base_url/jdk$version
+	echo $base_url/jdk$JDK_VERSION
     fi
 }
 
 adoptopenjdk_install_file() {
-    local version=${1}
-    local short_version=$(adoptopenjdk_short_version $version)       
+    local short_version=$(adoptopenjdk_short_version)       
 
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
@@ -135,13 +143,11 @@ adoptopenjdk_install_binaries() {
 }
 
 adoptopenjdk_install_jdk() {
-    local version=${1}
-
     if [ ! -d $JAVA_HOME ]; then       
-	local short_version=$(adoptopenjdk_short_version $version)       
-	local install_file=$(adoptopenjdk_install_file $version)
+	local short_version=$(adoptopenjdk_short_version)       
+	local install_file=$(adoptopenjdk_install_file)
 	local install_sha256_file=$install_file.sha256
-	local url=$(adoptopenjdk_download_url $version)
+	local url=$(adoptopenjdk_download_url)
 
 	if [ ! -f /tmp/$install_file ]; then
 	    curl -L $url/$install_file -o /tmp/$install_file
@@ -163,75 +169,60 @@ adoptopenjdk_install_jdk() {
 }
 
 openjdk_export_variables() {
-    local version=${1}
-    local version_number=$(openjdk_version_number $version)
-    local version_number=$(java_version_number $version)
-    local version_short=$(openjdk_version_short $version)
+    local version_number=$(java_version_number)
+    local version_short=$(openjdk_version_short)
 
     export JAVA_HOME="$HOME/opt/java-$version_number-openjdk-$version_short.ojdkbuild.windows.x86_64"
     export PATH="$PATH:$JAVA_HOME/bin"
-    export ORIGINAL_PATH="${PATH}"
+    SETUP_JAVA_ORIGINAL_PATH="${PATH}"
 }
 
 openjdk_version_number() {
-    local version=${1}
-
-    echo $version | sed -ne 's/\(\([0-9]\+\.\?\)\+\).*/\1/p'
+    echo $JDK_VERSION | sed -ne 's/\(\([0-9]\+\.\?\)\+\).*/\1/p'
 }
 
 java_version_number() {
-    local version=${1}
-
-    echo $version | sed -ne 's/\([0-9]\+\.[0-9]\.[0-9]\).*/\1/p'
+    echo $JDK_VERSION | sed -ne 's/\([0-9]\+\.[0-9]\.[0-9]\).*/\1/p'
 }
 
 openjdk_version_short() {
-    local version=${1}
-
-    echo $version | sed -ne 's/_/./g;s/-ojdkbuild-/./p'
+    echo $JDK_VERSION | sed -ne 's/_/./g;s/-ojdkbuild-/./p'
 }
 
 openjdk_install_file() {
-    local version=${1}
-    local version_number=$(java_version_number $version)
-    local version_short=$(openjdk_version_short $version)
+    local version_number=$(java_version_number)
+    local version_short=$(openjdk_version_short)
 
     echo java-$version_number-openjdk-$version_short.ojdkbuild.windows.x86_64.zip
 }
 
 openjdk_install_dir() {
-    local version=${1}
-    local version_number=$(java_version_number $version)
-    local version_short=$(openjdk_version_short $version)
+    local version_number=$(java_version_number)
+    local version_short=$(openjdk_version_short)
 
     echo java-$version_number-openjdk-$version_short.ojdkbuild.windows.x86_64
 }
 
 
 openjdk_java_version_short() {
-    local version=${1}
-    
-    echo $version | sed -ne 's/\(.*\)-ojdkbuild-.*/\1/p'
+    echo $JDK_VERSION | sed -ne 's/\(.*\)-ojdkbuild-.*/\1/p'
 }
 
 openjdk_download_url() {
-    local version="${1}"
-    local java_version=$(openjdk_java_version_short $version)
+    local java_version=$(openjdk_java_version_short)
 
     echo https://github.com/ojdkbuild/ojdkbuild/releases/download/$java_version/
 }
 
 
 openjdk_install_jdk() {
-    local version=${1}
-
     if [ ! -d $JAVA_HOME ]; then       
-	local version_number=$(openjdk_version_number $version)
-	local download_dir=$HOME/Downloads
+	local version_number=$(openjdk_version_number)
+	local download_dir=/tmp
 
-	local install_file=$(openjdk_install_file $version)
+	local install_file=$(openjdk_install_file)
 	local install_sha256_file=$install_file.sha256
-	local url=$(openjdk_download_url $version)
+	local url=$(openjdk_download_url)
 
 	if [ ! -f $download_dir/$install_file ]; then
 	    curl -v -L $url/$install_file -o $download_dir/$install_file
@@ -250,42 +241,43 @@ openjdk_install_jdk() {
     fi
 }
 
-
 while getopts v:p: opt; do
     case $opt in
-	v) version=$OPTARG
+	v) JDK_VERSION=$OPTARG
 	   ;;
-	p) provider=$OPTARG
+	p) JDK_PROVIDER=$OPTARG
 	   ;;
     esac
 done
 
-case ${provider:-$default_jdk_provider} in
+case ${JDK_PROVIDER:-$DEFAULT_JDK_PROVIDER} in
     oracle)
-	default_jdk_version=1.8.0_92-b14
-	version=${version:-$default_jdk_version}
-	echo "Setup Oracle JDK $version"
-	oracle_export_variables $version
-	oracle_install_jdk $version
+	DEFAULT_JDK_VERSION=1.8.0_92-b14
+	JDK_VERSION=${JDK_VERSION:-$DEFAULT_JDK_VERSION}
+	echo "Setup Oracle JDK $JDK_VERSION"
+	oracle_export_variables
+	oracle_install_jdk
 	java -version
 	;;
     adoptopenjdk)
-	version=${version:-$default_jdk_version}
-	echo "Setup AdoptOpenJDK $version"
-	adoptopenjdk_export_variables $version
-	adoptopenjdk_install_jdk $version
+	JDK_VERSION=${JDK_VERSION:-$DEFAULT_JDK_VERSION}
+	echo "Setup AdoptOpenJDK $JDK_VERSION"
+	adoptopenjdk_export_variables
+	adoptopenjdk_install_jdk
 	java -version
 	;;
     openjdk)
-	default_jdk_version=1.8.0_151-1-ojdkbuild-b12
-	version=${version:-$default_jdk_version}
-	echo "Setup OpenJDK  $version"
-	openjdk_export_variables $version
-	openjdk_install_jdk $version
+	DEFAULT_JDK_VERSION=1.8.0_151-1-ojdkbuild-b12
+	JDK_VERSION=${JDK_VERSION:-$DEFAULT_JDK_VERSION}
+	echo "Setup OpenJDK  $JDK_VERSION"
+	openjdk_export_variables
+	openjdk_install_jdk
 	java -version
 	;;
     *)
-	echo "ERROR: Wrong provider"
+	echo "ERROR: Wrong provider:$JDK_PROVIDER"
 	print_usage
-	return -1
+	abort
 esac
+
+cleanup_vars
