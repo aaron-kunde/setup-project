@@ -22,9 +22,27 @@ abort() {
     cleanup_vars
     return -1
 }
-    
-install_dir() {
-    echo $HOME/opt/node-$NODEJS_VERSION-win-x64
+
+installation_dir() {
+    case "$(uname -s)" in
+	CYGWIN*|MINGW*|MSYS*)
+	    echo $HOME/opt/node-$NODEJS_VERSION-win-x64
+	    ;;
+	*)
+	    echo $HOME/opt/node-$NODEJS_VERSION-linux-x64
+	    ;;
+    esac
+}
+
+nodejs_path() {
+    case "$(uname -s)" in
+	CYGWIN*|MINGW*|MSYS*)
+	    echo $HOME/opt/node-$NODEJS_VERSION-win-x64
+	    ;;
+	*)
+	    echo $HOME/opt/node-$NODEJS_VERSION-linux-x64/bin
+	    ;;
+    esac
 }
 
 is_installed() {
@@ -33,50 +51,70 @@ is_installed() {
 }
 
 download_url() {
-    echo https://nodejs.org/dist/$NODEJS_VERSION/node-$NODEJS_VERSION-win-x64.zip
+    echo https://nodejs.org/dist/$NODEJS_VERSION/$(installation_file)
 }
 
-trgt_installation_file() {
-    echo /tmp/node-$NODEJS_VERSION-win-x64.zip
+local_installation_file() {
+    echo /tmp/$(installation_file)
 }
 
 file_exists_local() {
-    local installation_file=${1}
-    test -f $(trgt_installation_file ${installation_file})
+    test -f $(local_installation_file)
 }
 
 file_exists_remote() {
-    local installation_file=${1}
-    curl -sIf $(download_url ${installation_file}) >/dev/null
+    curl -sIf $(download_url) >/dev/null
 }
 
 download_file() {
-    local installation_file=${1}
-    curl $(download_url ${installation_file}) -o $(trgt_installation_file ${installation_file})
+    curl $(download_url) -o $(local_installation_file)
+}
+
+installation_file() {
+    case "$(uname -s)" in
+	CYGWIN*|MINGW*|MSYS*)
+	    echo node-$NODEJS_VERSION-win-x64.zip
+	    ;;
+	*)
+	    echo node-$NODEJS_VERSION-linux-x64.tar.xz
+	    ;;
+    esac
+}
+
+extract_installation_file() {
+    local trgt_dir=$(dirname $(installation_dir))
+
+    case "$(uname -s)" in
+	CYGWIN*|MINGW*|MSYS*)
+	    unzip $(local_installation_file) -d $trgt_dir 
+	    ;;
+	*)
+	    tar Jxf $(local_installation_file) -C $trgt_dir
+	    ;;
+    esac
 }
 
 install_nodejs() {
     echo "Install new Node.js version: $NODEJS_VERSION"
-    local installation_file=node-$NODEJS_VERSION-win-x64.zip
 
-    if ! file_exists_local $installation_file; then
-	echo "Installation file $installation_file not found local. Fetching new one"
-	if file_exists_remote $installation_file; then
-	    download_file $installation_file
+    if ! file_exists_local; then
+	echo "Installation file $(installation_file) not found local. Fetching new one"
+	if file_exists_remote; then
+	    download_file
 	else
 	    echo "ERROR: No installation file found. Abort"
 	    abort
 	fi
     else
-	unzip $(trgt_installation_file) -d $HOME/opt
+	extract_installation_file
     fi
 }
 
 export_variables() {
-    echo "Adding Node.js installation $(install_dir) to PATH"
-    export PATH=$PATH:$(install_dir)
-    
+    echo "Adding Node.js installation $(installation_dir) to PATH"
     SETUP_NODEJS_ORIGINAL_PATH="${PATH}"
+
+    export PATH=$PATH:$(nodejs_path)
 }
 
 while getopts v: opt; do
@@ -87,7 +125,8 @@ while getopts v: opt; do
 done
 
 export_variables
-if is_installed $NODEJS_VERSION; then
+
+if is_installed; then
     echo "Node.js already installed"
 else
     echo "Node.js not configured"
