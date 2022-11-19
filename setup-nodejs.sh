@@ -54,16 +54,19 @@ install_nodejs() {
     fi
 }
 
+export_variables() {
+   echo "Adding Node.js installation $(install_dir) to PATH"
+   export PATH=$PATH:$(install_dir)
+
+   export ORIGINAL_PATH="${PATH}"
+}
+
 install_and_setup() {
     if [ ! -d $(install_dir) ]; then
 	echo "No Node.js installation found."
 	install_nodejs
     fi
-
-    echo "Adding Node.js installation $(install_dir) to PATH"
-    PATH=$PATH:$(install_dir)
-
-    export ORIGINAL_PATH="${PATH}"
+    export_variables
 }
 
 while getopts v: opt; do
@@ -78,6 +81,5 @@ if is_installed; then
 else
     echo "Node.js not configured"
     install_and_setup
+    node -v
 fi
-
-exec "$BASH" --login
