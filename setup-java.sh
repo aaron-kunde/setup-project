@@ -32,7 +32,7 @@ oracle_check_install_file() {
     if [ ! -f $filename ]; then
 	echo "Please download $(basename $filename) from URL to $HOME/Downloads: "
 	echo -e "\nhttps://www.oracle.com/technetwork/java/javase/archive-139210.html"
-	exit -1
+	return -1
     fi
 }    
 
@@ -287,5 +287,5 @@ case ${provider:-$default_provider} in
     *)
 	echo "ERROR: Wrong provider"
 	print_usage
-	exit -1
+	return -1
 esac
