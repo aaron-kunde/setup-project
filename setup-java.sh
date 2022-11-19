@@ -32,8 +32,8 @@ abort() {
 
 oracle_export_variables() {
     export JAVA_HOME="$HOME/opt/jdk$JDK_VERSION"
-    export PATH="$PATH:$JAVA_HOME/bin"
     SETUP_JAVA_ORIGINAL_PATH="${PATH}"
+    export PATH="$PATH:$JAVA_HOME/bin"
 }
 
 oracle_short_version() {
@@ -88,8 +88,8 @@ adoptopenjdk_export_variables() {
     else
 	export JAVA_HOME="$HOME/opt/jdk$JDK_VERSION"
     fi
-    export PATH="$PATH:$JAVA_HOME/bin"
     SETUP_JAVA_ORIGINAL_PATH="${PATH}"
+    export PATH="$PATH:$JAVA_HOME/bin"
 }
 
 adoptopenjdk_short_version() {
@@ -173,8 +173,8 @@ openjdk_export_variables() {
     local version_short=$(openjdk_version_short)
 
     export JAVA_HOME="$HOME/opt/java-$version_number-openjdk-$version_short.ojdkbuild.windows.x86_64"
-    export PATH="$PATH:$JAVA_HOME/bin"
     SETUP_JAVA_ORIGINAL_PATH="${PATH}"
+    export PATH="$PATH:$JAVA_HOME/bin"
 }
 
 openjdk_version_number() {
