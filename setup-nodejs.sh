@@ -155,5 +155,3 @@ if ! is_installed; then
 fi
 
 node -v
-# Reset global vars, not to be executed
-reset_global_vars
