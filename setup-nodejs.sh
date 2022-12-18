@@ -42,18 +42,24 @@ export_path_vars() {
     export PATH="$(installation_path):${PATH}"
 }
 
-cleanup_vars() {
-    unset DEFAULT_NODEJS_VERSION
-    OPTIND=1
-
+reset_path_vars() {
     if [ -v SETUP_NODEJS_ORIGINAL_PATH ]; then
-       export PATH=$SETUP_NODEJS_ORIGINAL_PATH
+       export PATH="${SETUP_NODEJS_ORIGINAL_PATH}"
        unset SETUP_NODEJS_ORIGINAL_PATH
     fi
 }
 
+reset_global_vars() {
+    unset DEFAULT_NODEJS_VERSION
+    unset NODEJS_VERSION
+    unset INSTALLATION_BASE_DIR
+    OPTIND=1
+}
+
 abort() {
-    cleanup_vars
+    reset_path_vars
+    reset_global_vars
+
     return -1
 }
 
@@ -136,6 +142,7 @@ install_nodejs() {
 
 
 init
+reset_path_vars
 set_vars_from_opts ${@}
 export_path_vars
 
@@ -146,4 +153,4 @@ else
     install_nodejs
 fi
 node -v
-cleanup_vars
+reset_global_vars
