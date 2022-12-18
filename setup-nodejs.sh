@@ -63,41 +63,10 @@ abort() {
     return -1
 }
 
-installation_dir() {
-    case "$(uname -s)" in
-	CYGWIN*|MINGW*|MSYS*)
-	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-win-x64
-	    ;;
-	*)
-	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-linux-x64
-	    ;;
-    esac
-}
-
 
 is_installed() {
     node --version 2>/dev/null &&
 	(node --version 2>&1 | grep $NODEJS_VERSION)
-}
-
-download_url() {
-    echo https://nodejs.org/dist/$NODEJS_VERSION/$(installation_file)
-}
-
-local_installation_file() {
-    echo /tmp/$(installation_file)
-}
-
-file_exists_local() {
-    test -f $(local_installation_file)
-}
-
-file_exists_remote() {
-    curl -sIf $(download_url) >/dev/null
-}
-
-download_file() {
-    curl $(download_url) -o $(local_installation_file)
 }
 
 installation_file() {
@@ -111,7 +80,43 @@ installation_file() {
     esac
 }
 
-extract_installation_file() {
+local_installation_file() {
+    echo /tmp/$(installation_file)
+}
+
+local_installation_file_exists() {
+    test -f $(local_installation_file)
+}
+
+local_installation_file_exists() {
+    test -f $(local_installation_file)
+}
+
+download_url() {
+    echo https://nodejs.org/dist/$NODEJS_VERSION/$(installation_file)
+}
+
+remote_installation_file_exists() {
+    curl -sIf $(download_url) >/dev/null
+}
+
+download_installation_file() {
+    echo "Download installation file" 
+    curl $(download_url) -o $(local_installation_file)
+}
+
+installation_dir() {
+    case "$(uname -s)" in
+	CYGWIN*|MINGW*|MSYS*)
+	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-win-x64
+	    ;;
+	*)
+	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-linux-x64
+	    ;;
+    esac
+}
+
+install_installation_file() {
     local trgt_dir=$(dirname $(installation_dir))
 
     case "$(uname -s)" in
@@ -124,33 +129,31 @@ extract_installation_file() {
     esac
 }
 
-install_nodejs() {
-    echo "Install new Node.js version: $NODEJS_VERSION"
+install() {
+    echo "Install new Node.js: $NODEJS_VERSION"
 
-    if ! file_exists_local; then
-	echo "Installation file $(installation_file) not found local. Fetching new one"
-	if file_exists_remote; then
-	    download_file
+    if ! local_installation_file_exists; then
+	echo "Local installation file not found: $(installation_file). Try, download new one"
+	if remote_installation_file_exists; then
+	    download_installation_file
 	else
 	    echo "ERROR: No installation file found. Abort"
 	    abort
 	fi
     else
-	extract_installation_file
+	install_installation_file
     fi
 }
-
 
 init_global_vars
 reset_path_vars
 set_vars_from_opts ${@}
 export_path_vars
 
-if is_installed; then
-    echo "Node.js already installed"
-else
-    echo "Node.js not configured"
-    install_nodejs
+if ! is_installed; then
+    install || abort
 fi
+
 node -v
+# Reset global vars, not to be executed
 reset_global_vars
