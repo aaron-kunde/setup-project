@@ -15,6 +15,14 @@ ${0} [-v VERSION]
 EOM
 }
 
+set_vars_from_opts() {
+    while getopts v: opt; do
+	case $opt in
+	    v) NODEJS_VERSION=$OPTARG
+	       ;;
+	esac
+    done
+}
 
 cleanup_vars() {
     unset DEFAULT_NODEJS_VERSION
@@ -125,14 +133,9 @@ export_variables() {
     export PATH=$PATH:$(nodejs_path)
 }
 
-while getopts v: opt; do
-    case $opt in
-	v) NODEJS_VERSION=$OPTARG
-	   ;;
-    esac
-done
 
 init
+set_vars_from_opts ${@}
 export_variables
 
 if is_installed; then
