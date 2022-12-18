@@ -1,6 +1,11 @@
 #!/bin/sh
 
-NODEJS_VERSION=v14.15.4
+init() {
+    DEFAULT_NODEJS_VERSION=v14.15.4
+    NODEJS_VERSION=$DEFAULT_NODEJS_VERSION
+    OPTIND=1
+    INSTALLATION_BASE_DIR=$HOME/opt
+}
 
 print_usage() {
     echo "${0} [-v VERSION]"
@@ -26,10 +31,10 @@ abort() {
 installation_dir() {
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    echo $HOME/opt/node-$NODEJS_VERSION-win-x64
+	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-win-x64
 	    ;;
 	*)
-	    echo $HOME/opt/node-$NODEJS_VERSION-linux-x64
+	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-linux-x64
 	    ;;
     esac
 }
@@ -37,10 +42,10 @@ installation_dir() {
 nodejs_path() {
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    echo $HOME/opt/node-$NODEJS_VERSION-win-x64
+	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-win-x64
 	    ;;
 	*)
-	    echo $HOME/opt/node-$NODEJS_VERSION-linux-x64/bin
+	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-linux-x64/bin
 	    ;;
     esac
 }
@@ -124,6 +129,7 @@ while getopts v: opt; do
     esac
 done
 
+init
 export_variables
 
 if is_installed; then
