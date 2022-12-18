@@ -24,6 +24,24 @@ set_vars_from_opts() {
     done
 }
 
+installation_path() {
+    case "$(uname -s)" in
+	CYGWIN*|MINGW*|MSYS*)
+	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-win-x64
+	    ;;
+	*)
+	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-linux-x64/bin
+	    ;;
+    esac
+}
+
+export_path_vars() {
+    echo "Adding $(installation_path) to PATH"
+    SETUP_NODEJS_ORIGINAL_PATH="${PATH}"
+
+    export PATH="$(installation_path):${PATH}"
+}
+
 cleanup_vars() {
     unset DEFAULT_NODEJS_VERSION
     OPTIND=1
@@ -50,16 +68,6 @@ installation_dir() {
     esac
 }
 
-nodejs_path() {
-    case "$(uname -s)" in
-	CYGWIN*|MINGW*|MSYS*)
-	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-win-x64
-	    ;;
-	*)
-	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-linux-x64/bin
-	    ;;
-    esac
-}
 
 is_installed() {
     node --version 2>/dev/null &&
@@ -126,17 +134,10 @@ install_nodejs() {
     fi
 }
 
-export_variables() {
-    echo "Adding Node.js installation $(installation_dir) to PATH"
-    SETUP_NODEJS_ORIGINAL_PATH="${PATH}"
-
-    export PATH=$PATH:$(nodejs_path)
-}
-
 
 init
 set_vars_from_opts ${@}
-export_variables
+export_path_vars
 
 if is_installed; then
     echo "Node.js already installed"
