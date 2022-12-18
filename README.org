@@ -1,3 +1,5 @@
+# -*- org-adapt-indentation: t; -*-
+
 * General
 ** Bash
    The scripts shall be usable from an interactive shell and as a
