@@ -1,10 +1,10 @@
 #!/bin/sh
 
-init() {
+init_global_vars() {
     DEFAULT_NODEJS_VERSION=v14.15.4
     NODEJS_VERSION=$DEFAULT_NODEJS_VERSION
-    OPTIND=1
     INSTALLATION_BASE_DIR=$HOME/opt
+    OPTIND=1
 }
 
 print_usage() {
@@ -141,7 +141,7 @@ install_nodejs() {
 }
 
 
-init
+init_global_vars
 reset_path_vars
 set_vars_from_opts ${@}
 export_path_vars
