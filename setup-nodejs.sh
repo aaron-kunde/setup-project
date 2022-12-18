@@ -8,10 +8,13 @@ init() {
 }
 
 print_usage() {
-    echo "${0} [-v VERSION]"
-    echo "  -v VERSION Version of Node.js"
-    echo "     Default: $DEFAULT_NODEJS_VERSION"
+    cat <<EOM
+${0} [-v VERSION]
+     -v VERSION Version of Node.js.
+     	Default: $DEFAULT_NODEJS_VERSION
+EOM
 }
+
 
 cleanup_vars() {
     unset DEFAULT_NODEJS_VERSION
