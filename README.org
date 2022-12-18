@@ -75,8 +75,8 @@
    For each Script, a default version ~VERSION~ is defined, which is
    set after the last needed version.
 
-** Removing the MAX_PATH limitation in MS Windoes
-   Followin the intructions from the [[https://docs.python.org/3/using/windows.html#removing-the-max-path-limitation][Python documentation]], set the
+** Removing the MAX_PATH limitation in MS Windows
+   Following the intructions from the [[https://docs.python.org/3/using/windows.html#removing-the-max-path-limitation][Python documentation]], set the
    registry key of
    ~HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled~
    to ~1~.
