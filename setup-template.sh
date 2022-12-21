@@ -164,5 +164,5 @@ if ! is_installed; then
 fi
 
 echo "TMPL installed"
-# Reset OPTIND, if getopts was used before
-OPTIND=1
+
+reset_global_vars
