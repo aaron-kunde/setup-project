@@ -149,11 +149,6 @@ install() {
     install_installation_file
 }
 
-
-
-
-
-
 init_global_vars
 reset_path_vars
 set_vars_from_opts ${@}
