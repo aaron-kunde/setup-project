@@ -1,6 +1,6 @@
 init_global_vars() {
-    DEFAULT_NODEJS_VERSION=v14.15.4
-    NODEJS_VERSION=$DEFAULT_NODEJS_VERSION
+    DEFAULT_VERSION=v14.15.4
+    VERSION=$DEFAULT_VERSION
     INSTALLATION_BASE_DIR=$HOME/opt
     OPTIND=1
 }
@@ -9,14 +9,14 @@ print_usage() {
     cat <<EOM
 ${0} [-v VERSION]
      -v VERSION Version of Node.js.
-     	Default: $DEFAULT_NODEJS_VERSION
+     	Default: $DEFAULT_VERSION
 EOM
 }
 
 set_vars_from_opts() {
     while getopts v: opt; do
 	case $opt in
-	    v) NODEJS_VERSION=$OPTARG
+	    v) VERSION=$OPTARG
 	       ;;
 	esac
     done
@@ -25,10 +25,10 @@ set_vars_from_opts() {
 installation_path() {
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-win-x64
+	    echo $INSTALLATION_BASE_DIR/node-$VERSION-win-x64
 	    ;;
 	*)
-	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-linux-x64/bin
+	    echo $INSTALLATION_BASE_DIR/node-$VERSION-linux-x64/bin
 	    ;;
     esac
 }
@@ -48,8 +48,8 @@ reset_path_vars() {
 }
 
 reset_global_vars() {
-    unset DEFAULT_NODEJS_VERSION
-    unset NODEJS_VERSION
+    unset DEFAULT_VERSION
+    unset VERSION
     unset INSTALLATION_BASE_DIR
     OPTIND=1
 }
@@ -64,16 +64,16 @@ abort() {
 
 is_installed() {
     node --version 2>/dev/null &&
-	(node --version 2>&1 | grep $NODEJS_VERSION)
+	(node --version 2>&1 | grep $VERSION)
 }
 
 installation_file() {
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    echo node-$NODEJS_VERSION-win-x64.zip
+	    echo node-$VERSION-win-x64.zip
 	    ;;
 	*)
-	    echo node-$NODEJS_VERSION-linux-x64.tar.xz
+	    echo node-$VERSION-linux-x64.tar.xz
 	    ;;
     esac
 }
@@ -86,12 +86,8 @@ local_installation_file_exists() {
     test -f $(local_installation_file)
 }
 
-local_installation_file_exists() {
-    test -f $(local_installation_file)
-}
-
 download_url() {
-    echo https://nodejs.org/dist/$NODEJS_VERSION/$(installation_file)
+    echo https://nodejs.org/dist/$VERSION/$(installation_file)
 }
 
 remote_installation_file_exists() {
@@ -106,10 +102,10 @@ download_installation_file() {
 installation_dir() {
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-win-x64
+	    echo $INSTALLATION_BASE_DIR/node-$VERSION-win-x64
 	    ;;
 	*)
-	    echo $INSTALLATION_BASE_DIR/node-$NODEJS_VERSION-linux-x64
+	    echo $INSTALLATION_BASE_DIR/node-$VERSION-linux-x64
 	    ;;
     esac
 }
@@ -128,7 +124,7 @@ install_installation_file() {
 }
 
 install() {
-    echo "Install new Node.js: $NODEJS_VERSION"
+    echo "Install new version: $VERSION"
 
     if ! local_installation_file_exists; then
 	echo "Local installation file not found: $(installation_file). Try, download new one"

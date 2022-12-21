@@ -1,7 +1,6 @@
-# Specific implementation needed
 init_global_vars() {
-    DEFAULT_TMPL_VERSION=default_version
-    TMPL_VERSION=$DEFAULT_TMPL_VERSION
+    DEFAULT_VERSION=default_version
+    VERSION=$DEFAULT_VERSION
     INSTALLATION_BASE_DIR=$HOME/opt
     # Reset OPTIND, if getopts was used before
     OPTIND=1
@@ -12,7 +11,7 @@ print_usage() {
     cat <<EOM
 ${0} [-v VERSION]
      -v VERSION Version of TMPL to install.
-     	Default: $DEFAULT_TMPL_VERSION
+     	Default: $DEFAULT_VERSION
 EOM
 }
 
@@ -20,7 +19,7 @@ EOM
 set_vars_from_opts() {
     while getopts v: opt; do
 	case $opt in
-	    v) TMPL_VERSION=$OPTARG
+	    v) VERSION=$OPTARG
 	       ;;
 	esac
     done
@@ -31,10 +30,10 @@ installation_path() {
     # There might be different installation paths, depending on target OS
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    echo $INSTALLATION_BASE_DIR/tmpl-$TMPL_VERSION
+	    echo $INSTALLATION_BASE_DIR/tmpl-$VERSION
 	    ;;
 	*)
-	    echo $INSTALLATION_BASE_DIR/tmpl-$TMPL_VERSION
+	    echo $INSTALLATION_BASE_DIR/tmpl-$VERSION
 	    ;;
     esac
 }
@@ -55,10 +54,9 @@ reset_path_vars() {
     fi
 }
 
-# Specific implementation needed
 reset_global_vars() {
-    unset TMPL_VERSION
-    unset DEFAULT_TMPL_VERSION
+    unset DEFAULT_VERSION
+    unset VERSION
     unset INSTALLATION_BASE_DIR
     # Reset OPTIND for future use of getopts
     OPTIND=1
@@ -73,7 +71,7 @@ abort() {
 
 # Specific implementation needed
 is_installed() {
-    case "$TMPL_VERSION" in
+    case "$VERSION" in
 	installed) return 0
 	    ;;
 	*) return 1
@@ -104,7 +102,7 @@ local_installation_file_exists() {
 
 # Specifc implermentation needed
 download_url() {
-    case "$TMPL_VERSION" in
+    case "$VERSION" in
 	download_fail) echo https://github.com/aaron-kunde/setup-project/blob/master/non-existing.file
 	   ;;
 	*) echo https://github.com/aaron-kunde/setup-project/blob/master/README.org
@@ -124,7 +122,7 @@ download_installation_file() {
 # Specific implementation needed
 install_installation_file() {
     echo "Install installation file"
-        case "$TMPL_VERSION" in
+        case "$VERSION" in
 	installation_fail) return 1
 	   ;;
 	*) return 0
@@ -132,10 +130,8 @@ install_installation_file() {
     esac
 }
 
-# TODO: Really specific?
-# Specific implementation needed
 install() {
-    echo "Install new TMPL: $TMPL_VERSION"
+    echo "Install new version: $VERSION"
 
     if ! local_installation_file_exists; then
 	echo "Local installation file not found: $(installation_file). Try, download new one"
