@@ -123,15 +123,7 @@ should_abort_installation_if_download_fails() {
 
     . ./setup-template.sh -vdownload_fail
 
-    assert_no_tmp_global_vars_set
-    assert "-z $SETUP_TMPL_ORIGINAL_PATH" \
-	   "SETUP_TMPL_ORIGINAL_PATH is set: $SETUP_TMPL_ORIGINAL_PATH"
-    assert "${PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
-	   "PATH is not correct: $PATH"
-    assert "! -e $INSTALLATION_FILE" \
-	   "Installation file should not exist"
-    
-    reset_path_vars
+    assert_clean_env
 }
 
 should_abort_installation_if_installation_fails() {
@@ -147,7 +139,6 @@ should_abort_installation_if_installation_fails() {
     assert "-e $INSTALLATION_FILE" \
 	   "Installation file should exist"
 
-    reset_path_vars
     rm "$INSTALLATION_FILE"
 }
 
@@ -221,15 +212,7 @@ should_abort_installation_and_deinstall_old_version_if_download_fails_and_instal
     rm "$INSTALLATION_FILE"
     . ./setup-template.sh -vdownload_fail
 
-    assert_no_tmp_global_vars_set
-    assert "-z $SETUP_TMPL_ORIGINAL_PATH" \
-	   "SETUP_TMPL_ORIGINAL_PATH is set: $SETUP_TMPL_ORIGINAL_PATH"
-    assert "${PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
-	   "PATH is not correct: $PATH"
-    assert "! -e $INSTALLATION_FILE" \
-	   "Installation file should not exist"
-
-    reset_path_vars
+    assert_clean_env
 }
 
 should_abort_installation_and_deinstall_old_version_if_installation_fails_and_installed_before() {
@@ -256,7 +239,6 @@ should_abort_installation_and_deinstall_old_version_if_installation_fails_and_in
     assert "-e $INSTALLATION_FILE" \
 	   "Installation file should exist"
 	
-    reset_path_vars
     rm "$INSTALLATION_FILE"
 }
 
