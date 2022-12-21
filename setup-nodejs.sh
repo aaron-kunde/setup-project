@@ -1,5 +1,3 @@
-#!/bin/sh
-
 init_global_vars() {
     DEFAULT_NODEJS_VERSION=v14.15.4
     NODEJS_VERSION=$DEFAULT_NODEJS_VERSION
@@ -60,7 +58,7 @@ abort() {
     reset_path_vars
     reset_global_vars
 
-    return -1
+    return 0
 }
 
 
@@ -140,9 +138,8 @@ install() {
 	    echo "ERROR: No installation file found. Abort"
 	    abort
 	fi
-    else
-	install_installation_file
     fi
+    install_installation_file
 }
 
 init_global_vars
@@ -155,3 +152,5 @@ if ! is_installed; then
 fi
 
 node -v
+
+reset_global_vars

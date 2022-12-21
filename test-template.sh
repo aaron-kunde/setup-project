@@ -98,7 +98,6 @@ should_skip_installation_and_set_paths_if_already_installed() {
 	   "Installation file should not exist"
     
     reset_path_vars
-    reset_global_vars
 }
 
 should_skip_download_and_install_if_installation_file_exists_local() {
@@ -176,7 +175,6 @@ should_successfully_use_default_version_as_new_version_if_no_version_given_and_i
 	   "Installation file should exist"
     
     reset_path_vars
-    reset_global_vars
     rm "$INSTALLATION_FILE"
 }
 
