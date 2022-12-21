@@ -145,16 +145,6 @@ should_abort_installation_if_installation_fails() {
 should_successfully_use_default_version_as_new_version_if_no_version_given_and_installed_before() {
     assert_clean_env
     
-    . ./setup-template.sh
-    
-    assert_no_tmp_global_vars_set
-    assert "${SETUP_TMPL_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
-	   "SETUP_TMPL_ORIGINAL_PATH != SPT_ORIGINAL_PATH: $SETUP_TMPL_ORIGINAL_PATH"
-    assert "${PATH// /§} = $HOME/opt/tmpl-default_version:${SPT_ORIGINAL_PATH// /§}" \
-	   "PATH is not correct: $PATH"
-    assert "-e $INSTALLATION_FILE" \
-	   "Installation file should exist"
-	
     . ./setup-template.sh -v0
     
     assert_no_tmp_global_vars_set
@@ -165,6 +155,16 @@ should_successfully_use_default_version_as_new_version_if_no_version_given_and_i
     assert "-e $INSTALLATION_FILE" \
 	   "Installation file should exist"
     
+    . ./setup-template.sh
+    
+    assert_no_tmp_global_vars_set
+    assert "${SETUP_TMPL_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
+	   "SETUP_TMPL_ORIGINAL_PATH != SPT_ORIGINAL_PATH: $SETUP_TMPL_ORIGINAL_PATH"
+    assert "${PATH// /§} = $HOME/opt/tmpl-default_version:${SPT_ORIGINAL_PATH// /§}" \
+	   "PATH is not correct: $PATH"
+    assert "-e $INSTALLATION_FILE" \
+	   "Installation file should exist"
+	
     reset_path_vars
     rm "$INSTALLATION_FILE"
 }
@@ -172,16 +172,6 @@ should_successfully_use_default_version_as_new_version_if_no_version_given_and_i
 should_successfully_use_given_version_as_new_version_if_installed_before() {
     assert_clean_env
     
-    . ./setup-template.sh -v0
-    
-    assert_no_tmp_global_vars_set
-    assert "${SETUP_TMPL_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
-	   "SETUP_TMPL_ORIGINAL_PATH != SPT_ORIGINAL_PATH: $SETUP_TMPL_ORIGINAL_PATH"
-    assert "${PATH// /§} = $HOME/opt/tmpl-0:${SPT_ORIGINAL_PATH// /§}" \
-	   "PATH is not correct: $PATH"
-    assert "-e $INSTALLATION_FILE" \
-	   "Installation file should exist"
-    
     . ./setup-template.sh
     
     assert_no_tmp_global_vars_set
@@ -192,6 +182,16 @@ should_successfully_use_given_version_as_new_version_if_installed_before() {
     assert "-e $INSTALLATION_FILE" \
 	   "Installation file should exist"
 	
+    . ./setup-template.sh -v0
+    
+    assert_no_tmp_global_vars_set
+    assert "${SETUP_TMPL_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
+	   "SETUP_TMPL_ORIGINAL_PATH != SPT_ORIGINAL_PATH: $SETUP_TMPL_ORIGINAL_PATH"
+    assert "${PATH// /§} = $HOME/opt/tmpl-0:${SPT_ORIGINAL_PATH// /§}" \
+	   "PATH is not correct: $PATH"
+    assert "-e $INSTALLATION_FILE" \
+	   "Installation file should exist"
+    
     reset_path_vars
     rm "$INSTALLATION_FILE"
 }
