@@ -54,7 +54,7 @@ assert_clean_env() {
 should_successfully_use_default_version_if_no_version_given() {
     assert_clean_env
     
-    . ./setup-nodejs.sh
+    . $(dirname ${0})/../src/setup-nodejs.sh
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_NODEJS_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -74,7 +74,7 @@ should_successfully_use_default_version_if_no_version_given() {
 should_successfully_use_given_version() {
     assert_clean_env
     
-    . ./setup-nodejs.sh -vv18.12.1
+    . $(dirname ${0})/../src/setup-nodejs.sh -vv18.12.1
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_NODEJS_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -93,7 +93,7 @@ should_successfully_use_given_version() {
 should_skip_installation_and_set_paths_if_already_installed() {
     assert_clean_env
     
-    . ./setup-nodejs.sh -vv18.12.1
+    . $(dirname ${0})/../src/setup-nodejs.sh -vv18.12.1
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_NODEJS_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -112,7 +112,7 @@ should_skip_installation_and_set_paths_if_already_installed() {
 should_skip_download_and_install_if_installation_file_exists_local() {
     assert_clean_env
 
-    . ./setup-nodejs.sh -vv18.12.1
+    . $(dirname ${0})/../src/setup-nodejs.sh -vv18.12.1
 
     assert_no_tmp_global_vars_set
     assert "${SETUP_NODEJS_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -132,7 +132,7 @@ should_skip_download_and_install_if_installation_file_exists_local() {
 should_abort_installation_if_download_fails() {
     assert_clean_env
 
-    . ./setup-nodejs.sh -vdownload_fail || echo "-> Expected failure"
+    . $(dirname ${0})/../src/setup-nodejs.sh -vdownload_fail || echo "-> Expected failure"
 
     assert_clean_env
 }
@@ -141,7 +141,7 @@ should_abort_installation_if_installation_fails() {
     assert_clean_env
     touch /tmp/node-v14.15.4-win-x64.zip
 
-    . ./setup-nodejs.sh || echo "-> Expected failure"
+    . $(dirname ${0})/../src/setup-nodejs.sh || echo "-> Expected failure"
 
     assert_no_tmp_global_vars_set
     assert "-z $SETUP_NODEJS_ORIGINAL_PATH" \
@@ -157,7 +157,7 @@ should_abort_installation_if_installation_fails() {
 should_successfully_use_default_version_as_new_version_if_no_version_given_and_installed_before() {
     assert_clean_env
     
-    . ./setup-nodejs.sh -vv18.12.1
+    . $(dirname ${0})/../src/setup-nodejs.sh -vv18.12.1
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_NODEJS_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -169,7 +169,7 @@ should_successfully_use_default_version_as_new_version_if_no_version_given_and_i
     assert "-e $HOME/opt/node-v18.12.1-win-x64" \
  	   "Installation dir should exist: $HOME/opt/node-v18.12.1-win-x64"
     
-    . ./setup-nodejs.sh
+    . $(dirname ${0})/../src/setup-nodejs.sh
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_NODEJS_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -191,7 +191,7 @@ should_successfully_use_default_version_as_new_version_if_no_version_given_and_i
 should_successfully_use_given_version_as_new_version_if_installed_before() {
     assert_clean_env
     
-    . ./setup-nodejs.sh
+    . $(dirname ${0})/../src/setup-nodejs.sh
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_NODEJS_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -203,7 +203,7 @@ should_successfully_use_given_version_as_new_version_if_installed_before() {
     assert "-e $HOME/opt/node-v14.15.4-win-x64" \
  	   "Installation dir should exist: $HOME/opt/node-v14.15.4-win-x64"
 	
-    . ./setup-nodejs.sh -vv18.12.1
+    . $(dirname ${0})/../src/setup-nodejs.sh -vv18.12.1
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_NODEJS_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -225,7 +225,7 @@ should_successfully_use_given_version_as_new_version_if_installed_before() {
 should_abort_installation_and_deinstall_old_version_if_download_fails_and_installed_before() {
     assert_clean_env
     
-    . ./setup-nodejs.sh -vv18.12.1
+    . $(dirname ${0})/../src/setup-nodejs.sh -vv18.12.1
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_NODEJS_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -237,7 +237,7 @@ should_abort_installation_and_deinstall_old_version_if_download_fails_and_instal
     assert "-e $HOME/opt/node-v18.12.1-win-x64" \
  	   "Installation dir should exist: $HOME/opt/node-v18.12.1-win-x64"
 
-    . ./setup-nodejs.sh -vdownload_fail || echo "-> Expected failure"
+    . $(dirname ${0})/../src/setup-nodejs.sh -vdownload_fail || echo "-> Expected failure"
 
     rm /tmp/node-v18.12.1-win-x64.zip
     assert_clean_env
@@ -247,7 +247,7 @@ should_abort_installation_and_deinstall_old_version_if_download_fails_and_instal
 should_abort_installation_and_deinstall_old_version_if_installation_fails_and_installed_before() {
     assert_clean_env
     
-    . ./setup-nodejs.sh -vv18.12.1
+    . $(dirname ${0})/../src/setup-nodejs.sh -vv18.12.1
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_NODEJS_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -261,7 +261,7 @@ should_abort_installation_and_deinstall_old_version_if_installation_fails_and_in
 
     touch /tmp/node-v14.15.4-win-x64.zip
 
-    . ./setup-nodejs.sh || echo "-> Expected failure"
+    . $(dirname ${0})/../src/setup-nodejs.sh || echo "-> Expected failure"
 
     assert_no_tmp_global_vars_set
     assert "-z $SETUP_NODEJS_ORIGINAL_PATH" \

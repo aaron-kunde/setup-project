@@ -53,7 +53,7 @@ assert_clean_env() {
 should_successfully_use_default_version_if_no_version_given() {
     assert_clean_env
     
-    . ./setup-template.sh
+    . $(dirname ${0})/../src/setup-template.sh
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_TMPL_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -70,7 +70,7 @@ should_successfully_use_default_version_if_no_version_given() {
 should_successfully_use_given_version() {
     assert_clean_env
     
-    . ./setup-template.sh -v0
+    . $(dirname ${0})/../src/setup-template.sh -v0
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_TMPL_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -87,7 +87,7 @@ should_successfully_use_given_version() {
 should_skip_installation_and_set_paths_if_already_installed() {
     assert_clean_env
     
-    . ./setup-template.sh -vinstalled
+    . $(dirname ${0})/../src/setup-template.sh -vinstalled
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_TMPL_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -104,7 +104,7 @@ should_skip_download_and_install_if_installation_file_exists_local() {
     assert_clean_env
     touch "$INSTALLATION_FILE"
 
-    . ./setup-template.sh -v0
+    . $(dirname ${0})/../src/setup-template.sh -v0
 
     assert_no_tmp_global_vars_set
     assert "${SETUP_TMPL_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -121,7 +121,7 @@ should_skip_download_and_install_if_installation_file_exists_local() {
 should_abort_installation_if_download_fails() {
     assert_clean_env
 
-    . ./setup-template.sh -vdownload_fail
+    . $(dirname ${0})/../src/setup-template.sh -vdownload_fail
 
     assert_clean_env
 }
@@ -129,7 +129,7 @@ should_abort_installation_if_download_fails() {
 should_abort_installation_if_installation_fails() {
     assert_clean_env
 
-    . ./setup-template.sh -vinstallation_fail
+    . $(dirname ${0})/../src/setup-template.sh -vinstallation_fail
 
     assert_no_tmp_global_vars_set
     assert "-z $SETUP_TMPL_ORIGINAL_PATH" \
@@ -145,7 +145,7 @@ should_abort_installation_if_installation_fails() {
 should_successfully_use_default_version_as_new_version_if_no_version_given_and_installed_before() {
     assert_clean_env
     
-    . ./setup-template.sh -v0
+    . $(dirname ${0})/../src/setup-template.sh -v0
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_TMPL_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -155,7 +155,7 @@ should_successfully_use_default_version_as_new_version_if_no_version_given_and_i
     assert "-e $INSTALLATION_FILE" \
 	   "Installation file should exist"
     
-    . ./setup-template.sh
+    . $(dirname ${0})/../src/setup-template.sh
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_TMPL_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -172,7 +172,7 @@ should_successfully_use_default_version_as_new_version_if_no_version_given_and_i
 should_successfully_use_given_version_as_new_version_if_installed_before() {
     assert_clean_env
     
-    . ./setup-template.sh
+    . $(dirname ${0})/../src/setup-template.sh
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_TMPL_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -182,7 +182,7 @@ should_successfully_use_given_version_as_new_version_if_installed_before() {
     assert "-e $INSTALLATION_FILE" \
 	   "Installation file should exist"
 	
-    . ./setup-template.sh -v0
+    . $(dirname ${0})/../src/setup-template.sh -v0
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_TMPL_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -199,7 +199,7 @@ should_successfully_use_given_version_as_new_version_if_installed_before() {
 should_abort_installation_and_deinstall_old_version_if_download_fails_and_installed_before() {
     assert_clean_env
     
-    . ./setup-template.sh
+    . $(dirname ${0})/../src/setup-template.sh
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_TMPL_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -210,7 +210,7 @@ should_abort_installation_and_deinstall_old_version_if_download_fails_and_instal
 	   "Installation file should exist"
 
     rm "$INSTALLATION_FILE"
-    . ./setup-template.sh -vdownload_fail
+    . $(dirname ${0})/../src/setup-template.sh -vdownload_fail
 
     assert_clean_env
 }
@@ -218,7 +218,7 @@ should_abort_installation_and_deinstall_old_version_if_download_fails_and_instal
 should_abort_installation_and_deinstall_old_version_if_installation_fails_and_installed_before() {
     assert_clean_env
     
-    . ./setup-template.sh
+    . $(dirname ${0})/../src/setup-template.sh
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_TMPL_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
@@ -229,7 +229,7 @@ should_abort_installation_and_deinstall_old_version_if_installation_fails_and_in
 	   "Installation file should exist"
 
     rm "$INSTALLATION_FILE"
-    . ./setup-template.sh -vinstallation_fail
+    . $(dirname ${0})/../src/setup-template.sh -vinstallation_fail
 
     assert_no_tmp_global_vars_set
     assert "-z $SETUP_TMPL_ORIGINAL_PATH" \
