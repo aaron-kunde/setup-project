@@ -19,15 +19,20 @@ cleanup_vars() {
     unset JDK_PROVIDER
     OPTIND=1
 
-    if [ -v SETUP_JAVA_ORIGINAL_PATH ]; then
-	export PATH="${SETUP_JAVA_ORIGINAL_PATH}"
-	unset SETUP_JAVA_ORIGINAL_PATH
-    fi
 }
 
 abort() {
     cleanup_vars
+    if [ -v SETUP_JAVA_ORIGINAL_PATH ]; then
+	export PATH="${SETUP_JAVA_ORIGINAL_PATH}"
+	unset SETUP_JAVA_ORIGINAL_PATH
+    fi
     return -1
+}
+
+is_installed() {
+    java -version 2>/dev/null &&
+	(java -version 2>&1 | grep $JDK_VERSION)
 }
 
 oracle_export_variables() {
@@ -52,32 +57,33 @@ oracle_check_install_file() {
 }    
 
 oracle_install_jdk() {
-    if [ ! -d $JAVA_HOME ]; then
-	local short_version=$(oracle_short_version)
-	local download_dir=$HOME/Downloads
-    	local install_file=$download_dir/jdk-$short_version-windows-x64.exe
-    	oracle_check_install_file $install_file
-	
-    	local sdk_src_file=$download_dir/jdk-$short_version-linux-x64.tar.gz
-    	oracle_check_install_file $sdk_src_file
-	
-	# Installing binaries
-	local tmp_dir=$(mktemp -d)
-	7z -o$tmp_dir x $install_file
-	unzip $tmp_dir/tools.zip -d $JAVA_HOME
-	rm -rf $tmp_dir
-	find $JAVA_HOME -name '*.pack' | while IFS= read filename; do $JAVA_HOME/bin/unpack200.exe -r $filename ${filename::-4}jar; done;
-	
-	# Adding sources
-	tar zvxf $sdk_src_file --strip-components=1 -C $JAVA_HOME $(basename ${JAVA_HOME::-4})/src.zip
-    else
- 	echo "Directory $JAVA_HOME already exists. Skipping installation"
-    fi
+    local short_version=$(oracle_short_version)
+    local download_dir=$HOME/Downloads
+    local install_file=$download_dir/jdk-$short_version-windows-x64.exe
+    oracle_check_install_file $install_file
+    
+    local sdk_src_file=$download_dir/jdk-$short_version-linux-x64.tar.gz
+    oracle_check_install_file $sdk_src_file
+    
+    # Installing binaries
+    local tmp_dir=$(mktemp -d)
+    7z -o$tmp_dir x $install_file
+    unzip $tmp_dir/tools.zip -d $JAVA_HOME
+    rm -rf $tmp_dir
+    find $JAVA_HOME -name '*.pack' | while IFS= read filename; do $JAVA_HOME/bin/unpack200.exe -r $filename ${filename::-4}jar; done;
+    
+    # Adding sources
+    tar zvxf $sdk_src_file --strip-components=1 -C $JAVA_HOME $(basename ${JAVA_HOME::-4})/src.zip
 }
 
-
 adoptopenjdk_major_version() {
-    echo $JDK_VERSION | sed -ne "s/^\([0-9]\+\).*/\1/p" 
+    local ret=$(echo $JDK_VERSION | sed -ne "s/^\([0-9]\+\).*/\1/p")
+
+    if [ -z $ret ]; then
+	echo -1
+    else
+	echo $ret
+    fi 
 }
 
 adoptopenjdk_export_variables() {
@@ -97,9 +103,13 @@ adoptopenjdk_short_version() {
 
     if [ $major_version -gt 8 ]; then
 	echo $JDK_VERSION | sed -ne 's/\+/_/gp'
-    else
-	echo $JDK_VERSION | tr -d '-'
-    fi 
+     else
+	 echo $JDK_VERSION | tr -d '-'
+    fi
+}
+
+adoptopenjdk_file_exists_remote() {
+    curl -sIf $(adoptopenjdk_download_url) >/dev/null
 }
 
 adoptopenjdk_download_url() {
@@ -138,34 +148,27 @@ adoptopenjdk_install_binaries() {
 	    tar zxf $install_file -C $(dirname $JAVA_HOME)
 	    ;;
     esac
-
-
 }
 
 adoptopenjdk_install_jdk() {
-    if [ ! -d $JAVA_HOME ]; then       
-	local short_version=$(adoptopenjdk_short_version)       
-	local install_file=$(adoptopenjdk_install_file)
-	local install_sha256_file=$install_file.sha256
-	local url=$(adoptopenjdk_download_url)
-
-	if [ ! -f /tmp/$install_file ]; then
-	    curl -L $url/$install_file -o /tmp/$install_file
-	fi
-	if [ ! -f /tmp/$install_sha256_file ]; then
-	    curl -L $url/$install_sha256_file.txt \
-		 -o /tmp/$install_sha256_file
-	fi
-	local pwd=$PWD
-	cd /tmp
-	sha256sum -c $install_sha256_file
-	cd $pwd
-	
-	adoptopenjdk_install_binaries /tmp/$install_file
-	
-    else
-	echo "Directory $JAVA_HOME already exists. Skipping installation"
+    local short_version=$(adoptopenjdk_short_version)       
+    local install_file=$(adoptopenjdk_install_file)
+    local install_sha256_file=$install_file.sha256
+    local url=$(adoptopenjdk_download_url)
+    
+    if [ ! -f /tmp/$install_file ]; then
+	curl -L $url/$install_file -o /tmp/$install_file
     fi
+    if [ ! -f /tmp/$install_sha256_file ]; then
+	curl -L $url/$install_sha256_file.txt \
+	     -o /tmp/$install_sha256_file
+    fi
+    local pwd=$PWD
+    cd /tmp
+    sha256sum -c $install_sha256_file
+    cd $pwd
+    
+    adoptopenjdk_install_binaries /tmp/$install_file
 }
 
 openjdk_export_variables() {
@@ -203,7 +206,6 @@ openjdk_install_dir() {
     echo java-$version_number-openjdk-$version_short.ojdkbuild.windows.x86_64
 }
 
-
 openjdk_java_version_short() {
     echo $JDK_VERSION | sed -ne 's/\(.*\)-ojdkbuild-.*/\1/p'
 }
@@ -214,31 +216,26 @@ openjdk_download_url() {
     echo https://github.com/ojdkbuild/ojdkbuild/releases/download/$java_version/
 }
 
-
 openjdk_install_jdk() {
-    if [ ! -d $JAVA_HOME ]; then       
-	local version_number=$(openjdk_version_number)
-	local download_dir=/tmp
-
-	local install_file=$(openjdk_install_file)
-	local install_sha256_file=$install_file.sha256
-	local url=$(openjdk_download_url)
-
-	if [ ! -f $download_dir/$install_file ]; then
-	    curl -v -L $url/$install_file -o $download_dir/$install_file
-	fi
-	if [ ! -f $download_dir/$install_sha256_file ]; then
-	    echo "1905ea74b79d6d1d2ea2b2b6887c14770f090fbb8b46e7e1bfb56e92845e9cf2 *$install_file" >  $download_dir/$install_sha256_file
-	fi
-	pushd $download_dir
-	sha256sum -c $install_sha256_file
-	popd
-	
-	# Installing binaries
-	unzip $download_dir/$install_file -d $(dirname $JAVA_HOME)
-    else
-	echo "Directory $JAVA_HOME already exists. Skipping installation"
+    local version_number=$(openjdk_version_number)
+    local download_dir=/tmp
+    
+    local install_file=$(openjdk_install_file)
+    local install_sha256_file=$install_file.sha256
+    local url=$(openjdk_download_url)
+    
+    if [ ! -f $download_dir/$install_file ]; then
+	curl -v -L $url/$install_file -o $download_dir/$install_file
     fi
+    if [ ! -f $download_dir/$install_sha256_file ]; then
+	echo "1905ea74b79d6d1d2ea2b2b6887c14770f090fbb8b46e7e1bfb56e92845e9cf2 *$install_file" >  $download_dir/$install_sha256_file
+    fi
+    pushd $download_dir
+    sha256sum -c $install_sha256_file
+    popd
+    
+    # Installing binaries
+    unzip $download_dir/$install_file -d $(dirname $JAVA_HOME)
 }
 
 while getopts v:p: opt; do
@@ -256,22 +253,37 @@ case ${JDK_PROVIDER:-$DEFAULT_JDK_PROVIDER} in
 	JDK_VERSION=${JDK_VERSION:-$DEFAULT_JDK_VERSION}
 	echo "Setup Oracle JDK $JDK_VERSION"
 	oracle_export_variables
-	oracle_install_jdk
+	if is_installed; then
+	    echo "Oracle JDK already installed"
+	else
+	    echo "Oracle JDK not configured"
+	    oracle_install_jdk
+	fi
 	java -version
 	;;
     adoptopenjdk)
 	JDK_VERSION=${JDK_VERSION:-$DEFAULT_JDK_VERSION}
 	echo "Setup AdoptOpenJDK $JDK_VERSION"
 	adoptopenjdk_export_variables
-	adoptopenjdk_install_jdk
+	if is_installed; then
+	    echo "AdoptOpenJDK already installed"
+	else
+	    echo "AdoptOpenJDK not configured"
+	    adoptopenjdk_install_jdk
+	fi
 	java -version
 	;;
     openjdk)
 	DEFAULT_JDK_VERSION=1.8.0_151-1-ojdkbuild-b12
 	JDK_VERSION=${JDK_VERSION:-$DEFAULT_JDK_VERSION}
-	echo "Setup OpenJDK  $JDK_VERSION"
+	echo "Setup OpenJDK $JDK_VERSION"
 	openjdk_export_variables
-	openjdk_install_jdk
+	if is_installed; then
+	    echo "OpenJDK already installed"
+	else
+	    echo "OpenJDK not configured"
+	    openjdk_install_jdk
+	fi
 	java -version
 	;;
     *)
