@@ -2,74 +2,51 @@
 ** Bash
 The scripts shall be usable from an interactive shell and as a dependent script for other scripts. The following methods of using the scripts have been evaluated:
 - Execution in shell :: Just executing the script in a shell does not export variables in the current shell, because variables are only exported in SubShells. See: https://tldp.org/LDP/abs/html/gotchas.html#PARCHILDPROBREF
-- Inclusion in shell :: Include the scritp into the current shell, using ~source~ or ~.~ exposes all variables into the current script (or shell), because they are no subprocesses. It also closes the shell, if the bash option ~-e~ is set in the script or its dependencies. Inclusion of other scripts doesn't work with relative paths, because ~dirname $0~ in a shell points to the directory of the shell executable (e.g. ~bin/bash~). Furhtermore ~getopts~ doesn't work properly for repeated calls with inclusion of dependent scripts.
+- Inclusion in shell ::
+  1. Including the scritp into the current shell, using ~source~ or ~.~ exposes all variables into the current script (or shell), because they are no subprocesses.
+  2. It also closes the shell, if the bash option ~-e~ is set in the script or its dependencies.
+  3. Inclusion of other scripts doesn't work with relative paths, because ~dirname $0~ in a shell points to the directory of the shell executable (e.g. ~bin/bash~). Furhtermore ~getopts~ doesn't work properly for repeated calls with inclusion of dependent scripts.
 - Using as init file :: ~bash --init-file .. [-i]~ sets variables regardless of exports. It also ignores the file ~~/.bashrc~.
-     
-To be able to use the scripts as well from an interactive shell and  as an included dependency the following template for a script with dependencies is used:
-#+begin_src bash
-  #!/bin/sh
+  
+The best way, to use the scripts, is by including them using ~source~ or ~.~. A basic [[file:src/setup-template.sh][template]] is defined, which can act as a base for specific scripts.
 
-  # Include dependencies / parents. Should be the first entries, to prevent,
-  # that includes overwrite declarations
-  . $(dirname ${0})/setup-parent.sh
-
-  set -e
-
-  VERSION=child_default
-  PARENT_VERSION=parent_from_child_default
-
-  print_usage() { ... }
-
-  # Method name should be unique through all used scripts
-  child_stuff() { ... }
-
-  options() {
-      while getopts hv:p: opt; do
-          case $opt in
-              h) print_usage
-                 exit 0
-                 ;;
-              v) VERSION=$OPTARG
-                 ;;
-              p) PARENT_VERSION=$OPTARG
-                 ;;
-              ...
-          esac	
-      done
-  }
-
-  ...
-
-  # EOF: Handles calling from interactive login shell or as inclusion
-  if [ $(caller | cut -d' ' -f2) == "NULL" ]; then
-      # Was called from interactive login shell
-      options ${@}
-      parent_stuff $PARENT_VERSION # Defined in setup-parent.sh
-      child_stuff $VERSION 
-      ...
-      /bin/bash --login -i
-  else
-      # Was called from inclusion. Usually do nothing
-  fi
-#+end_src
-
-** Default version 
+*** Default version 
 For each Script, a default version ~VERSION~ is defined, which is set after the last needed version.
 
-** Removing the MAX_PATH limitation in MS Windows
+*** General approach
+1. Set PATH and other installation relevant variables for the specified version.
+2. Check, whether this version is already installed.
+   1. If yes, installation is complete.
+   2. If not, check if an installation file for the current OS is present.
+      1. I yes, install version with this installation file.
+      2. If not, download correct installation file and proceed with step 2.1.
+
+If something goes wrong, abort. This means restore the PATH and other variables.         
+   
+** Windows
+Batch- or PowerShell-Scripts are currently not supported.
+*** Removing the MAX_PATH limitation in MS Windows
 Following the intructions from the [[https://docs.python.org/3/using/windows.html#removing-the-max-path-limitation][Python documentation]], set the registry key of ~HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled~ to ~1~.
 
-** Create symbolic links in MS Windows
+*** Create symbolic links in MS Windows
 To create symbolic links for each setup-file in a target directory, execute the following command in a PowerShell, which has been started as Administrator:
 #+begin_src fundamental
   foreach ($file in Get-ChildItem PROJECT_DIR\setup-*.* | Where-Object { ! ($_.Name -match ".~") }) { $fname = $file.Name; New-Item -Path TARGET_DIR\$fname -ItemType SymbolicLink -Value $file -Force}
 #+end_src
 
-* Common Lisp in Emacs
+* Specific Scripts
+
+** Node.js
+The implementation of the script [[file:src/setup-nodejs.sh][setup-nodejs.sh]] is straight forward. The installation process consists of determining the correct installation file for the current OS, downloading it, if not present and extracting it to the installation path. The installation of Node.js is done globally, so that the same version can be shared among several projects.
+
+** Angular
+Angular is installed by using [[https://www.npmjs.com/][npm]], therefore the appropriate version of [[https://nodejs.org][Node.js]] must be installed before. The installation of Angular is not done globally, but in the current directory, for each project separately.
+
+* TODO Common Lisp in Emacs
 1. Installation des clisp Interpreters
 2. Setzen der Variabinferior-lisp-program ~C:/Users/aaron/opt/clisp-2.49/clisp.exe~
 
-* Python
+* TODO Python
 https://docs.python.org/3/using/windows.html
   
 Windows versions of Python are fetched from https://www.python.org/downloads.
