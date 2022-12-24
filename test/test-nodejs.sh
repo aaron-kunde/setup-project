@@ -57,7 +57,7 @@ should_successfully_use_default_version_if_no_version_given() {
     
     assert_no_tmp_global_vars_set
     assert "${SETUP_NODEJS_ORIGINAL_PATH// /§} = ${SPT_ORIGINAL_PATH// /§}" \
-	"SETUP_NODEJS_ORIGINAL_PATH != SPT_ORIGINAL_PATH: $SETUP_NODEJS_ORIGINAL_PATH"
+	   "SETUP_NODEJS_ORIGINAL_PATH != SPT_ORIGINAL_PATH: $SETUP_NODEJS_ORIGINAL_PATH"
     assert "${PATH// /§} = $HOME/opt/node-v14.15.4-win-x64:${SPT_ORIGINAL_PATH// /§}" \
 	   "PATH is not correct: $PATH"
     assert "-e /tmp/node-v14.15.4-win-x64.zip" \
