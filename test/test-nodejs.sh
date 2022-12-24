@@ -50,7 +50,6 @@ assert_clean_env() {
  	   "Installation file exists: /tmp/node-v18.12.1-win-x64.zip"
 }
 
-
 should_successfully_use_default_version_if_no_version_given() {
     assert_clean_env
     
