@@ -115,7 +115,7 @@ install_installation_file() {
 
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    unzip $(local_installation_file) -d $trgt_dir 
+	    unzip -q $(local_installation_file) -d $trgt_dir 
 	    ;;
 	*)
 	    tar Jxf $(local_installation_file) -C $trgt_dir
@@ -124,7 +124,7 @@ install_installation_file() {
 }
 
 install() {
-    echo "Install new version: $VERSION"
+    echo "Install version: $VERSION"
 
     if ! local_installation_file_exists; then
 	echo "Local installation file not found: $(installation_file). Try, download new one"

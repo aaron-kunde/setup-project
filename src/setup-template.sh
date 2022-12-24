@@ -131,7 +131,7 @@ install_installation_file() {
 }
 
 install() {
-    echo "Install new version: $VERSION"
+    echo "Install version: $VERSION"
 
     if ! local_installation_file_exists; then
 	echo "Local installation file not found: $(installation_file). Try, download new one"

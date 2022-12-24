@@ -65,7 +65,7 @@ install_installation_file() {
 }
 
 install() {
-    echo "Install new version: $VERSION"
+    echo "Install version: $VERSION"
 
     install_installation_file
 }
