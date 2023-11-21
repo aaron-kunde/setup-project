@@ -1,5 +1,5 @@
 init_global_vars() {
-    DEFAULT_VERSION=default_version
+    DEFAULT_VERSION=21.0.1+12
     VERSION=$DEFAULT_VERSION
     INSTALLATION_BASE_DIR=$HOME/opt
     # Reset OPTIND, if getopts was used before
