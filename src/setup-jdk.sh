@@ -64,7 +64,7 @@ export_path_vars() {
     SETUP_JDK_ORIGINAL_JAVA_HOME="${JAVA_HOME}"
     
     export JAVA_HOME=$(installation_path)
-    export PATH="$PATH:$JAVA_HOME/bin"
+    export PATH="$JAVA_HOME/bin:${PATH}"
 }
 
 # TODO: Rename to reset_vars?
