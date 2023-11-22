@@ -38,19 +38,27 @@ installation_path() {
     esac
 }
 
-# Specific implementation needed
+# TODO: Rename to export_vars?
+# Specific implementation
 export_path_vars() {
     echo "Adding $(installation_path) to PATH"
     SETUP_GRADLE_ORIGINAL_PATH="${PATH}"
-    
-    export PATH="$(installation_path):${PATH}"
+    SETUP_GRADLE_ORIGINAL_GRADLE_HOME=${GRADLE_HOME}
+
+    export GRADLE_HOME="$(installation_path)"
+    export PATH="$GRADLE_HOME/bin:${PATH}"
 }
 
-# Specific implementation needed
+# TODO: Rename to reset_vars?
+# Specific implementation
 reset_path_vars() {
     if [ -v SETUP_GRADLE_ORIGINAL_PATH ]; then
 	export PATH="${SETUP_GRADLE_ORIGINAL_PATH}"
 	unset SETUP_GRADLE_ORIGINAL_PATH
+    fi
+    if [ -v SETUP_GRADLE_ORIGINAL_GRADLE_HOME ]; then
+	export GRADLE_HOME="${SETUP_GRADLE_ORIGINAL_GRADLE_HOME}"
+	unset SETUP_GRADLE_ORIGINAL_GRADLE_HOME
     fi
 }
 
