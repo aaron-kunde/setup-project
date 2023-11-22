@@ -35,7 +35,7 @@ major_version() {
     fi 
 }
 
-# Specific implementation needed
+# Specific implementation
 installation_path() {
     local major_version=$(major_version)
 
@@ -57,7 +57,7 @@ installation_path() {
 }
 
 # TODO: Rename to export_vars?
-# Specific implementation needed
+# Specific implementation
 export_path_vars() {
     echo "Adding $(installation_path) to PATH"
     SETUP_JDK_ORIGINAL_PATH="${PATH}"
@@ -68,7 +68,7 @@ export_path_vars() {
 }
 
 # TODO: Rename to reset_vars?
-# Specific implementation needed
+# Specific implementation
 reset_path_vars() {
     if [ -v SETUP_JDK_ORIGINAL_PATH ]; then
 	export PATH="${SETUP_JDK_ORIGINAL_PATH}"
@@ -95,7 +95,7 @@ abort() {
     return 0
 }
 
-# Specific implementation needed
+# Specific implementation
 is_installed() {
     java -version 2>/dev/null &&
 	(java -version 2>&1 | grep $VERSION)
