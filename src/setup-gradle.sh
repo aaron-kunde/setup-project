@@ -69,14 +69,9 @@ abort() {
     return 0
 }
 
-# Specific implementation needed
+# Specific implementation
 is_installed() {
-    case "$VERSION" in
-	installed) return 0
-	    ;;
-	*) return 1
-	    ;;
-    esac
+    gradle -v 1>/dev/null && (gradle -v | grep 8.4)
 }
 
 # Specific implementation
