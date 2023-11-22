@@ -106,15 +106,10 @@ download_installation_file() {
     curl -L $(download_url) -o $(local_installation_file)
 }
 
-# Specific implementation needed
+# Specific implementation
 install_installation_file() {
     echo "Install installation file"
-        case "$VERSION" in
-	installation_fail) return 1
-	   ;;
-	*) return 0
-	   ;;
-    esac
+    unzip $(local_installation_file) -d $(dirname $GRADLE_HOME)
 }
 
 install() {
