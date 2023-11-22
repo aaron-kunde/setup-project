@@ -160,15 +160,15 @@ download_installation_file() {
 install_binaries() {
     echo "Install installation binaries"
 
-    local install_file=${1}
+    local local_installation_file=$(local_installation_file)
     mkdir -p $JAVA_HOME
     
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    unzip $install_file -d $(dirname $JAVA_HOME)
+	    unzip $local_installation_file -d $(dirname $JAVA_HOME)
 	    ;;
 	*)
-	    tar zxf $install_file -C $(dirname $JAVA_HOME)
+	    tar zxf $local_installation_file -C $(dirname $JAVA_HOME)
 	    ;;
     esac
 }
