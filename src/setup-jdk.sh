@@ -137,23 +137,23 @@ local_installation_file_exists() {
 # Specifc implermentation
 download_url() {
     local major_version=$(major_version)
-    local base_url=https://github.com/temurin$major_version-binaries/releases/download/
+    local base_url=https://github.com/adoptium/temurin$major_version-binaries/releases/download
     local installation_file=$(installation_file)
     
     if [ $major_version -gt 8 ]; then
-	echo $base_url/jdk-$VERSION/$installation_file
+	echo $base_url/jdk-${VERSION}/$installation_file
     else
-	echo $base_url/jdk$VERSION/$installation_file
+	echo $base_url/jdk${VERSION}/$installation_file
     fi
 }
 
-remote_installation_file_exists() {
+remote_installation_file_exists() {    
     curl -sIf $(download_url) >/dev/null
 }
 
 download_installation_file() {
     echo "Download installation file" 
-    curl $(download_url) -o $(local_installation_file)
+    curl -L $(download_url) -o $(local_installation_file)
 }
 
 # Specific implementation
@@ -177,16 +177,16 @@ install_binaries() {
 check_installation_file() {
     echo "Check installation file"
 
-    local install_file=$(adoptopenjdk_install_file)
-    local install_sha256_file=$install_file.sha256
+    local installation_file=$(installation_file)
+    local local_installation_sha256_file=/tmp/$installation_file.sha256
 
-    if [ ! -f /tmp/$install_sha256_file ]; then
-	curl -L $url/$install_sha256_file.txt \
-	     -o /tmp/$install_sha256_file
+    if [ ! -f $local_installation_sha256_file ]; then
+	curl -L $(download_url).sha256.txt \
+	     -o $local_installation_sha256_file
     fi
     local pwd=$PWD
     cd /tmp
-    sha256sum -c $install_sha256_file
+    sha256sum -c $local_installation_sha256_file
     cd $pwd
 }
 
