@@ -101,15 +101,27 @@ is_installed() {
 	(java -version 2>&1 | grep $VERSION)
 }
 
-# Specific implementation needed
+short_version() {
+    local major_version=$(major_version)
+
+    if [ $major_version -gt 8 ]; then
+	echo $VERSION | sed -ne 's/\+/_/gp'
+    else
+	echo $VERSION | tr -d '-'
+    fi
+}
+
+# Specific implementation
 installation_file() {
-    # There might be different installation files, depending on target OS
+    local major_version=$(major_version)
+    local short_version=$(short_version)
+
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    echo installation.file
+	    echo OpenJDK${major_version}U-jdk_x64_windows_hotspot_$short_version.zip
 	    ;;
 	*)
-	    echo installation.file
+	    echo OpenJDK${major_version}U-jdk_x64_linux_hotspot_$short_version.tar.gz
 	    ;;
     esac
 }
@@ -122,16 +134,17 @@ local_installation_file_exists() {
     test -f $(local_installation_file)
 }
 
-# Specifc implermentation needed
+# Specifc implermentation
 download_url() {
-    local major_version=
-    echo https://github.com/adoptium/temurin$major_version-binaries/releases/tag/jdk-$VERSION
-    case "$VERSION" in
-	download_fail) echo https://github.com/aaron-kunde/setup-project/blob/master/non-existing.file
-	   ;;
-	*) echo https://github.com/aaron-kunde/setup-project/blob/master/README.org
-	   ;;
-    esac
+    local major_version=$(major_version)
+    local base_url=https://github.com/temurin$major_version-binaries/releases/download/
+    local installation_file=$(installation_file)
+    
+    if [ $major_version -gt 8 ]; then
+	echo $base_url/jdk-$VERSION/$installation_file
+    else
+	echo $base_url/jdk$VERSION/$installation_file
+    fi
 }
 
 remote_installation_file_exists() {
