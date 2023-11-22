@@ -40,20 +40,10 @@ installation_path() {
     local major_version=$(major_version)
 
     if [ $major_version -gt 8 ]; then
-	installation_subdir="$HOME/opt/jdk-$VERSION"
+	echo $INSTALLATION_BASE_DIR/jdk-$VERSION
     else
-	installation_subdir="$HOME/opt/jdk$VERSION"
+	echo $INSTALLATION_BASE_DIR/jdk$VERSION
     fi
-
-    # There might be different installation paths, depending on target OS
-    case "$(uname -s)" in
-	CYGWIN*|MINGW*|MSYS*)
-	    echo $INSTALLATION_BASE_DIR/$installation_subdir
-	    ;;
-	*)
-	    echo $INSTALLATION_BASE_DIR/$installation_subdir
-	    ;;
-    esac
 }
 
 # TODO: Rename to export_vars?
