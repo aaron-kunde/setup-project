@@ -61,7 +61,7 @@ installation_path() {
 export_path_vars() {
     echo "Adding $(installation_path) to PATH"
     SETUP_JDK_ORIGINAL_PATH="${PATH}"
-    SETUP_JDK_ORIGINAL_JAVA_HOME="{JAVA_HOME}"
+    SETUP_JDK_ORIGINAL_JAVA_HOME="${JAVA_HOME}"
     
     export JAVA_HOME=$(installation_path)
     export PATH="$PATH:$JAVA_HOME/bin"
@@ -75,7 +75,7 @@ reset_path_vars() {
 	unset SETUP_JDK_ORIGINAL_PATH
     fi
     if [ -v SETUP_JDK_ORIGINAL_JAVA_HOME ]; then
-	export PATH="${SETUP_JDK_ORIGINAL_JAVA_HOME}"
+	export JAVA_HOME="${SETUP_JDK_ORIGINAL_JAVA_HOME}"
 	unset SETUP_JDK_ORIGINAL_JAVA_HOME
     fi
 }
