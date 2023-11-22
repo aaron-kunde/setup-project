@@ -25,17 +25,9 @@ set_vars_from_opts() {
     done
 }
 
-# Specific implementation needed
+# Specific implementation
 installation_path() {
-    # There might be different installation paths, depending on target OS
-    case "$(uname -s)" in
-	CYGWIN*|MINGW*|MSYS*)
-	    echo $INSTALLATION_BASE_DIR/tmpl-$VERSION
-	    ;;
-	*)
-	    echo $INSTALLATION_BASE_DIR/tmpl-$VERSION
-	    ;;
-    esac
+    echo $INSTALLATION_BASE_DIR/gradle-$VERSION
 }
 
 # TODO: Rename to export_vars?
