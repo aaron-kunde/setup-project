@@ -25,32 +25,58 @@ set_vars_from_opts() {
     done
 }
 
+major_version() {
+    local ret=$(echo $VERSION | sed -ne "s/^\([0-9]\+\).*/\1/p")
+
+    if [ -z $ret ]; then
+	echo -1
+    else
+	echo $ret
+    fi 
+}
+
 # Specific implementation needed
 installation_path() {
+    local major_version=$(major_version)
+
+    if [ $major_version -gt 8 ]; then
+	installation_subdir="$HOME/opt/jdk-$VERSION"
+    else
+	installation_subdir="$HOME/opt/jdk$VERSION"
+    fi
+
     # There might be different installation paths, depending on target OS
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    echo $INSTALLATION_BASE_DIR/tmpl-$VERSION
+	    echo $INSTALLATION_BASE_DIR/$installation_subdir
 	    ;;
 	*)
-	    echo $INSTALLATION_BASE_DIR/tmpl-$VERSION
+	    echo $INSTALLATION_BASE_DIR/$installation_subdir
 	    ;;
     esac
 }
 
+# TODO: Rename to export_vars?
 # Specific implementation needed
 export_path_vars() {
     echo "Adding $(installation_path) to PATH"
     SETUP_JDK_ORIGINAL_PATH="${PATH}"
+    SETUP_JDK_ORIGINAL_JAVA_HOME="{JAVA_HOME}"
     
-    export PATH="$(installation_path):${PATH}"
+    export JAVA_HOME=$(installation_path)
+    export PATH="$PATH:$JAVA_HOME/bin"
 }
 
+# TODO: Rename to reset_vars?
 # Specific implementation needed
 reset_path_vars() {
     if [ -v SETUP_JDK_ORIGINAL_PATH ]; then
 	export PATH="${SETUP_JDK_ORIGINAL_PATH}"
 	unset SETUP_JDK_ORIGINAL_PATH
+    fi
+    if [ -v SETUP_JDK_ORIGINAL_JAVA_HOME ]; then
+	export PATH="${SETUP_JDK_ORIGINAL_JAVA_HOME}"
+	unset SETUP_JDK_ORIGINAL_JAVA_HOME
     fi
 }
 
@@ -101,7 +127,20 @@ local_installation_file_exists() {
 }
 
 # Specifc implermentation needed
+nmajor_version() {
+    local ret=$(echo $VERSION | sed -ne "s/^\([0-9]\+\).*/\1/p")
+    
+    if [ -z $ret ]; then
+	echo -1
+    else
+	echo $ret
+    fi 
+}
+
+# Specifc implermentation needed
 download_url() {
+    local major_version=
+    echo https://github.com/adoptium/temurin$major_version-binaries/releases/tag/jdk-$VERSION
     case "$VERSION" in
 	download_fail) echo https://github.com/aaron-kunde/setup-project/blob/master/non-existing.file
 	   ;;

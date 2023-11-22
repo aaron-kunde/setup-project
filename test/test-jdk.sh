@@ -256,3 +256,10 @@ it should_successfully_use_default_version_as_new_version_if_no_version_given_an
 it should_successfully_use_given_version_as_new_version_if_installed_before
 it should_abort_installation_and_deinstall_old_version_if_download_fails_and_installed_before
 it should_abort_installation_and_deinstall_old_version_if_installation_fails_and_installed_before
+
+echo "Speciral cases"
+echo TODO: differentiate between major version > 8 and <= 8
+echo TODO: Dealing with JAVA_HOME
+
+
+
