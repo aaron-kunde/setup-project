@@ -123,17 +123,6 @@ local_installation_file_exists() {
 }
 
 # Specifc implermentation needed
-nmajor_version() {
-    local ret=$(echo $VERSION | sed -ne "s/^\([0-9]\+\).*/\1/p")
-    
-    if [ -z $ret ]; then
-	echo -1
-    else
-	echo $ret
-    fi 
-}
-
-# Specifc implermentation needed
 download_url() {
     local major_version=
     echo https://github.com/adoptium/temurin$major_version-binaries/releases/tag/jdk-$VERSION
