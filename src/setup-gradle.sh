@@ -87,17 +87,9 @@ is_installed() {
     esac
 }
 
-# Specific implementation needed
+# Specific implementation
 installation_file() {
-    # There might be different installation files, depending on target OS
-    case "$(uname -s)" in
-	CYGWIN*|MINGW*|MSYS*)
-	    echo installation.file
-	    ;;
-	*)
-	    echo installation.file
-	    ;;
-    esac
+    echo gradle-$VERSION-bin.zip
 }
 
 local_installation_file() {
@@ -108,14 +100,9 @@ local_installation_file_exists() {
     test -f $(local_installation_file)
 }
 
-# Specifc implermentation needed
+# Specifc implermentation
 download_url() {
-    case "$VERSION" in
-	download_fail) echo https://github.com/aaron-kunde/setup-project/blob/master/non-existing.file
-	   ;;
-	*) echo https://github.com/aaron-kunde/setup-project/blob/master/README.org
-	   ;;
-    esac
+    echo https://services.gradle.org/distributions/$(installation_file)
 }
 
 remote_installation_file_exists() {
@@ -124,7 +111,7 @@ remote_installation_file_exists() {
 
 download_installation_file() {
     echo "Download installation file" 
-    curl $(download_url) -o $(local_installation_file)
+    curl -L $(download_url) -o $(local_installation_file)
 }
 
 # Specific implementation needed
