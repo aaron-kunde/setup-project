@@ -156,15 +156,46 @@ download_installation_file() {
     curl $(download_url) -o $(local_installation_file)
 }
 
-# Specific implementation needed
+# Specific implementation
+install_binaries() {
+    echo "Install installation binaries"
+
+    local install_file=${1}
+    mkdir -p $JAVA_HOME
+    
+    case "$(uname -s)" in
+	CYGWIN*|MINGW*|MSYS*)
+	    unzip $install_file -d $(dirname $JAVA_HOME)
+	    ;;
+	*)
+	    tar zxf $install_file -C $(dirname $JAVA_HOME)
+	    ;;
+    esac
+}
+
+# Specific implmenetation
+check_installation_file() {
+    echo "Check installation file"
+
+    local install_file=$(adoptopenjdk_install_file)
+    local install_sha256_file=$install_file.sha256
+
+    if [ ! -f /tmp/$install_sha256_file ]; then
+	curl -L $url/$install_sha256_file.txt \
+	     -o /tmp/$install_sha256_file
+    fi
+    local pwd=$PWD
+    cd /tmp
+    sha256sum -c $install_sha256_file
+    cd $pwd
+}
+
+# Specific implementation
 install_installation_file() {
     echo "Install installation file"
-        case "$VERSION" in
-	installation_fail) return 1
-	   ;;
-	*) return 0
-	   ;;
-    esac
+
+    check_installation_file
+    install_binaries
 }
 
 install() {
