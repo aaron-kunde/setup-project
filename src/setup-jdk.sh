@@ -97,12 +97,8 @@ abort() {
 
 # Specific implementation needed
 is_installed() {
-    case "$VERSION" in
-	installed) return 0
-	    ;;
-	*) return 1
-	    ;;
-    esac
+    java -version 2>/dev/null &&
+	(java -version 2>&1 | grep $VERSION)
 }
 
 # Specific implementation needed
