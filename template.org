@@ -1,0 +1,24 @@
+*** Default version 
+For each Script, a default version ~VERSION~ is defined, which is set after the last needed version.
+
+*** General approach
+1. Set PATH and other installation relevant variables for the specified version.
+2. Check, whether this version is already installed.
+   1. If yes, installation is complete.
+   2. If not, check if an installation file for the current OS is present.
+      1. I yes, install version with this installation file.
+      2. If not, download correct installation file and proceed with step 2.1.
+
+If something goes wrong, abort. This means restore the PATH and other variables.         
+   
+* Specific Scripts
+
+** Angular
+Angular is installed by using [[https://www.npmjs.com/][npm]], therefore the appropriate version of [[https://nodejs.org][Node.js]] must be installed before. The installation of Angular is not done globally, but in the current directory, for each project separately.
+
+** Go
+The implementation of the script [[file:src/setup-go.sh][setup-go.sh]] is straight forward. The installation process consists of determining the correct installation file for the current OS, downloading it, if not present and extracting it to the installation path. The installation of Node.js is done globally, so that the same version can be shared among several projects.
+
+** Node.js
+The implementation of the script [[file:src/setup-nodejs.sh][setup-nodejs.sh]] is straight forward. The installation process consists of determining the correct installation file for the current OS, downloading it, if not present and extracting it to the installation path. The installation of Node.js is done globally, so that the same version can be shared among several projects.
+
