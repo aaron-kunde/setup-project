@@ -1,5 +1,16 @@
 *** Default version 
 For each Script, a default version ~VERSION~ is defined, which is set after the last needed version.
+* General approach
+1. Set PATH and other installation relevant global variables for the specified version.
+2. Check, whether this version is already installed.
+   1. If yes, installation is complete.
+   2. If not, check if an installation file for the current OS is present.
+      1. I yes, install version with this installation file.
+      2. If not, download correct installation file and proceed with step 2.1.
+3. Clean up the global variables after installation, but not PATH
+
+If something goes wrong, abort. This means, restore the PATH and other global variables.
+
 * Overriding of functions
 The template can be included into the software specific scripts, where specific functions can be overriden.
 *NOTE*: By including scripts, you have to be careful, with execution of scripts, since these are executed during the inclusion and therefore before anything else!
@@ -64,13 +75,4 @@ The reset of global variables depends on the initialisation. It is necessary to 
   }
 #+end_src
 
-*** General approach
-1. Set PATH and other installation relevant variables for the specified version.
-2. Check, whether this version is already installed.
-   1. If yes, installation is complete.
-   2. If not, check if an installation file for the current OS is present.
-      1. I yes, install version with this installation file.
-      2. If not, download correct installation file and proceed with step 2.1.
 
-If something goes wrong, abort. This means restore the PATH and other variables.         
-   
