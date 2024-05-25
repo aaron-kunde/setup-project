@@ -1,5 +1,68 @@
 *** Default version 
 For each Script, a default version ~VERSION~ is defined, which is set after the last needed version.
+* Overriding of functions
+The template can be included into the software specific scripts, where specific functions can be overriden.
+*NOTE*: By including scripts, you have to be careful, with execution of scripts, since these are executed during the inclusion and therefore before anything else!
+
+#+begin_src shell :tangle foo.sh
+  f1() {
+      echo "Foo f1: To override"
+  }
+
+  f2() {
+      echo "Foo f2: Not to override"
+  }
+
+  # To override
+  main() {
+      f1
+      f2
+  }
+
+  main
+#+end_src
+#+begin_src shell :tangle bar.sh
+  . foo.sh
+
+  f1() {
+      echo "Bar f1: To override"
+  }
+
+  f3() {
+      f2
+      echo "Bar f3: Not to override"
+  }
+
+  main() {
+      f1
+      f3
+  }
+
+  main
+#+end_src
+
+* Global variables
+Each script uses some global variables, like the version to install. These have to be initialized for each run of the script. The initialization of this variables might be the same for all:
+#+name: init_global_vars
+#+begin_src shell
+  init_global_vars() {
+      VERSION=$(default_version)
+      INSTALLATION_BASE_DIR=$HOME/opt
+      # Reset OPTIND, if getopts was used before
+      OPTIND=1
+  }
+#+end_src
+
+The reset of global variables depends on the initialisation. It is necessary to clean up, after the script ran successful or was aborted, because of an error. If ~init_global_vars~ was adopted in a script,  ~reset_global_vars~ variables might need to be adjusted as well:
+#+name: reset_global_vars
+#+begin_src shell
+  reset_global_vars() {
+      unset VERSION
+      unset INSTALLATION_BASE_DIR
+      # Reset OPTIND for future use of getopts
+      OPTIND=1
+  }
+#+end_src
 
 *** General approach
 1. Set PATH and other installation relevant variables for the specified version.
