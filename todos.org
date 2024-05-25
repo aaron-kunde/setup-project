@@ -1,0 +1,25 @@
+* TODO Common Lisp in Emacs
+1. Installation des clisp Interpreters
+2. Setzen der Variabinferior-lisp-program ~C:/Users/aaron/opt/clisp-2.49/clisp.exe~
+
+* TODO Python
+https://docs.python.org/3/using/windows.html
+  
+Windows versions of Python are fetched from https://www.python.org/downloads.
+
+Older version (pre 3.5) use MSI-Installer, while newer versions use EXE-Installer. Therefore, the schript first tries to use the MSI-Installer and then the EXE-Installer.
+
+** Unistall
+Use Installer to complete Uninstall, since /Apps and Features/ under Windows doesn't work always properly
+
+* TODO Windows
+Batch- or PowerShell-Scripts are currently not supported.
+** Removing the MAX_PATH limitation in MS Windows
+Following the intructions from the [[https://docs.python.org/3/using/windows.html#removing-the-max-path-limitation][Python documentation]], set the registry key of ~HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled~ to ~1~.
+
+** Create symbolic links in MS Windows
+To create symbolic links for each setup-file in a target directory, execute the following command in a PowerShell, which has been started as Administrator:
+#+begin_src fundamental
+  foreach ($file in Get-ChildItem PROJECT_DIR\setup-*.* | Where-Object { ! ($_.Name -match ".~") }) { $fname = $file.Name; New-Item -Path TARGET_DIR\$fname -ItemType SymbolicLink -Value $file -Force}
+#+end_src
+
