@@ -12,6 +12,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
 #+name: definitions
 #+begin_src shell :tangle src/setup-template.sh :mkdirp yes :noweb yes :shebang #!/bin/sh :tangle-mode '#o644 :exports none
   <<default_version>>
+  <<print_usage>>
   <<init_global_vars>>
   <<reset_global_vars>>
 #+end_src
@@ -20,6 +21,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
   init_global_vars
 
   echo "TODO: Not yet implemented"
+  print_usage
 
   reset_global_vars
 #+end_src
@@ -104,5 +106,18 @@ Since the strings for version (and therefore default version) are specific to th
 	  export PATH="${SETUP_TMPL_ORIGINAL_PATH}"
 	  unset SETUP_TMPL_ORIGINAL_PATH
       fi
+  }
+#+end_src
+
+* Print usage
+Each script must provide a usage information, to explain the valid arguments, options and the default version:
+#+name: print_usage
+#+begin_src shell
+  print_usage() {
+      cat <<EOM
+  ${0} [-v VERSION]
+       -v VERSION Version of TMPL to install.
+	  Default: $(default_version)
+  EOM
   }
 #+end_src

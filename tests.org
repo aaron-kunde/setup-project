@@ -10,9 +10,11 @@ Therefore the test script has definitions of assertions and test cases and an ex
 
   # Define test cases
   <<environment_must_be_clean_after_execution>>
+  <<default_version_must_be_printed>>
 
   # Execute test cases
   environment_must_be_clean_after_execution
+  default_version_must_be_printed
 #+end_src
 
 * Assertions
@@ -60,3 +62,11 @@ The preconditions for an environment, where no setup took place are:
 *** Postconditions
 The postconditions are the same as the preconditions.  
 
+** Must print default version
+If usage information is printed, the correct default version must be shown
+#+name: default_version_must_be_printed
+#+begin_src shell
+  default_version_must_be_printed() {
+      . $(dirname ${0})/../src/setup-template.sh | grep -qe 'Default: tmpl_default-version'
+  }
+#+end_src

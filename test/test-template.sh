@@ -23,6 +23,10 @@ environment_must_be_clean_after_execution() {
     assert_optind_is_1
     assert_no_global_vars_set
 }
+default_version_must_be_printed() {
+    . $(dirname ${0})/../src/setup-template.sh | grep -qe 'Default: tmpl_default-version'
+}
 
 # Execute test cases
 environment_must_be_clean_after_execution
+default_version_must_be_printed
