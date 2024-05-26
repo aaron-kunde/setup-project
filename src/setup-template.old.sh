@@ -8,7 +8,7 @@
 }
 
 # Specific implementation needed
-print_usage() {
+-print_usage() {
     cat <<EOM
 ${0} [-v VERSION]
      -v VERSION Version of TMPL to install.

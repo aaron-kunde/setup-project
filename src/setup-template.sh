@@ -1,6 +1,13 @@
 #!/bin/sh
 default_version() {
-    echo tmpl_defaul-version
+    echo tmpl_default-version
+}
+print_usage() {
+    cat <<EOM
+${0} [-v VERSION]
+     -v VERSION Version of TMPL to install.
+	Default: $(default_version)
+EOM
 }
 init_global_vars() {
     VERSION=$(default_version)
@@ -18,5 +25,6 @@ reset_global_vars() {
 init_global_vars
 
 echo "TODO: Not yet implemented"
+print_usage
 
 reset_global_vars
