@@ -1,72 +1,67 @@
 #+title: Tests
-For each setup script in [[file:~/work/src][src]], a test script with several test cases exists, which can be executed. Each test case has pre- and postconditions. To define pre- and postconditions assertions are defined, which must be fulfilled.
+For each setup script in [[file:~/work/src][src]], a test script written with [[https://github.com/bats-core/bats-core][Bats]] exists. The tests can be executed with:
+#+begin_example
+  $ ./test/bats/bin/bats -t test/<test-file>.bats
+#+end_example
+
+, which can be executed. Each test case has pre- and postconditions. To define pre- and postconditions assertions are defined, which must be fulfilled.
 Therefore the test script has definitions of assertions and test cases and an execution block for the test cases.
-#+begin_src shell :tangle test/test-template.sh :mkdirp yes :noweb strip-export :shebang #!/bin/sh :exports none
-  set -e
+#+begin_src bats :tangle test/test-template.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
+    setup() {
+      load 'test_helper/bats-support/load'
+      load 'test_helper/bats-assert/load'
+    }
 
-  # Define common assertions
-  <<assert_optind_is_1>>
-  <<assert_no_global_vars_set>>
-
-  # Define test cases
-  <<environment_must_be_clean_after_execution>>
-  <<default_version_must_be_printed>>
-
-  # Execute test cases
-  environment_must_be_clean_after_execution
-  default_version_must_be_printed
+    <<default_version_must_be_printed>>
+    <<environment_must_be_clean_after_execution_with_default_version>>
+    <<environment_must_be_clean_after_execution_with_given_version>>
 #+end_src
-
-* Assertions
-Assertions can be used in several test cases for their pre- and postconditions.
 
 * Test cases
 
-** Environment must be clean after execution
-After the script has run, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~.
-#+name: environment_must_be_clean_after_execution
-#+begin_src shell
-  environment_must_be_clean_after_execution() {
-      assert_optind_is_1
-      assert_no_global_vars_set
-
-      . $(dirname ${0})/../src/setup-template.sh
-
-      assert_optind_is_1
-      assert_no_global_vars_set
-  }
-#+end_src
-
-*** Preconditions
-The preconditions for an environment, where no setup took place are:
-- Variable ~$OPTIND~ is ~1~
-#+name: assert_optind_is_1
-#+begin_src shell
-    assert_optind_is_1() {
-	test $OPTIND -eq 1 ||
-	    (echo "Fail: OPTIND = 1"; exit 1)
-    }
-#+end_src
-- Variable ~$INSTALLATION_BASE_DIR~ is not set
-- Variable ~$VERSION~ is not set
-#+name: assert_no_global_vars_set
-#+begin_src shell
-  assert_no_global_vars_set() {
-      test -z $INSTALLATION_BASE_DIR ||
-	  (echo "Fail: INSTALLATION_BASE_DIR is set: $INSTALLATION_BASE_DIR"; exit 1)
-      test -z $VERSION ||
-	  (echo "Fail: VERSION is set: $VERSION"; exit 1)
-  }
-#+end_src
-
-*** Postconditions
-The postconditions are the same as the preconditions.  
-
 ** Must print default version
-If usage information is printed, the correct default version must be shown
+If usage information is printed, the correct default version must be shown.
 #+name: default_version_must_be_printed
-#+begin_src shell
-  default_version_must_be_printed() {
-      . $(dirname ${0})/../src/setup-template.sh | grep -qe 'Default: tmpl_default-version'
+#+begin_src bats
+  @test "Default version must be printed" {
+      run load ../src/setup-template.sh
+
+      assert_line -p 'Default: tmpl_default-version'
+  }
+#+end_src
+
+** Environment must be clean after execution
+
+*** With default version
+After the script has run, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~.
+#+name: environment_must_be_clean_after_execution_with_default_version
+#+begin_src bats
+  @test "Environment must be clean after execution with default version" {
+      assert [ $OPTIND -eq 1 ]
+      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $VERSION ]
+
+      run load ../src/setup-template.sh
+
+      assert [ $OPTIND -eq 1 ]
+      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $VERSION ]
+  }
+#+end_src
+
+*** With given version
+After the script has run, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~.
+#+name: environment_must_be_clean_after_execution_with_given_version
+#+begin_src bats
+  @test "No previous installation default version" {
+      assert [ $OPTIND -eq 1 ]
+      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $VERSION ]
+
+      run load ../src/setup-template.sh -v some_other-version
+
+      assert [ $OPTIND -eq 1 ]
+      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $VERSION ]
   }
 #+end_src

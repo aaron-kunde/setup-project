@@ -21,9 +21,17 @@ reset_global_vars() {
     # Reset OPTIND for future use of getopts
     OPTIND=1
 }
+set_vars_from_opts() {
+    while getopts v: opt; do
+	case $opt in
+	    v) VERSION=$OPTARG
+	       ;;
+	esac
+    done
+}
 
 init_global_vars
-
+set_vars_from_opts
 echo "TODO: Not yet implemented"
 print_usage
 
