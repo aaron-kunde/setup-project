@@ -5,11 +5,11 @@ Therefore the test script has definitions of assertions and test cases and an ex
   set -e
 
   # Define common assertions
-  <<Assert OPTIND is 1>>
-  <<Assert no global vars set>>
+  <<assert_optind_is_1>>
+  <<assert_no_global_vars_set>>
 
   # Define test cases
-  <<Environment must be clean after execution>>
+  <<environment_must_be_clean_after_execution>>
 
   # Execute test cases
   environment_must_be_clean_after_execution
@@ -22,7 +22,7 @@ Assertions can be used in several test cases for their pre- and postconditions.
 
 ** Environment must be clean after execution
 After the script has run, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~.
-#+name: Environment must be clean after execution
+#+name: environment_must_be_clean_after_execution
 #+begin_src shell
   environment_must_be_clean_after_execution() {
       assert_optind_is_1
@@ -38,7 +38,7 @@ After the script has run, the newly introduced global variables shall not be set
 *** Preconditions
 The preconditions for an environment, where no setup took place are:
 - Variable ~$OPTIND~ is ~1~
-#+name: Assert OPTIND is 1
+#+name: assert_optind_is_1
 #+begin_src shell
     assert_optind_is_1() {
 	test $OPTIND -eq 1 ||
@@ -47,7 +47,7 @@ The preconditions for an environment, where no setup took place are:
 #+end_src
 - Variable ~$INSTALLATION_BASE_DIR~ is not set
 - Variable ~$VERSION~ is not set
-#+name: Assert no global vars set
+#+name: assert_no_global_vars_set
 #+begin_src shell
   assert_no_global_vars_set() {
       test -z $INSTALLATION_BASE_DIR ||
