@@ -27,7 +27,7 @@ EOM
 }
 
 # Specific implementation needed
-installation_path() {
+-installation_path() {
     # There might be different installation paths, depending on target OS
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
@@ -40,7 +40,7 @@ installation_path() {
 }
 
 # Specific implementation needed
-export_path_vars() {
+-export_path_vars() {
     echo "Adding $(installation_path) to PATH"
     SETUP_TMPL_ORIGINAL_PATH="${PATH}"
     
@@ -48,7 +48,7 @@ export_path_vars() {
 }
 
 # Specific implementation needed
-reset_path_vars() {
+-reset_path_vars() {
     if [ -v SETUP_TMPL_ORIGINAL_PATH ]; then
 	export PATH="${SETUP_TMPL_ORIGINAL_PATH}"
 	unset SETUP_TMPL_ORIGINAL_PATH

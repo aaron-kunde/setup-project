@@ -18,15 +18,22 @@ If something goes wrong, abort. This means, restore the PATH and other global va
   <<init_global_vars>>
   <<reset_global_vars>>
   <<set_vars_from_opts>>
+  <<installation_path>>
+  <<export_vars>>
+  <<restore_exported_vars>>
 #+end_src
 #+name: execution
 #+begin_src shell :tangle src/setup-template.sh :mkdirp yes :noweb strip-export
   init_global_vars
-  set_vars_from_opts
+  set_vars_from_opts ${@}
+  restore_exported_vars
+  export_vars
+
   echo "TODO: Not yet implemented"
   print_usage
 
   reset_global_vars
+  echo "TMPL successfully installed"
 #+end_src
 
 * Overriding of functions
@@ -117,13 +124,36 @@ To pass options (like the version to be installed) to the scripts /getopts/ is u
 #+end_src
 At least the version needs to be set, but other scripts might need additional options. Therefore this method might be overridden.
 
-** COMMENT PATH variables
+** Exported variables
+The ~PATH~ variable and every other global variable, which is exported by the scripts might exist before the script is run and therefore must be saved and restored, if something goes wrong. In the following example, the ~PATH~ is saved before the new one is exported:
+#+name: export_vars
 #+begin_src shell
-  reset_path_vars() {
+  export_vars() {
+      echo "Adding $(installation_path) to PATH"
+      SETUP_TMPL_ORIGINAL_PATH="${PATH}"
+
+      export PATH="$(installation_path):${PATH}"
+  }
+#+end_src
+*NOTE*: It is important to have an unique name for the backup variables!
+
+The corresponding reset function restores the ~PATH~ and deletes the backup, to clean up the environment:
+#+name: restore_exported_vars
+#+begin_src shell
+  restore_exported_vars() {
       if [ -v SETUP_TMPL_ORIGINAL_PATH ]; then
 	  export PATH="${SETUP_TMPL_ORIGINAL_PATH}"
 	  unset SETUP_TMPL_ORIGINAL_PATH
       fi
+  }
+#+end_src
+
+** Installation path
+Since the installation path might be different, depending on the target OS and the software, it is declared as a function, which can be overridden:
+#+name: installation_path
+#+begin_src shell
+  installation_path() {
+      echo $INSTALLATION_BASE_DIR/tmpl-$VERSION
   }
 #+end_src
 

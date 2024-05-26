@@ -2,10 +2,20 @@
 setup() {
   load 'test_helper/bats-support/load'
   load 'test_helper/bats-assert/load'
+
+  SPT_ORIGINAL_PATH="$PATH"
+}
+teardown() {
+    PATH="$SPT_ORIGINAL_PATH"
 }
 
-@test "Default version must be printed" {
-    run load ../src/setup-template.sh
+@test "Must print success message" {
+    run . src/setup-template.sh
+
+    assert_line -p 'Default: tmpl_default-version'
+}
+@test "Usage information must contain default version" {
+    run . src/setup-template.sh
 
     assert_line -p 'Default: tmpl_default-version'
 }
@@ -14,20 +24,22 @@ setup() {
     assert [ -z $INSTALLATION_BASE_DIR ]
     assert [ -z $VERSION ]
 
-    run load ../src/setup-template.sh
+    . src/setup-template.sh
 
     assert [ $OPTIND -eq 1 ]
     assert [ -z $INSTALLATION_BASE_DIR ]
     assert [ -z $VERSION ]
+    assert [ $PATH == "$HOME/opt/tmpl-tmpl_default-version:$SPT_ORIGINAL_PATH" ]
 }
-@test "No previous installation default version" {
+@test "Environment must be clean after execution with given version" {
     assert [ $OPTIND -eq 1 ]
     assert [ -z $INSTALLATION_BASE_DIR ]
     assert [ -z $VERSION ]
 
-    run load ../src/setup-template.sh -v some_other-version
+    . src/setup-template.sh -v some_other-version
 
     assert [ $OPTIND -eq 1 ]
     assert [ -z $INSTALLATION_BASE_DIR ]
     assert [ -z $VERSION ]
+    assert [ $PATH == "$HOME/opt/tmpl-some_other-version:$SPT_ORIGINAL_PATH" ]
 }
