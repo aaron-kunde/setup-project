@@ -14,4 +14,4 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run template tests
-        run: pwd
+        run: test/test-template.sh
