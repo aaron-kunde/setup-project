@@ -17,7 +17,7 @@ EOM
 }
 
 # Specific implementation needed
-set_vars_from_opts() {
+-set_vars_from_opts() {
     while getopts v: opt; do
 	case $opt in
 	    v) VERSION=$OPTARG
