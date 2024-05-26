@@ -1,0 +1,17 @@
+name: 'Test setup scripts'
+
+on:
+  # Run this workflow, whenever something is pushed
+  push:
+  # Run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  test_template:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run template tests
+        run: pwd
