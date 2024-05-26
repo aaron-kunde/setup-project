@@ -1,0 +1,62 @@
+#+title: Tests
+For each setup script in [[file:~/work/src][src]], a test script with several test cases exists, which can be executed. Each test case has pre- and postconditions. To define pre- and postconditions assertions are defined, which must be fulfilled.
+Therefore the test script has definitions of assertions and test cases and an execution block for the test cases.
+#+begin_src shell :tangle test/test-template.sh :mkdirp yes :noweb strip-export :shebang #!/bin/sh :exports none
+  set -e
+
+  # Define common assertions
+  <<Assert OPTIND is 1>>
+  <<Assert no global vars set>>
+
+  # Define test cases
+  <<Environment must be clean after execution>>
+
+  # Execute test cases
+  environment_must_be_clean_after_execution
+#+end_src
+
+* Assertions
+Assertions can be used in several test cases for their pre- and postconditions.
+
+* Test cases
+
+** Environment must be clean after execution
+After the script has run, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~.
+#+name: Environment must be clean after execution
+#+begin_src shell
+  environment_must_be_clean_after_execution() {
+      assert_optind_is_1
+      assert_no_global_vars_set
+
+      . $(dirname ${0})/../src/setup-template.sh
+
+      assert_optind_is_1
+      assert_no_global_vars_set
+  }
+#+end_src
+
+*** Preconditions
+The preconditions for an environment, where no setup took place are:
+- Variable ~$OPTIND~ is ~1~
+#+name: Assert OPTIND is 1
+#+begin_src shell
+    assert_optind_is_1() {
+	test $OPTIND -eq 1 ||
+	    (echo "Fail: OPTIND = 1"; exit 1)
+    }
+#+end_src
+- Variable ~$INSTALLATION_BASE_DIR~ is not set
+- Variable ~$VERSION~ is not set
+#+name: Assert no global vars set
+#+begin_src shell
+  assert_no_global_vars_set() {
+      test -z $INSTALLATION_BASE_DIR ||
+	  (echo "Fail: INSTALLATION_BASE_DIR is set: $INSTALLATION_BASE_DIR"; exit 1)
+      test -z $VERSION ||
+	  (echo "Fail: VERSION is set: $VERSION"; exit 1)
+  }
+#+end_src
+
+*** Postconditions
+The postconditions are the same as the preconditions.  
+

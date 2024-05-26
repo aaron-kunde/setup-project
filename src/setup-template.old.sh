@@ -1,5 +1,5 @@
 # Specific implementation needed
-init_global_vars() {
+-init_global_vars() {
     DEFAULT_VERSION=default_version
     VERSION=$DEFAULT_VERSION
     INSTALLATION_BASE_DIR=$HOME/opt
@@ -55,7 +55,7 @@ reset_path_vars() {
     fi
 }
 
-reset_global_vars() {
+-reset_global_vars() {
     unset DEFAULT_VERSION
     unset VERSION
     unset INSTALLATION_BASE_DIR
