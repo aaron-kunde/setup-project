@@ -9,9 +9,15 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   test_template:
+    name: Test setup-template
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Bats and Bats libs
+        uses: bats-core/bats-action@2.0.0
+        with:
+          support-path: ${{ github.workspace }}/test/test_helper/bats-support
+          assert-path: ${{ github.workspace }}/test/test_helper/bats-assert
       - name: Run template tests
-        run: test/test-template.sh
+        run: bats -t test/test-template.bats
