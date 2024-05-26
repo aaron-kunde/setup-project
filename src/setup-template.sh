@@ -29,10 +29,29 @@ set_vars_from_opts() {
 	esac
     done
 }
+installation_path() {
+    echo $INSTALLATION_BASE_DIR/tmpl-$VERSION
+}
+export_vars() {
+    echo "Adding $(installation_path) to PATH"
+    SETUP_TMPL_ORIGINAL_PATH="${PATH}"
+
+    export PATH="$(installation_path):${PATH}"
+}
+restore_exported_vars() {
+    if [ -v SETUP_TMPL_ORIGINAL_PATH ]; then
+	export PATH="${SETUP_TMPL_ORIGINAL_PATH}"
+	unset SETUP_TMPL_ORIGINAL_PATH
+    fi
+}
 
 init_global_vars
-set_vars_from_opts
+set_vars_from_opts ${@}
+restore_exported_vars
+export_vars
+
 echo "TODO: Not yet implemented"
 print_usage
 
 reset_global_vars
+echo "TMPL successfully installed"

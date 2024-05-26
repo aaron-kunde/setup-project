@@ -3,28 +3,57 @@ For each setup script in [[file:~/work/src][src]], a test script written with [[
 #+begin_example
   $ ./test/bats/bin/bats -t test/<test-file>.bats
 #+end_example
-
-, which can be executed. Each test case has pre- and postconditions. To define pre- and postconditions assertions are defined, which must be fulfilled.
-Therefore the test script has definitions of assertions and test cases and an execution block for the test cases.
 #+begin_src bats :tangle test/test-template.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
-    setup() {
-      load 'test_helper/bats-support/load'
-      load 'test_helper/bats-assert/load'
-    }
+  <<setup>>
+  <<teardown>>
 
-    <<default_version_must_be_printed>>
-    <<environment_must_be_clean_after_execution_with_default_version>>
-    <<environment_must_be_clean_after_execution_with_given_version>>
+  <<Must print success message>>
+  <<Usage information must contain default version>>
+  <<Environment must be clean after execution with default version>>
+  <<Environment must be clean after execution with given version>>
+#+end_src
+
+Each test needs a setup, which loads the necessary Bats libraries:
+- [[https://github.com/bats-core/bats-support][bats-support]]
+- [[https://github.com/bats-core/bats-assert][bats-assert]]
+Furthermore, the exported variables are backed up. In this case at least the ~PATH~
+#+name: setup
+#+begin_src bats
+  setup() {
+    load 'test_helper/bats-support/load'
+    load 'test_helper/bats-assert/load'
+
+    SPT_ORIGINAL_PATH="$PATH"
+  }
+#+end_src
+
+To clean up, the exported variables are reset to its saved values after each test:
+#+name: teardown
+#+begin_src bats
+  teardown() {
+      PATH="$SPT_ORIGINAL_PATH"
+  }
 #+end_src
 
 * Test cases
 
-** Must print default version
-If usage information is printed, the correct default version must be shown.
-#+name: default_version_must_be_printed
+** Must print success message
+If successful, a success message must be printed:
+#+name: Must print success message
 #+begin_src bats
-  @test "Default version must be printed" {
-      run load ../src/setup-template.sh
+  @test "Must print success message" {
+      run . src/setup-template.sh
+
+      assert_line -p 'Default: tmpl_default-version'
+  }
+#+end_src
+
+** Usage information must contain default version
+If usage information is printed, the correct default version must be shown:
+#+name: Usage information must contain default version
+#+begin_src bats
+  @test "Usage information must contain default version" {
+      run . src/setup-template.sh
 
       assert_line -p 'Default: tmpl_default-version'
   }
@@ -33,35 +62,37 @@ If usage information is printed, the correct default version must be shown.
 ** Environment must be clean after execution
 
 *** With default version
-After the script has run, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~.
-#+name: environment_must_be_clean_after_execution_with_default_version
+After the script has run without a given version, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~. Furhtermore the exported ~$PATH~ must be extended with the default version:
+#+name: Environment must be clean after execution with default version
 #+begin_src bats
   @test "Environment must be clean after execution with default version" {
       assert [ $OPTIND -eq 1 ]
       assert [ -z $INSTALLATION_BASE_DIR ]
       assert [ -z $VERSION ]
 
-      run load ../src/setup-template.sh
+      . src/setup-template.sh
 
       assert [ $OPTIND -eq 1 ]
       assert [ -z $INSTALLATION_BASE_DIR ]
       assert [ -z $VERSION ]
+      assert [ $PATH == "$HOME/opt/tmpl-tmpl_default-version:$SPT_ORIGINAL_PATH" ]
   }
 #+end_src
 
 *** With given version
-After the script has run, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~.
-#+name: environment_must_be_clean_after_execution_with_given_version
+After the script has run with a given version, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~. Furhtermore the exported ~$PATH~ must be extended with the given version:
+#+name: Environment must be clean after execution with given version
 #+begin_src bats
-  @test "No previous installation default version" {
+  @test "Environment must be clean after execution with given version" {
       assert [ $OPTIND -eq 1 ]
       assert [ -z $INSTALLATION_BASE_DIR ]
       assert [ -z $VERSION ]
 
-      run load ../src/setup-template.sh -v some_other-version
+      . src/setup-template.sh -v some_other-version
 
       assert [ $OPTIND -eq 1 ]
       assert [ -z $INSTALLATION_BASE_DIR ]
       assert [ -z $VERSION ]
+      assert [ $PATH == "$HOME/opt/tmpl-some_other-version:$SPT_ORIGINAL_PATH" ]
   }
 #+end_src
