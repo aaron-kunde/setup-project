@@ -10,7 +10,7 @@
 
 If something goes wrong, abort. This means, restore the PATH and other global variables:
 #+name: definitions
-#+begin_src shell :tangle src/setup-template.sh :mkdirp yes :noweb yes :shebang #!/bin/sh :tangle-mode o644 :exports none
+#+begin_src shell :tangle src/setup-template.sh :mkdirp yes :noweb yes :shebang #!/bin/sh :tangle-mode '#o644 :exports none
   <<default_version>>
   <<init_global_vars>>
   <<reset_global_vars>>
