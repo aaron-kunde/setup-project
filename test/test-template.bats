@@ -12,12 +12,7 @@ teardown() {
 @test "Must print success message" {
     run . src/setup-template.sh
 
-    assert_line -p 'Default: tmpl_default-version'
-}
-@test "Usage information must contain default version" {
-    run . src/setup-template.sh
-
-    assert_line -p 'Default: tmpl_default-version'
+    assert_line 'TMPL successfully installed'
 }
 @test "Environment must be clean after execution with default version" {
     assert [ $OPTIND -eq 1 ]

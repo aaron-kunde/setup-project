@@ -1,4 +1,11 @@
 #+title: Template
+* Usage
+#+begin_example
+  $ . set-template.sh [-v VERSION]
+#+end_example
+** Version
+The version you want to install. Defaults to the [[*Default version][default version]].
+
 * General approach
 1. Set global variables.
 2. Override global variables given by options.
@@ -14,7 +21,6 @@ If something goes wrong, abort. This means, restore the PATH and other global va
 #+name: definitions
 #+begin_src shell :tangle src/setup-template.sh :mkdirp yes :noweb yes :shebang #!/bin/sh :tangle-mode '#o644 :exports none
   <<default_version>>
-  <<print_usage>>
   <<init_global_vars>>
   <<reset_global_vars>>
   <<set_vars_from_opts>>
@@ -30,7 +36,6 @@ If something goes wrong, abort. This means, restore the PATH and other global va
   export_vars
 
   echo "TODO: Not yet implemented"
-  print_usage
 
   reset_global_vars
   echo "TMPL successfully installed"
@@ -154,18 +159,5 @@ Since the installation path might be different, depending on the target OS and t
 #+begin_src shell
   installation_path() {
       echo $INSTALLATION_BASE_DIR/tmpl-$VERSION
-  }
-#+end_src
-
-* Print usage
-Each script must provide a usage information, to explain the valid arguments, options and the default version:
-#+name: print_usage
-#+begin_src shell
-  print_usage() {
-      cat <<EOM
-  ${0} [-v VERSION]
-       -v VERSION Version of TMPL to install.
-	  Default: $(default_version)
-  EOM
   }
 #+end_src
