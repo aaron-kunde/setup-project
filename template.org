@@ -57,7 +57,24 @@ The template can be included into the software specific scripts, where specific 
 7. Print success message
 
 If something goes wrong, abort. This means, restore the PATH and other global variables:
-#+name: definitions
+#+name: main
+#+begin_src shell
+  main() {
+      init_global_vars
+      set_vars_from_opts ${@}
+
+      if ! is_installed; then
+	  echo "Start installation"
+	  restore_exported_vars
+	  export_vars
+	  install || abort
+      fi
+
+      reset_global_vars
+      print_success_message
+  }
+#+end_src
+
 #+begin_src shell :tangle src/setup-template.sh :mkdirp yes :noweb yes :shebang #!/bin/sh :tangle-mode '#o644 :exports none
   <<default_version>>
   <<init_global_vars>>
@@ -76,21 +93,9 @@ If something goes wrong, abort. This means, restore the PATH and other global va
   <<install>>
   <<install_installation_file>>
   <<print_success_message>>
-#+end_src
-#+name: execution
-#+begin_src shell :tangle src/setup-template.sh :mkdirp yes :noweb strip-export
-  init_global_vars
-  set_vars_from_opts ${@}
+  <<main>>
 
-  if ! is_installed; then
-    echo "Start installation"
-      restore_exported_vars
-      export_vars
-      install || abort
-  fi
-
-  reset_global_vars
-  print_success_message
+  main ${@}
 #+end_src
 
 ** Global variables
