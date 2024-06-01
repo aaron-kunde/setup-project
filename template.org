@@ -54,7 +54,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
 The template can be included into the software specific scripts, where specific functions can be overridden.
 *NOTE*: By including scripts, you have to be careful, with execution of scripts, since these are executed during the inclusion and therefore before anything else!
 
-#+begin_src shell :tangle foo.sh
+#+begin_src shell :tangle no
   f1() {
       echo "Foo f1: To override"
   }
@@ -71,7 +71,7 @@ The template can be included into the software specific scripts, where specific 
 
   main
 #+end_src
-#+begin_src shell :tangle bar.sh
+#+begin_src shell :tangle no
   . foo.sh
 
   f1() {
