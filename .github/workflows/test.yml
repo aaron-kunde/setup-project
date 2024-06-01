@@ -19,5 +19,6 @@ jobs:
         with:
           support-path: ${{ github.workspace }}/test/test_helper/bats-support
           assert-path: ${{ github.workspace }}/test/test_helper/bats-assert
+          file-path: ${{ github.workspace }}/test/test_helper/bats-file
       - name: Run template tests
         run: bats -t test/test-template.bats
