@@ -303,3 +303,219 @@ The success message dependes of the installed software and must be implmenented 
       echo "TMPL successfully installed"
   }
 #+end_src
+
+* Tests
+#+begin_src bats :tangle test/test-template.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
+  <<setup>>
+  <<teardown>>
+
+  <<Must print success message>>
+  <<Must print versions to install with default version>>
+  <<Must print versions to install with given version>>
+  <<Must print error message if remote installation file not found>>
+  <<Environment must be clean after execution if succeeds with default version>>
+  <<Environment must be clean after execution if succeeds with given version>>
+  <<Environment must be clean after execution if installation fails>>
+  <<Should not set variables if version is already installed>>
+  <<Should only output success message if version is already installedinstalled>>
+  <<Should try download if local installation file not exists>>
+  <<Should not try download if local installation file exists>>
+  <<Should try download if remote installation file exists>>
+#+end_src
+
+Each test needs a setup, which loads the necessary Bats libraries:
+- [[https://github.com/bats-core/bats-support][bats-support]]
+- [[https://github.com/bats-core/bats-assert][bats-assert]]
+- [[https://github.com/bats-core/bats-file][bats-file]]
+
+Furthermore, the exported variables are backed up. In this case at least the ~PATH~
+#+name: setup
+#+begin_src bats
+  setup() {
+    load 'test_helper/bats-support/load'
+    load 'test_helper/bats-assert/load'
+    load 'test_helper/bats-file/load'
+
+    SPT_ORIGINAL_PATH="$PATH"
+  }
+#+end_src
+
+To clean up, the exported variables are reset to its saved values after each test:
+#+name: teardown
+#+begin_src bats
+  teardown() {
+      PATH="$SPT_ORIGINAL_PATH"
+  }
+#+end_src
+
+** Test cases
+
+*** Must print success message
+If successful, a success message must be printed:
+#+name: Must print success message
+#+begin_src bats
+  @test "Must print success message" {
+      run . src/setup-template.sh
+
+      assert_line 'TMPL successfully installed'
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+*** Must print versions to install
+
+**** With default version
+#+name: Must print versions to install with default version
+#+begin_src bats
+  @test "Must print versions to install with default version" {
+      run . src/setup-template.sh
+
+      assert_line 'Install version: tmpl_default-version'
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+**** With given version
+#+name: Must print versions to install with given version
+#+begin_src bats
+  @test "Must print versions to install with given version" {
+      run . src/setup-template.sh -v some_other-version
+
+      assert_line 'Install version: some_other-version'
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+*** Must print error message, if remote installation file not found
+#+name: Must print error message if remote installation file not found
+#+begin_src bats
+  @test "Must print error message if remote installation file not found" {
+      run . src/setup-template.sh -v download_fail
+
+      assert_line "ERROR: No remote installation file found. Abort"
+      assert_file_not_exists  /tmp/installation.file
+  }
+#+end_src
+
+*** Environment must be clean after execution
+
+**** If succeeds with default version
+After the script has run without a given version, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~. Furhtermore the exported ~$PATH~ must be extended with the default version:
+#+name: Environment must be clean after execution if succeeds with default version
+#+begin_src bats
+  @test "Environment must be clean after execution if succeeds with default version" {
+      . src/setup-template.sh
+
+      assert [ $OPTIND -eq 1 ]
+      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $VERSION ]
+      assert [ $PATH == "$HOME/opt/tmpl-tmpl_default-version:$SPT_ORIGINAL_PATH" ]
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+**** If succeeds with given version
+After the script has run with a given version, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~. Furhtermore the exported ~$PATH~ must be extended with the given version:
+#+name: Environment must be clean after execution with if succeeds given version
+#+begin_src bats
+  @test "Environment must be clean after execution if succeeds with given version" {
+      . src/setup-template.sh -v some_other-version
+
+      assert [ $OPTIND -eq 1 ]
+      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $VERSION ]
+      assert [ $PATH == "$HOME/opt/tmpl-some_other-version:$SPT_ORIGINAL_PATH" ]
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+**** If installation fails
+#+name: Environment must be clean after execution if installation fails
+#+begin_src bats
+  @test "Environment must be clean after execution if installation fails" {
+      . src/setup-template.sh -v installation_fail
+
+      assert [ $OPTIND -eq 1 ]
+      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $VERSION ]
+      assert [ $PATH == $SPT_ORIGINAL_PATH ]
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+*** Should not set variables, if version is already installed
+If the given (or default) version is already installed, the environment should not be altered:
+#+name: Should not set variables if version is already installed
+#+begin_src bats
+  @test "Should not set variables if version is already installed" {
+      PATH="/some/new/path:$SPT_ORIGINAL_PATH"
+
+      . src/setup-template.sh -v installed
+
+      assert [ $OPTIND -eq 1 ]
+      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $VERSION ]
+      assert [ $PATH == "/some/new/path:$SPT_ORIGINAL_PATH" ]
+      assert_file_not_exists  /tmp/installation.file
+  }
+#+end_src
+
+*** Should only output success message, if version is already installed
+If the given (or default) version is already installed, only a success message should be shown:
+#+name: Should only output success message if version is already installedinstalled
+#+begin_src bats
+  @test "Should only output success message if version is already installed" {
+      run . src/setup-template.sh -v installed
+
+      refute_line "Adding $HOME/opt/tmpl-tmpl_default-version to PATH"
+      refute_line "Install version: tmpl_default-version"
+      assert_line "TMPL successfully installed"
+
+      assert_file_not_exists  /tmp/installation.file
+  }
+#+end_src
+
+*** Should try download, if local installation file not exists
+#+name: Should try download if local installation file not exists
+#+begin_src bats
+  @test "Should try download if local installation file not exists" {
+      run . src/setup-template.sh
+
+      assert_line "Local installation file not found: /tmp/installation.file. Try, download new one"
+      assert_line "Download installation file"
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+*** Should not try download, if local installation file exists
+#+name: Should not try download if local installation file exists
+#+begin_src bats
+  @test "Should not try download if local installation file exists" {
+      touch /tmp/installation.file
+
+      run . src/setup-template.sh
+
+      refute_line "Local installation file not found: /tmp/installation.file. Try, download new one"
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+*** Should download, if remote installation file found
+#+name: Should try download if remote installation file exists
+#+begin_src bats
+  @test "Should try download if remote installation file found" {
+      run . src/setup-template.sh
+
+      assert_line "Download installation file"
+
+      rm /tmp/installation.file
+   }
+#+end_src
