@@ -6,7 +6,48 @@
 ** Version
 The version you want to install. Defaults to the [[*Default version][default version]].
 
-* General approach
+** Overriding of functions
+The template can be included into the software specific scripts, where specific functions can be overridden.
+*NOTE*: By including scripts, you have to be careful, with execution of scripts, since these are executed during the inclusion and therefore before anything else!
+
+#+begin_src shell :tangle no
+  f1() {
+      echo "Foo f1: To override"
+  }
+
+  f2() {
+      echo "Foo f2: Not to override"
+  }
+
+  # To override
+  main() {
+      f1
+      f2
+  }
+
+  main
+#+end_src
+#+begin_src shell :tangle no
+  . foo.sh
+
+  f1() {
+      echo "Bar f1: To override"
+  }
+
+  f3() {
+      f2
+      echo "Bar f3: Not to override"
+  }
+
+  main() {
+      f1
+      f3
+  }
+
+  main
+#+end_src
+
+* Implementation
 1. Set global variables.
 2. Override global variables given by options.
 3. Reset PATH and other installation relevant exported variables.
@@ -50,48 +91,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
   echo "TMPL successfully installed"
 #+end_src
 
-* Overriding of functions
-The template can be included into the software specific scripts, where specific functions can be overridden.
-*NOTE*: By including scripts, you have to be careful, with execution of scripts, since these are executed during the inclusion and therefore before anything else!
-
-#+begin_src shell :tangle no
-  f1() {
-      echo "Foo f1: To override"
-  }
-
-  f2() {
-      echo "Foo f2: Not to override"
-  }
-
-  # To override
-  main() {
-      f1
-      f2
-  }
-
-  main
-#+end_src
-#+begin_src shell :tangle no
-  . foo.sh
-
-  f1() {
-      echo "Bar f1: To override"
-  }
-
-  f3() {
-      f2
-      echo "Bar f3: Not to override"
-  }
-
-  main() {
-      f1
-      f3
-  }
-
-  main
-#+end_src
-
-* Global variables
+** Global variables
 Each script uses some global variables, like the version to install. These have to be initialized for each run of the script. The initialization of this variables might be the same for all scripts. The only exception is the definition of the [[Default version][default version]], which is described later:
 #+name: init_global_vars
 #+begin_src shell
@@ -114,7 +114,7 @@ The reset of global variables depends on the initialization. It is necessary to 
   }
 #+end_src
 
-** Default version
+*** Default version
 Since the strings for version (and therefore default version) are specific to the software, at least the function retrieving the default version has to be adapted in the particular scripts:
 #+name: default_version
 #+begin_src shell
@@ -123,7 +123,7 @@ Since the strings for version (and therefore default version) are specific to th
   }
 #+end_src
 
-** Options
+*** Options
 To pass options (like the version to be installed) to the scripts /getopts/ is used:
 #+name: set_vars_from_opts
 #+begin_src shell
@@ -138,7 +138,7 @@ To pass options (like the version to be installed) to the scripts /getopts/ is u
 #+end_src
 At least the version needs to be set, but other scripts might need additional options. Therefore this method might be overridden.
 
-** Exported variables
+*** Exported variables
 The ~PATH~ variable and every other global variable, which is exported by the scripts might exist before the script is run and therefore must be saved and restored, if something goes wrong. In the following example, the ~PATH~ is saved before the new one is exported:
 #+name: export_vars
 #+begin_src shell
@@ -162,7 +162,7 @@ The corresponding reset function restores the ~PATH~ and deletes the backup, to 
   }
 #+end_src
 
-** Installation path
+*** Installation path
 Since the installation path might be different, depending on the target OS and the software, it is declared as a function, which can be overridden:
 #+name: installation_path
 #+begin_src shell
@@ -170,7 +170,7 @@ Since the installation path might be different, depending on the target OS and t
       echo $INSTALLATION_BASE_DIR/tmpl-$VERSION
   }
 #+end_src
-* Check, if wanted version is installed
+** Check, if wanted version is installed
 Before starting the installation, check if the wanted version is already installed. This should usually execute the wanted command and check the output for the correct version. In this template this is just a mock, which returns true, if the given version is ~installed~:
 #+name: is_installed
 #+begin_src shell
@@ -184,7 +184,7 @@ Before starting the installation, check if the wanted version is already install
   }
 #+end_src
 
-* Install wanted version
+** Install wanted version
 If the wanted version is not installed, start the installation. This includes the following steps:
 1. Check if an installation file for the current OS is present.
    1. If not, download correct installation file and proceed with next step. If no download file could be found, abort installation with an error message.
@@ -207,7 +207,7 @@ If the wanted version is not installed, start the installation. This includes th
    }
 #+end_src
 
-** Installation file
+*** Installation file
 The name of the installation file is specific to the software, its version and the target OS. Therefore a specific implementation is needed. For the template a dummy is used:
 #+name: installation_file
 #+begin_src shell
@@ -216,7 +216,7 @@ The name of the installation file is specific to the software, its version and t
   }
 #+end_src
 
-** Local installation file path
+*** Local installation file path
 The path to the local installation file. The default location is in the ~/tmp/~ directory:
 #+name: local_installation_file_path
 #+begin_src shell
@@ -225,7 +225,7 @@ The path to the local installation file. The default location is in the ~/tmp/~ 
   }
 #+end_src
 
-** Install installation file
+*** Install installation file
 The installation of the local installation file is specific to the software. For the template a dummy is used:
 #+name: install_installation_file
 #+begin_src shell
@@ -240,7 +240,7 @@ The installation of the local installation file is specific to the software. For
   }
 #+end_src
 
-** Check, if remote installation file exists
+*** Check, if remote installation file exists
 Before downloading the installation file, check if it exists:
 #+name: remote_installation_file_exists
 #+begin_src shell
@@ -249,7 +249,7 @@ Before downloading the installation file, check if it exists:
   }
 #+end_src
 
-** Download URL
+*** Download URL
 The download URL is specific to the software. For the template a dummy implementation is used:
 #+name: download_url
 #+begin_src shell
@@ -263,7 +263,7 @@ The download URL is specific to the software. For the template a dummy implement
   }
 #+end_src
 
-** Download installation file
+*** Download installation file
 If a remote installation file was found, download it:
 #+name: download_installation_file
 #+begin_src shell
@@ -273,7 +273,7 @@ If a remote installation file was found, download it:
   }
 #+end_src
 
-* Abort installation
+** Abort installation
 During the installation process, several errors can occurs, which cause the need to abort the installation process. If the process needs to be aborted, all global variables need to be reset, as if the installation process never had been started:
 #+name: abort
 #+begin_src shell
