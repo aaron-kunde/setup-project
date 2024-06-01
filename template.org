@@ -74,8 +74,8 @@ If something goes wrong, abort. This means, restore the PATH and other global va
       print_success_message
   }
 #+end_src
-
-#+begin_src shell :tangle src/setup-template.sh :mkdirp yes :noweb yes :shebang #!/bin/sh :tangle-mode '#o644 :exports none
+#+name: lib
+#+begin_src org :noweb yes :exports none
   <<default_version>>
   <<init_global_vars>>
   <<reset_global_vars>>
@@ -94,6 +94,9 @@ If something goes wrong, abort. This means, restore the PATH and other global va
   <<install_installation_file>>
   <<print_success_message>>
   <<main>>
+#+end_src
+#+begin_src shell :tangle src/setup-template.sh :mkdirp yes :noweb yes :shebang #!/bin/sh :tangle-mode '#o644 :exports none
+  <<lib>>
 
   main ${@}
 #+end_src
