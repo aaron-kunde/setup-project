@@ -98,16 +98,19 @@ install_installation_file() {
 print_success_message() {
     echo "TMPL successfully installed"
 }
+main() {
+    init_global_vars
+    set_vars_from_opts ${@}
 
-init_global_vars
-set_vars_from_opts ${@}
+    if ! is_installed; then
+	echo "Start installation"
+	restore_exported_vars
+	export_vars
+	install || abort
+    fi
 
-if ! is_installed; then
-  echo "Start installation"
-    restore_exported_vars
-    export_vars
-    install || abort
-fi
+    reset_global_vars
+    print_success_message
+}
 
-reset_global_vars
-print_success_message
+main ${@}
