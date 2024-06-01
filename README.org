@@ -85,4 +85,7 @@ A basic [[file:template.org][template]] is defined, which is used as an abstract
 - [[file:nodejs.org][Node.js]]
 
 * Tests
-The tests are described [[file:tests.org][test documentation]]. Scripts are tested by testing scripts in the [[file:test/][test]] directoriy.
+For each setup script in [[file:~/work/src][src]], a test script written with [[https://github.com/bats-core/bats-core][Bats]] exists in the [[file:test/][test]] directory. The tests can be executed with:
+#+begin_example
+  $ ./test/bats/bin/bats -t test/<test-file>.bats
+#+end_example
