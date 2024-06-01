@@ -37,13 +37,74 @@ restore_exported_vars() {
 	unset SETUP_TMPL_ORIGINAL_PATH
     fi
 }
+abort() {
+    restore_exported_vars
+    reset_global_vars
+
+    return 0
+}
+installation_file() {
+    echo installation.file
+}
+local_installation_file_path() {
+    echo /tmp/$(installation_file)
+}
+is_installed() {
+    case "$VERSION" in
+	installed) return 0
+	    ;;
+	*) return 1
+	    ;;
+    esac
+}
+download_url() {
+    case "$VERSION" in
+	download_fail) echo https://github.com/aaron-kunde/setup-project/blob/main/non-existing.file
+	   ;;
+	*) echo https://github.com/aaron-kunde/setup-project/blob/main/README.org
+	   ;;
+    esac
+}
+remote_installation_file_exists() {
+    curl -sIf $(download_url) >/dev/null
+}
+download_installation_file() {
+    echo "Download installation file"
+    curl $(download_url) -o $(local_installation_file_path)
+}
+install() {
+    echo "Install version: $VERSION"
+
+    if [ ! -f $(local_installation_file_path) ]; then
+	echo "Local installation file not found: $(local_installation_file_path). Try, download new one"
+	if remote_installation_file_exists; then
+	    download_installation_file
+	else
+	    echo "ERROR: No remote installation file found. Abort"
+	    abort
+	fi
+    fi
+    install_installation_file
+ }
+install_installation_file() {
+    echo "Install installation file"
+	case "$VERSION" in
+	installation_fail) return 1
+	   ;;
+	*) return 0
+	   ;;
+    esac
+}
 
 init_global_vars
 set_vars_from_opts ${@}
-restore_exported_vars
-export_vars
 
-echo "TODO: Not yet implemented"
+if ! is_installed; then
+  echo "Start installation"
+    restore_exported_vars
+    export_vars
+    install || abort
+fi
 
 reset_global_vars
 echo "TMPL successfully installed"
