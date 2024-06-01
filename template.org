@@ -77,7 +77,6 @@ If something goes wrong, abort. This means, restore the PATH and other global va
 #+end_src
 #+name: lib
 #+begin_src org :noweb yes :exports none
-  <<default_version>>
   <<init_global_vars>>
   <<reset_global_vars>>
   <<set_vars_from_opts>>
@@ -98,6 +97,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
 #+end_src
 #+begin_src shell :tangle src/setup-template.sh :mkdirp yes :noweb yes :shebang #!/bin/sh :tangle-mode '#o644 :exports none
   <<lib>>
+  <<default_version>>
 
   main ${@}
 #+end_src
