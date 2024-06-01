@@ -1,8 +1,9 @@
 #+title: Template
 * Usage
 #+begin_example
-  $ . set-template.sh [-v VERSION]
+  $ . setup-template.sh [-v VERSION]
 #+end_example
+
 ** Version
 The version you want to install. Defaults to the [[*Default version][default version]].
 
