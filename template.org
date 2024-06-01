@@ -54,6 +54,7 @@ The template can be included into the software specific scripts, where specific 
 4. Check, whether the wanted version is already installed.
 5. If not, install the wanted version
 6. Clean up the global variables after installation, but not the exported ones.
+7. Print success message
 
 If something goes wrong, abort. This means, restore the PATH and other global variables:
 #+name: definitions
@@ -74,6 +75,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
   <<download_installation_file>>
   <<install>>
   <<install_installation_file>>
+  <<print_success_message>>
 #+end_src
 #+name: execution
 #+begin_src shell :tangle src/setup-template.sh :mkdirp yes :noweb strip-export
@@ -88,7 +90,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
   fi
 
   reset_global_vars
-  echo "TMPL successfully installed"
+  print_success_message
 #+end_src
 
 ** Global variables
@@ -282,5 +284,14 @@ During the installation process, several errors can occurs, which cause the need
       reset_global_vars
 
       return 0
+  }
+#+end_src
+
+** Print success message
+The success message dependes of the installed software and must be implmenented specific:
+#+name: print_success_message
+#+begin_src shell
+  print_success_message() {
+      echo "TMPL successfully installed"
   }
 #+end_src
