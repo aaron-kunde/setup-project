@@ -24,6 +24,8 @@ For each setup script in [[file:~/work/src][src]], a test script written with [[
 Each test needs a setup, which loads the necessary Bats libraries:
 - [[https://github.com/bats-core/bats-support][bats-support]]
 - [[https://github.com/bats-core/bats-assert][bats-assert]]
+- [[https://github.com/bats-core/bats-file][bats-file]]
+
 Furthermore, the exported variables are backed up. In this case at least the ~PATH~
 #+name: setup
 #+begin_src bats
