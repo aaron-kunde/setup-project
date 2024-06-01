@@ -8,8 +8,8 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  test_template:
-    name: Test setup-template
+  test_scripts:
+    name: Test setup-scripts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -20,5 +20,7 @@ jobs:
           support-path: ${{ github.workspace }}/test/test_helper/bats-support
           assert-path: ${{ github.workspace }}/test/test_helper/bats-assert
           file-path: ${{ github.workspace }}/test/test_helper/bats-file
-      - name: Run template tests
+      - name: Run tests for Template
         run: bats -t test/test-template.bats
+      - name: Run tests for Node.js
+        run: bats -t test/test-nodejs.bats

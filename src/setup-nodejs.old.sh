@@ -1,4 +1,4 @@
-init_global_vars() {
+-init_global_vars() {
     DEFAULT_VERSION=v14.15.4
     VERSION=$DEFAULT_VERSION
     INSTALLATION_BASE_DIR=$HOME/opt
@@ -13,7 +13,7 @@ ${0} [-v VERSION]
 EOM
 }
 
-set_vars_from_opts() {
+-set_vars_from_opts() {
     while getopts v: opt; do
 	case $opt in
 	    v) VERSION=$OPTARG
@@ -47,7 +47,7 @@ reset_path_vars() {
     fi
 }
 
-reset_global_vars() {
+-reset_global_vars() {
     unset DEFAULT_VERSION
     unset VERSION
     unset INSTALLATION_BASE_DIR
