@@ -28,7 +28,7 @@ The template can be included into the software specific scripts, where specific 
   main
 #+end_src
 #+begin_src shell :tangle no
-  . foo.sh
+  . $(dirname ${BASH_SOURCE[0]})/foo.sh
 
   f1() {
       echo "Bar f1: To override"
