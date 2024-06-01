@@ -1,2 +1,107 @@
 #+title: Node.js
-https://nodejs.org/en
+Use to install [[https://nodejs.org][Node.js]].
+
+* Usage
+#+begin_example
+  $ . setup-nodejs.sh [-v VERSION]
+#+end_example
+
+** Version
+The version you want to install. Defaults to the [[*Default version][default version]].
+
+
+* Implementation
+#+begin_src shell :tangle src/setup-nodejs.sh :mkdirp yes :noweb yes :shebang #!/bin/sh :tangle-mode '#o644 :exports none
+  <<template.org:lib()>>
+  <<default_version>>
+
+  main ${@}
+#+end_src
+
+** Global variables
+
+*** Default version
+Use the current LTS:
+#+name: default_version
+#+begin_src shell
+  default_version() {
+      echo v20.14.0
+  }
+#+end_src
+
+* Tests
+** Execute
+#+begin_src shell
+  test/bats/bin/bats -t test/test-nodejs.bats
+#+end_src
+
+#+begin_src bats :tangle test/test-nodejs.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
+  SPT_SCRIPT=src/setup-nodejs.sh
+
+  <<setup>>
+  <<teardown>>
+
+  <<Must print success message>>
+  <<Must print versions to install with default version>>
+  <<Must print versions to install with given version>>
+  <<Must print error message if remote installation file not found>>
+  <<Environment must be clean after execution if succeeds with default version>>
+  <<Environment must be clean after execution if succeeds with given version>>
+  <<Environment must be clean after execution if installation fails>>
+  <<Should not set variables if version is already installed>>
+  <<Should only output success message if version is already installedinstalled>>
+  <<Should try download if local installation file not exists>>
+  <<Should not try download if local installation file exists>>
+  <<Should try download if remote installation file exists>>
+#+end_src
+
+Each test needs a setup, which loads the necessary Bats libraries:
+- [[https://github.com/bats-core/bats-support][bats-support]]
+- [[https://github.com/bats-core/bats-assert][bats-assert]]
+
+Furthermore, the exported variables are backed up. In this case at least the ~PATH~.
+#+name: setup
+#+begin_src bats
+  setup() {
+    load 'test_helper/bats-support/load'
+    load 'test_helper/bats-assert/load'
+
+    SPT_ORIGINAL_PATH="$PATH"
+  }
+#+end_src
+
+To clean up, the exported variables are reset to its saved values after each test:
+#+name: teardown
+#+begin_src bats
+  teardown() {
+      PATH="$SPT_ORIGINAL_PATH"
+  }
+#+end_src
+
+*** Test cases
+
+**** Must print versions to install
+
+***** With default version
+#+name: Must print versions to install with default version
+#+begin_src bats
+  @test "Must print versions to install with default version" {
+      run . $SPT_SCRIPT
+
+      assert_line 'Install version: v20.14.0'
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+***** With given version
+#+name: Must print versions to install with given version
+#+begin_src bats
+  @test "Must print versions to install with given version" {
+      run .  $SPT_SCRIPT -v v18.20.3
+
+      assert_line 'Install version: v18.20.3'
+
+      rm /tmp/installation.file
+  }
+#+end_src
