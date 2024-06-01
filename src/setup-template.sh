@@ -95,6 +95,9 @@ install_installation_file() {
 	   ;;
     esac
 }
+print_success_message() {
+    echo "TMPL successfully installed"
+}
 
 init_global_vars
 set_vars_from_opts ${@}
@@ -107,4 +110,4 @@ if ! is_installed; then
 fi
 
 reset_global_vars
-echo "TMPL successfully installed"
+print_success_message
