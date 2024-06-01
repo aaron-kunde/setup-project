@@ -1,7 +1,4 @@
 #!/bin/sh
-default_version() {
-    echo tmpl_default-version
-}
 init_global_vars() {
     VERSION=$(default_version)
     INSTALLATION_BASE_DIR=$HOME/opt
@@ -111,6 +108,9 @@ main() {
 
     reset_global_vars
     print_success_message
+}
+default_version() {
+    echo tmpl_default-version
 }
 
 main ${@}
