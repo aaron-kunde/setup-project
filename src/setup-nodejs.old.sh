@@ -33,6 +33,17 @@ EOM
     esac
 }
 
+-installation_dir() {
+    case "$(uname -s)" in
+	CYGWIN*|MINGW*|MSYS*)
+	    echo $INSTALLATION_BASE_DIR/node-$VERSION-win-x64
+	    ;;
+	*)
+	    echo $INSTALLATION_BASE_DIR/node-$VERSION-linux-x64
+	    ;;
+    esac
+}
+
 -export_path_vars() {
     echo "Adding $(installation_path) to PATH"
     SETUP_NODEJS_ORIGINAL_PATH="${PATH}"
@@ -67,7 +78,7 @@ abort() {
 	(node --version 2>&1 | grep $VERSION)
 }
 
-installation_file() {
+-installation_file() {
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
 	    echo node-$VERSION-win-x64.zip
@@ -86,7 +97,7 @@ local_installation_file_exists() {
     test -f $(local_installation_file)
 }
 
-download_url() {
+-download_url() {
     echo https://nodejs.org/dist/$VERSION/$(installation_file)
 }
 
@@ -99,18 +110,8 @@ download_installation_file() {
     curl $(download_url) -o $(local_installation_file)
 }
 
-installation_dir() {
-    case "$(uname -s)" in
-	CYGWIN*|MINGW*|MSYS*)
-	    echo $INSTALLATION_BASE_DIR/node-$VERSION-win-x64
-	    ;;
-	*)
-	    echo $INSTALLATION_BASE_DIR/node-$VERSION-linux-x64
-	    ;;
-    esac
-}
 
-install_installation_file() {
+-install_installation_file() {
     local trgt_dir=$(dirname $(installation_dir))
 
     case "$(uname -s)" in

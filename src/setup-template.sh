@@ -25,19 +25,8 @@ abort() {
 
     return 0
 }
-installation_file() {
-    echo installation.file
-}
 local_installation_file_path() {
     echo /tmp/$(installation_file)
-}
-download_url() {
-    case "$VERSION" in
-	download_fail) echo https://github.com/aaron-kunde/setup-project/blob/main/non-existing.file
-	   ;;
-	*) echo https://github.com/aaron-kunde/setup-project/blob/main/README.org
-	   ;;
-    esac
 }
 remote_installation_file_exists() {
     curl -sIf $(download_url) >/dev/null
@@ -60,18 +49,6 @@ install() {
     fi
     install_installation_file
  }
-install_installation_file() {
-    echo "Install installation file"
-	case "$VERSION" in
-	installation_fail) return 1
-	   ;;
-	*) return 0
-	   ;;
-    esac
-}
-print_success_message() {
-    echo "TMPL successfully installed"
-}
 main() {
     init_global_vars
     set_vars_from_opts ${@}
@@ -111,6 +88,29 @@ is_installed() {
 	*) return 1
 	    ;;
     esac
+}
+installation_file() {
+    echo installation.file
+}
+install_installation_file() {
+    echo "Install installation file"
+	case "$VERSION" in
+	installation_fail) return 1
+	   ;;
+	*) return 0
+	   ;;
+    esac
+}
+download_url() {
+    case "$VERSION" in
+	download_fail) echo https://github.com/aaron-kunde/setup-project/blob/main/non-existing.file
+	   ;;
+	*) echo https://github.com/aaron-kunde/setup-project/blob/main/README.org
+	   ;;
+    esac
+}
+print_success_message() {
+    echo "TMPL successfully installed"
 }
 
 main ${@}

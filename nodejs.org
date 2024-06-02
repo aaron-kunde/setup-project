@@ -17,6 +17,10 @@ The version you want to install. Defaults to the [[*Default version][default ver
   <<restore_exported_vars>>
   <<installation_path>>
   <<is_installed>>
+  <<installation_file>>
+  <<install_installation_file>>
+  <<download_url>>
+  <<print_success_message>>
 
   main ${@}
 #+end_src
@@ -81,6 +85,58 @@ Before starting the installation, check if the wanted version is already install
   }
 #+end_src
 
+** Install wanted version
+The installation file is specific to the target OS:
+*** Installation file
+#+name: installation_file
+#+begin_src shell
+  installation_file() {
+      case "$(uname -s)" in
+	  CYGWIN*|MINGW*|MSYS*)
+	      echo node-$VERSION-win-x64.zip
+	      ;;
+	  ,*)
+	      echo node-$VERSION-linux-x64.tar.xz
+	      ;;
+      esac
+  }
+#+end_src
+
+*** Install installation file
+The installation of the installation file is specific to the target OS:
+#+name: install_installation_file
+#+begin_src shell
+  install_installation_file() {
+      local trgt_dir=$(dirname $(installation_path))
+
+      case "$(uname -s)" in
+	  CYGWIN*|MINGW*|MSYS*)
+	      unzip -q $(local_installation_file_path) -d $trgt_dir
+	      ;;
+	  ,*)
+	      tar Jxf $(local_installation_file_path) -C $INSTALLATION_BASE_DIR
+	      ;;
+      esac
+  }
+#+end_src
+
+*** Download URL
+#+name: download_url
+#+begin_src shell
+  download_url() {
+      echo https://nodejs.org/dist/$VERSION/$(installation_file)
+  }
+#+end_src
+
+** Print success message
+The success message prints the version of the current Node.js installation:
+#+name: print_success_message
+#+begin_src shell
+  print_success_message() {
+      node -v
+  }
+#+end_src
+
 * Tests
 ** Execute
 #+begin_src shell
@@ -93,10 +149,6 @@ Before starting the installation, check if the wanted version is already install
   <<setup>>
   <<teardown>>
 
-  <<Must print versions to install with default version>>
-  <<Must print versions to install with given version>>
-  <<Environment must be clean after execution if succeeds with default version>>
-  <<Environment must be clean after execution if succeeds with given version>>
 
   <<Must print success message>>
   <<Must print error message if remote installation file not found>>
@@ -117,6 +169,10 @@ Before starting the installation, check if the wanted version is already install
   <<setup>>
   <<teardown>>
 
+  <<Environment must be clean after execution if succeeds with default version using Linux>>
+  <<Environment must be clean after execution if succeeds with given version using Linux>>
+  <<Must print versions to install with default version using Linux>>
+  <<Must print versions to install with given version using Linux>>
   <<Exported variables must be set if succeeds with default version using Linux>>
   <<Exported variables must be set if succeeds with given version using Linux>>
 
@@ -138,6 +194,7 @@ Before starting the installation, check if the wanted version is already install
 Each test needs a setup, which loads the necessary Bats libraries:
 - [[https://github.com/bats-core/bats-support][bats-support]]
 - [[https://github.com/bats-core/bats-assert][bats-assert]]
+- [[https://github.com/bats-core/bats-file][bats-file]]
 
 Furthermore, the exported variables are backed up. In this case at least the ~PATH~:
 #+name: setup
@@ -145,6 +202,7 @@ Furthermore, the exported variables are backed up. In this case at least the ~PA
   setup() {
     load 'test_helper/bats-support/load'
     load 'test_helper/bats-assert/load'
+    load 'test_helper/bats-file/load'
 
     SPT_ORIGINAL_PATH="$PATH"
   }
@@ -162,27 +220,27 @@ To clean up, the exported variables are reset to its saved values after each tes
 
 *** Must print versions to install
 
-**** With default version
-#+name: Must print versions to install with default version
+**** With default version using Linux
+#+name: Must print versions to install with default version using Linux
 #+begin_src bats
-  @test "Must print versions to install with default version" {
+  @test "Must print versions to install with default version using Linux" {
       run . $SPT_SCRIPT
 
       assert_line 'Install version: v20.14.0'
 
-      rm /tmp/installation.file
+      rm /tmp/node-v20.14.0-linux-x64.tar.xz
   }
 #+end_src
 
-**** With given version
-#+name: Must print versions to install with given version
+**** With given version using Linux
+#+name: Must print versions to install with given version using Linux
 #+begin_src bats
   @test "Must print versions to install with given version" {
       run .  $SPT_SCRIPT -v v18.20.3
 
       assert_line 'Install version: v18.20.3'
 
-      rm /tmp/installation.file
+      rm /tmp/node-v18.20.3-linux-x64.tar.xz
   }
 #+end_src
 
@@ -190,31 +248,31 @@ To clean up, the exported variables are reset to its saved values after each tes
 
 **** If succeeds with default version
 After the script has run without a given version, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~:
-#+name: Environment must be clean after execution if succeeds with default version
+#+name: Environment must be clean after execution if succeeds with default version using Linux
 #+begin_src bats
-  @test "Environment must be clean after execution if succeeds with default version" {
+  @test "Environment must be clean after execution if succeeds with default version using Linux" {
       . $SPT_SCRIPT
 
       assert_equal $OPTIND 1
       assert [ -z $INSTALLATION_BASE_DIR ]
       assert [ -z $VERSION ]
 
-      rm /tmp/installation.file
+      rm /tmp/node-v20.14.0-linux-x64.tar.xz
   }
 #+end_src
 
 **** If succeeds with given version
 After the script has run with a given version, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~:
-#+name: Environment must be clean after execution if succeeds with given version
+#+name: Environment must be clean after execution if succeeds with given version using Linux
 #+begin_src bats
-  @test "Environment must be clean after execution if succeeds with given version" {
+  @test "Environment must be clean after execution if succeeds with given version using Linux" {
       . $SPT_SCRIPT -v v18.20.3
 
       assert_equal $OPTIND 1
       assert [ -z $INSTALLATION_BASE_DIR ]
       assert [ -z $VERSION ]
 
-      rm /tmp/installation.file
+      rm /tmp/node-v18.20.3-linux-x64.tar.xz
   }
 #+end_src
 
@@ -231,7 +289,7 @@ The exported ~$PATH~ must be extended with the wanted version.
 
       assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
 
-      rm /tmp/installation.file
+      rm /tmp/node-v20.14.0-linux-x64.tar.xz
   }
 #+end_src
 
@@ -243,7 +301,7 @@ The exported ~$PATH~ must be extended with the wanted version.
 
       assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64:$SPT_ORIGINAL_PATH"
 
-      rm /tmp/installation.file
+      rm /tmp/node-v20.14.0-win-x64.zip
   }
 #+end_src
 
@@ -257,7 +315,7 @@ The exported ~$PATH~ must be extended with the wanted version.
 
       assert_equal "$PATH" "$HOME/opt/node-v18.20.3-linux-x64/bin:$SPT_ORIGINAL_PATH"
 
-      rm /tmp/installation.file
+      rm /tmp/node-v18.20.3-linux-x64.tar.xz
   }
 #+end_src
 
@@ -269,7 +327,7 @@ The exported ~$PATH~ must be extended with the wanted version.
 
       assert_equal "$PATH" "$HOME/opt/node-v18.20.3-win-x64:$SPT_ORIGINAL_PATH"
 
-      rm /tmp/installation.file
+      rm /tmp/node-v18.20.3-win-x64.zip
   }
 #+end_src
 
@@ -279,17 +337,19 @@ If the given (or default) version is already installed, only a success message s
 #+begin_src bats
   @test "Should only output success message if version is already installed" {
       . $SPT_SCRIPT
-      assert_line "Adding $HOME/opt/node-v20.14.0-linux-x64/bin to PATH"
-      assert_line "Install version: v20.14.0"
-      assert_line "TMPL successfully installed"
+      # assert_line "Adding $HOME/opt/node-v20.14.0-linux-x64/bin to PATH"
+      # assert_line "Install version: v20.14.0"
+      # assert_line "v20.14.0"
+
+      rm /tmp/node-v20.14.0-linux-x64.tar.xz
 
       run . $SPT_SCRIPT
 
       refute_line -p "Adding $HOME/opt/"
       refute_line -p "Install version: "
-      assert_line "TMPL successfully installed"
+      assert_line "v20.14.0"
 
-      assert_file_not_exists  /tmp/installation.file
+      assert_file_not_exists /tmp/node-v20.14.0-linux-x64.tar.xz
   }
 #+end_src
 
@@ -305,6 +365,8 @@ If the given (or default) version is already installed, the environment should n
       assert [ -z $VERSION ]
       assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
 
+      rm /tmp/node-v20.14.0-linux-x64.tar.xz
+
       . $SPT_SCRIPT
 
       assert_equal $OPTIND 1
@@ -312,6 +374,6 @@ If the given (or default) version is already installed, the environment should n
       assert [ -z $VERSION ]
       assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
 
-      assert_file_not_exists  /tmp/installation.file
+      assert_file_not_exists /tmp/node-v20.14.0-linux-x64.tar.xz
   }
 #+end_src

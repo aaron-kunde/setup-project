@@ -25,19 +25,8 @@ abort() {
 
     return 0
 }
-installation_file() {
-    echo installation.file
-}
 local_installation_file_path() {
     echo /tmp/$(installation_file)
-}
-download_url() {
-    case "$VERSION" in
-	download_fail) echo https://github.com/aaron-kunde/setup-project/blob/main/non-existing.file
-	   ;;
-	*) echo https://github.com/aaron-kunde/setup-project/blob/main/README.org
-	   ;;
-    esac
 }
 remote_installation_file_exists() {
     curl -sIf $(download_url) >/dev/null
@@ -60,18 +49,6 @@ install() {
     fi
     install_installation_file
  }
-install_installation_file() {
-    echo "Install installation file"
-	case "$VERSION" in
-	installation_fail) return 1
-	   ;;
-	*) return 0
-	   ;;
-    esac
-}
-print_success_message() {
-    echo "TMPL successfully installed"
-}
 main() {
     init_global_vars
     set_vars_from_opts ${@}
@@ -114,6 +91,34 @@ installation_path() {
 is_installed() {
     node --version 2>/dev/null &&
 	(node --version 2>&1 | grep $VERSION)
+}
+installation_file() {
+    case "$(uname -s)" in
+	CYGWIN*|MINGW*|MSYS*)
+	    echo node-$VERSION-win-x64.zip
+	    ;;
+	*)
+	    echo node-$VERSION-linux-x64.tar.xz
+	    ;;
+    esac
+}
+install_installation_file() {
+    local trgt_dir=$(dirname $(installation_path))
+
+    case "$(uname -s)" in
+	CYGWIN*|MINGW*|MSYS*)
+	    unzip -q $(local_installation_file_path) -d $trgt_dir
+	    ;;
+	*)
+	    tar Jxf $(local_installation_file_path) -C $INSTALLATION_BASE_DIR
+	    ;;
+    esac
+}
+download_url() {
+    echo https://nodejs.org/dist/$VERSION/$(installation_file)
+}
+print_success_message() {
+    node -v
 }
 
 main ${@}
