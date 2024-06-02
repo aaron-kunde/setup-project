@@ -31,14 +31,6 @@ installation_file() {
 local_installation_file_path() {
     echo /tmp/$(installation_file)
 }
-is_installed() {
-    case "$VERSION" in
-	installed) return 0
-	    ;;
-	*) return 1
-	    ;;
-    esac
-}
 download_url() {
     case "$VERSION" in
 	download_fail) echo https://github.com/aaron-kunde/setup-project/blob/main/non-existing.file
@@ -118,6 +110,10 @@ installation_path() {
 	    echo $INSTALLATION_BASE_DIR/node-$VERSION-linux-x64/bin
 	    ;;
     esac
+}
+is_installed() {
+    node --version 2>/dev/null &&
+	(node --version 2>&1 | grep $VERSION)
 }
 
 main ${@}

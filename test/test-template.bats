@@ -80,26 +80,7 @@ teardown() {
 
     rm /tmp/installation.file
 }
-@test "Should not set variables if version is already installed" {
-    PATH="/some/new/path:$SPT_ORIGINAL_PATH"
 
-    . $SPT_SCRIPT -v installed
-
-    assert_equal $OPTIND 1
-    assert [ -z $INSTALLATION_BASE_DIR ]
-    assert [ -z $VERSION ]
-    assert_equal "$PATH" "/some/new/path:$SPT_ORIGINAL_PATH"
-    assert_file_not_exists  /tmp/installation.file
-}
-@test "Should only output success message if version is already installed" {
-    run . $SPT_SCRIPT -v installed
-
-    refute_line "Adding $HOME/opt/tmpl-tmpl_default-version to PATH"
-    refute_line "Install version: tmpl_default-version"
-    assert_line "TMPL successfully installed"
-
-    assert_file_not_exists  /tmp/installation.file
-}
 @test "Should try download if local installation file not exists" {
     run . $SPT_SCRIPT
 
@@ -124,3 +105,26 @@ teardown() {
 
     rm /tmp/installation.file
  }
+
+
+
+@test "Should only output success message if version is already installed" {
+    run . $SPT_SCRIPT -v installed
+
+    refute_line "Adding $HOME/opt/tmpl-tmpl_default-version to PATH"
+    refute_line "Install version: tmpl_default-version"
+    assert_line "TMPL successfully installed"
+
+    assert_file_not_exists  /tmp/installation.file
+}
+@test "Should not set variables if version is already installed" {
+    PATH="/some/new/path:$SPT_ORIGINAL_PATH"
+
+    . $SPT_SCRIPT -v installed
+
+    assert_equal $OPTIND 1
+    assert [ -z $INSTALLATION_BASE_DIR ]
+    assert [ -z $VERSION ]
+    assert_equal "$PATH" "/some/new/path:$SPT_ORIGINAL_PATH"
+    assert_file_not_exists  /tmp/installation.file
+}
