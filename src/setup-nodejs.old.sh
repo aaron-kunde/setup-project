@@ -22,7 +22,7 @@ EOM
     done
 }
 
-installation_path() {
+-installation_path() {
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
 	    echo $INSTALLATION_BASE_DIR/node-$VERSION-win-x64
@@ -33,14 +33,14 @@ installation_path() {
     esac
 }
 
-export_path_vars() {
+-export_path_vars() {
     echo "Adding $(installation_path) to PATH"
     SETUP_NODEJS_ORIGINAL_PATH="${PATH}"
 
     export PATH="$(installation_path):${PATH}"
 }
 
-reset_path_vars() {
+-reset_path_vars() {
     if [ -v SETUP_NODEJS_ORIGINAL_PATH ]; then
        export PATH="${SETUP_NODEJS_ORIGINAL_PATH}"
        unset SETUP_NODEJS_ORIGINAL_PATH
