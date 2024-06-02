@@ -446,7 +446,7 @@ The exported ~$PATH~ must be extended with the wanted version.
   @test "Exported variables must be set if succeeds with default version" {
       . $SPT_SCRIPT
 
-      assert [ $PATH == "$HOME/opt/tmpl-tmpl_default-version:$SPT_ORIGINAL_PATH" ]
+      assert [ "$PATH" == "$HOME/opt/tmpl-tmpl_default-version:$SPT_ORIGINAL_PATH" ]
 
       rm /tmp/installation.file
   }
@@ -459,7 +459,7 @@ The exported ~$PATH~ must be extended with the wanted version.
   @test "Exported variables must be set if succeeds with given version" {
       . $SPT_SCRIPT -v some_other-version
 
-      assert [ $PATH == "$HOME/opt/tmpl-some_other-version:$SPT_ORIGINAL_PATH" ]
+      assert [ "$PATH" == "$HOME/opt/tmpl-some_other-version:$SPT_ORIGINAL_PATH" ]
 
       rm /tmp/installation.file
   }
@@ -472,7 +472,7 @@ After the script failed, the exported ~$PATH~ must not be altered:
   @test "Exported variables must not be set if installation fails" {
       . $SPT_SCRIPT -v installation_fail
 
-      assert [ $PATH == $SPT_ORIGINAL_PATH ]
+      assert [ "$PATH" == "$SPT_ORIGINAL_PATH" ]
 
       rm /tmp/installation.file
   }
@@ -514,7 +514,7 @@ If the given (or default) version is already installed, the environment should n
       assert [ $OPTIND -eq 1 ]
       assert [ -z $INSTALLATION_BASE_DIR ]
       assert [ -z $VERSION ]
-      assert [ $PATH == "/some/new/path:$SPT_ORIGINAL_PATH" ]
+      assert [ "$PATH" == "/some/new/path:$SPT_ORIGINAL_PATH" ]
       assert_file_not_exists  /tmp/installation.file
   }
 #+end_src
