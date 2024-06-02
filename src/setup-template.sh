@@ -19,21 +19,6 @@ set_vars_from_opts() {
 	esac
     done
 }
-installation_path() {
-    echo $INSTALLATION_BASE_DIR/tmpl-$VERSION
-}
-export_vars() {
-    echo "Adding $(installation_path) to PATH"
-    SETUP_TMPL_ORIGINAL_PATH="${PATH}"
-
-    export PATH="$(installation_path):${PATH}"
-}
-restore_exported_vars() {
-    if [ -v SETUP_TMPL_ORIGINAL_PATH ]; then
-	export PATH="${SETUP_TMPL_ORIGINAL_PATH}"
-	unset SETUP_TMPL_ORIGINAL_PATH
-    fi
-}
 abort() {
     restore_exported_vars
     reset_global_vars
@@ -111,6 +96,21 @@ main() {
 }
 default_version() {
     echo tmpl_default-version
+}
+export_vars() {
+    echo "Adding $(installation_path) to PATH"
+    SETUP_TMPL_ORIGINAL_PATH="${PATH}"
+
+    export PATH="$(installation_path):${PATH}"
+}
+restore_exported_vars() {
+    if [ -v SETUP_TMPL_ORIGINAL_PATH ]; then
+	export PATH="${SETUP_TMPL_ORIGINAL_PATH}"
+	unset SETUP_TMPL_ORIGINAL_PATH
+    fi
+}
+installation_path() {
+    echo $INSTALLATION_BASE_DIR/tmpl-$VERSION
 }
 
 main ${@}

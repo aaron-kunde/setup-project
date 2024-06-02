@@ -19,21 +19,6 @@ set_vars_from_opts() {
 	esac
     done
 }
-installation_path() {
-    echo $INSTALLATION_BASE_DIR/tmpl-$VERSION
-}
-export_vars() {
-    echo "Adding $(installation_path) to PATH"
-    SETUP_TMPL_ORIGINAL_PATH="${PATH}"
-
-    export PATH="$(installation_path):${PATH}"
-}
-restore_exported_vars() {
-    if [ -v SETUP_TMPL_ORIGINAL_PATH ]; then
-	export PATH="${SETUP_TMPL_ORIGINAL_PATH}"
-	unset SETUP_TMPL_ORIGINAL_PATH
-    fi
-}
 abort() {
     restore_exported_vars
     reset_global_vars
@@ -111,6 +96,28 @@ main() {
 }
 default_version() {
     echo v20.14.0
+}
+export_vars() {
+    echo "Adding $(installation_path) to PATH"
+    SETUP_NODEJS_ORIGINAL_PATH="${PATH}"
+
+    export PATH="$(installation_path):${PATH}"
+}
+restore_exported_vars() {
+    if [ -v SETUP_TMPL_ORIGINAL_PATH ]; then
+	export PATH="${SETUP_NODEJS_ORIGINAL_PATH}"
+	unset SETUP_NODEJS_ORIGINAL_PATH
+    fi
+}
+installation_path() {
+    case "$(uname -s)" in
+	CYGWIN*|MINGW*|MSYS*)
+	    echo $INSTALLATION_BASE_DIR/node-$VERSION-win-x64
+	    ;;
+	*)
+	    echo $INSTALLATION_BASE_DIR/node-$VERSION-linux-x64/bin
+	    ;;
+    esac
 }
 
 main ${@}

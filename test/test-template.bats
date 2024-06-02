@@ -12,13 +12,6 @@ teardown() {
     PATH="$SPT_ORIGINAL_PATH"
 }
 
-@test "Must print success message" {
-    run . $SPT_SCRIPT
-
-    assert_line 'TMPL successfully installed'
-
-    rm /tmp/installation.file
-}
 @test "Must print versions to install with default version" {
     run . $SPT_SCRIPT
 
@@ -33,29 +26,56 @@ teardown() {
 
     rm /tmp/installation.file
 }
-@test "Must print error message if remote installation file not found" {
-    run . $SPT_SCRIPT -v download_fail
-
-    assert_line "ERROR: No remote installation file found. Abort"
-    assert_file_not_exists  /tmp/installation.file
-}
 @test "Environment must be clean after execution if succeeds with default version" {
     . $SPT_SCRIPT
 
     assert [ $OPTIND -eq 1 ]
     assert [ -z $INSTALLATION_BASE_DIR ]
     assert [ -z $VERSION ]
-    assert [ $PATH == "$HOME/opt/tmpl-tmpl_default-version:$SPT_ORIGINAL_PATH" ]
 
     rm /tmp/installation.file
 }
 
+@test "Exported variables must be set if succeeds with default version" {
+    . $SPT_SCRIPT
+
+    assert [ $PATH == "$HOME/opt/tmpl-tmpl_default-version:$SPT_ORIGINAL_PATH" ]
+
+    rm /tmp/installation.file
+}
+@test "Exported variables must be set if succeeds with given version" {
+    . $SPT_SCRIPT -v some_other-version
+
+    assert [ $PATH == "$HOME/opt/tmpl-some_other-version:$SPT_ORIGINAL_PATH" ]
+
+    rm /tmp/installation.file
+}
+
+@test "Must print success message" {
+    run . $SPT_SCRIPT
+
+    assert_line 'TMPL successfully installed'
+
+    rm /tmp/installation.file
+}
+@test "Must print error message if remote installation file not found" {
+    run . $SPT_SCRIPT -v download_fail
+
+    assert_line "ERROR: No remote installation file found. Abort"
+    assert_file_not_exists  /tmp/installation.file
+}
 @test "Environment must be clean after execution if installation fails" {
     . $SPT_SCRIPT -v installation_fail
 
     assert [ $OPTIND -eq 1 ]
     assert [ -z $INSTALLATION_BASE_DIR ]
     assert [ -z $VERSION ]
+
+    rm /tmp/installation.file
+}
+@test "Exported variables must not be set if installation fails" {
+    . $SPT_SCRIPT -v installation_fail
+
     assert [ $PATH == $SPT_ORIGINAL_PATH ]
 
     rm /tmp/installation.file

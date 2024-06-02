@@ -11,7 +11,6 @@ teardown() {
     PATH="$SPT_ORIGINAL_PATH"
 }
 
-
 @test "Must print versions to install with default version" {
     run . $SPT_SCRIPT
 
@@ -23,6 +22,15 @@ teardown() {
     run .  $SPT_SCRIPT -v v18.20.3
 
     assert_line 'Install version: v18.20.3'
+
+    rm /tmp/installation.file
+}
+@test "Environment must be clean after execution if succeeds with default version" {
+    . $SPT_SCRIPT
+
+    assert [ $OPTIND -eq 1 ]
+    assert [ -z $INSTALLATION_BASE_DIR ]
+    assert [ -z $VERSION ]
 
     rm /tmp/installation.file
 }
