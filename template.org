@@ -83,7 +83,6 @@ If something goes wrong, abort. This means, restore the PATH and other global va
   <<abort>>
   <<installation_file>>
   <<local_installation_file_path>>
-  <<is_installed>>
   <<download_url>>
   <<remote_installation_file_exists>>
   <<download_installation_file>>
@@ -98,6 +97,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
   <<export_vars>>
   <<restore_exported_vars>>
   <<installation_path>>
+  <<is_installed>>
 
   main ${@}
 #+end_src
@@ -329,11 +329,15 @@ The success message dependes of the installed software and must be implmenented 
   <<Must print error message if remote installation file not found>>
   <<Environment must be clean after execution if installation fails>>
   <<Exported variables must not be set if installation fails>>
-  <<Should not set variables if version is already installed>>
-  <<Should only output success message if version is already installedinstalled>>
+
   <<Should try download if local installation file not exists>>
   <<Should not try download if local installation file exists>>
   <<Should try download if remote installation file exists>>
+
+
+
+  <<Should only output success message if version is already installed>>
+  <<Should not set variables if version is already installed>>
 #+end_src
 
 Each test needs a setup, which loads the necessary Bats libraries:
@@ -465,6 +469,38 @@ The exported ~$PATH~ must be extended with the wanted version.
   }
 #+end_src
 
+*** Should only output success message, if version is already installed
+If the given (or default) version is already installed, only a success message should be shown:
+#+name: Should only output success message if version is already installed
+#+begin_src bats
+  @test "Should only output success message if version is already installed" {
+      run . $SPT_SCRIPT -v installed
+
+      refute_line "Adding $HOME/opt/tmpl-tmpl_default-version to PATH"
+      refute_line "Install version: tmpl_default-version"
+      assert_line "TMPL successfully installed"
+
+      assert_file_not_exists  /tmp/installation.file
+  }
+#+end_src
+
+*** Should not set variables, if version is already installed
+If the given (or default) version is already installed, the environment should not be altered:
+#+name: Should not set variables if version is already installed
+#+begin_src bats
+  @test "Should not set variables if version is already installed" {
+      PATH="/some/new/path:$SPT_ORIGINAL_PATH"
+
+      . $SPT_SCRIPT -v installed
+
+      assert_equal $OPTIND 1
+      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $VERSION ]
+      assert_equal "$PATH" "/some/new/path:$SPT_ORIGINAL_PATH"
+      assert_file_not_exists  /tmp/installation.file
+  }
+#+end_src
+
 *** Exported variables must not be set if installation fails
 After the script failed, the exported ~$PATH~ must not be altered:
 #+name: Exported variables must not be set if installation fails
@@ -498,38 +534,6 @@ If successful, a success message must be printed:
       run . $SPT_SCRIPT -v download_fail
 
       assert_line "ERROR: No remote installation file found. Abort"
-      assert_file_not_exists  /tmp/installation.file
-  }
-#+end_src
-
-*** Should not set variables, if version is already installed
-If the given (or default) version is already installed, the environment should not be altered:
-#+name: Should not set variables if version is already installed
-#+begin_src bats
-  @test "Should not set variables if version is already installed" {
-      PATH="/some/new/path:$SPT_ORIGINAL_PATH"
-
-      . $SPT_SCRIPT -v installed
-
-      assert_equal $OPTIND 1
-      assert [ -z $INSTALLATION_BASE_DIR ]
-      assert [ -z $VERSION ]
-      assert_equal "$PATH" "/some/new/path:$SPT_ORIGINAL_PATH"
-      assert_file_not_exists  /tmp/installation.file
-  }
-#+end_src
-
-*** Should only output success message, if version is already installed
-If the given (or default) version is already installed, only a success message should be shown:
-#+name: Should only output success message if version is already installedinstalled
-#+begin_src bats
-  @test "Should only output success message if version is already installed" {
-      run . $SPT_SCRIPT -v installed
-
-      refute_line "Adding $HOME/opt/tmpl-tmpl_default-version to PATH"
-      refute_line "Install version: tmpl_default-version"
-      assert_line "TMPL successfully installed"
-
       assert_file_not_exists  /tmp/installation.file
   }
 #+end_src
