@@ -81,14 +81,10 @@ If something goes wrong, abort. This means, restore the PATH and other global va
   <<reset_global_vars>>
   <<set_vars_from_opts>>
   <<abort>>
-  <<installation_file>>
   <<local_installation_file_path>>
-  <<download_url>>
   <<remote_installation_file_exists>>
   <<download_installation_file>>
   <<install>>
-  <<install_installation_file>>
-  <<print_success_message>>
   <<main>>
 #+end_src
 #+begin_src shell :tangle src/setup-template.sh :mkdirp yes :noweb yes :shebang #!/bin/sh :tangle-mode '#o644 :exports none
@@ -98,6 +94,10 @@ If something goes wrong, abort. This means, restore the PATH and other global va
   <<restore_exported_vars>>
   <<installation_path>>
   <<is_installed>>
+  <<installation_file>>
+  <<install_installation_file>>
+  <<download_url>>
+  <<print_success_message>>
 
   main ${@}
 #+end_src
