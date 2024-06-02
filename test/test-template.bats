@@ -29,7 +29,7 @@ teardown() {
 @test "Environment must be clean after execution if succeeds with default version" {
     . $SPT_SCRIPT
 
-    assert [ $OPTIND -eq 1 ]
+    assert_equal $OPTIND 1
     assert [ -z $INSTALLATION_BASE_DIR ]
     assert [ -z $VERSION ]
 
@@ -39,14 +39,14 @@ teardown() {
 @test "Exported variables must be set if succeeds with default version" {
     . $SPT_SCRIPT
 
-    assert [ "$PATH" == "$HOME/opt/tmpl-tmpl_default-version:$SPT_ORIGINAL_PATH" ]
+    assert_equal "$PATH" "$HOME/opt/tmpl-tmpl_default-version:$SPT_ORIGINAL_PATH"
 
     rm /tmp/installation.file
 }
 @test "Exported variables must be set if succeeds with given version" {
     . $SPT_SCRIPT -v some_other-version
 
-    assert [ "$PATH" == "$HOME/opt/tmpl-some_other-version:$SPT_ORIGINAL_PATH" ]
+    assert_equal "$PATH" "$HOME/opt/tmpl-some_other-version:$SPT_ORIGINAL_PATH"
 
     rm /tmp/installation.file
 }
@@ -67,7 +67,7 @@ teardown() {
 @test "Environment must be clean after execution if installation fails" {
     . $SPT_SCRIPT -v installation_fail
 
-    assert [ $OPTIND -eq 1 ]
+    assert_equal $OPTIND 1
     assert [ -z $INSTALLATION_BASE_DIR ]
     assert [ -z $VERSION ]
 
@@ -76,7 +76,7 @@ teardown() {
 @test "Exported variables must not be set if installation fails" {
     . $SPT_SCRIPT -v installation_fail
 
-    assert [ "$PATH" == "$SPT_ORIGINAL_PATH" ]
+    assert_equal "$PATH" "$SPT_ORIGINAL_PATH"
 
     rm /tmp/installation.file
 }
@@ -85,10 +85,10 @@ teardown() {
 
     . $SPT_SCRIPT -v installed
 
-    assert [ $OPTIND -eq 1 ]
+    assert_equal $OPTIND 1
     assert [ -z $INSTALLATION_BASE_DIR ]
     assert [ -z $VERSION ]
-    assert [ "$PATH" == "/some/new/path:$SPT_ORIGINAL_PATH" ]
+    assert_equal "$PATH" "/some/new/path:$SPT_ORIGINAL_PATH"
     assert_file_not_exists  /tmp/installation.file
 }
 @test "Should only output success message if version is already installed" {

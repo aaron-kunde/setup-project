@@ -14,14 +14,14 @@ teardown() {
 @test "Exported variables must be set if succeeds with default version using Windows" {
     . $SPT_SCRIPT
 
-    assert [ "$PATH" == "$HOME/opt/node-v20.14.0-win-x64:$SPT_ORIGINAL_PATH" ]
+    assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64:$SPT_ORIGINAL_PATH"
 
     rm /tmp/installation.file
 }
 @test "Exported variables must be set if succeeds with given version using Windows" {
     . $SPT_SCRIPT -v v18.20.3
 
-    assert [ "$PATH" == "$HOME/opt/node-v18.20.3-win-x64:$SPT_ORIGINAL_PATH" ]
+    assert_equal "$PATH" "$HOME/opt/node-v18.20.3-win-x64:$SPT_ORIGINAL_PATH"
 
     rm /tmp/installation.file
 }
