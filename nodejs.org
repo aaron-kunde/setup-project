@@ -16,6 +16,7 @@ The version you want to install. Defaults to the [[*Default version][default ver
   <<export_vars>>
   <<restore_exported_vars>>
   <<installation_path>>
+  <<is_installed>>
 
   main ${@}
 #+end_src
@@ -70,6 +71,16 @@ The installation differs, depending on the target OS. Windows with MingW and Lin
   }
 #+end_src
 
+** Check, if wanted version is installed
+Before starting the installation, check if the wanted version is already installed:
+#+name: is_installed
+#+begin_src shell
+  is_installed() {
+      node --version 2>/dev/null &&
+	  (node --version 2>&1 | grep $VERSION)
+  }
+#+end_src
+
 * Tests
 ** Execute
 #+begin_src shell
@@ -91,11 +102,14 @@ The installation differs, depending on the target OS. Windows with MingW and Lin
   <<Must print error message if remote installation file not found>>
   <<Environment must be clean after execution if installation fails>>
   <<Exported variables must not be set if installation fails>>
-  <<Should not set variables if version is already installed>>
-  <<Should only output success message if version is already installedinstalled>>
+
   <<Should try download if local installation file not exists>>
   <<Should not try download if local installation file exists>>
   <<Should try download if remote installation file exists>>
+
+
+
+  <<Should only output success message if version is already installed>>
 #+end_src
 #+begin_src bats :tangle test/test-nodejs.linux.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
   SPT_SCRIPT=src/setup-nodejs.sh
@@ -105,6 +119,10 @@ The installation differs, depending on the target OS. Windows with MingW and Lin
 
   <<Exported variables must be set if succeeds with default version using Linux>>
   <<Exported variables must be set if succeeds with given version using Linux>>
+
+
+
+  <<Should not set variables if version is already installed using Linux>>
 #+end_src
 #+begin_src bats :tangle test/test-nodejs.win.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
   SPT_SCRIPT=src/setup-nodejs.sh
@@ -187,7 +205,7 @@ After the script has run without a given version, the newly introduced global va
 
 **** If succeeds with given version
 After the script has run with a given version, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~:
-#+name: Environment must be clean after execution with if succeeds given version
+#+name: Environment must be clean after execution if succeeds with given version
 #+begin_src bats
   @test "Environment must be clean after execution if succeeds with given version" {
       . $SPT_SCRIPT -v v18.20.3
@@ -252,5 +270,48 @@ The exported ~$PATH~ must be extended with the wanted version.
       assert_equal "$PATH" "$HOME/opt/node-v18.20.3-win-x64:$SPT_ORIGINAL_PATH"
 
       rm /tmp/installation.file
+  }
+#+end_src
+
+*** Should only output success message, if version is already installed
+If the given (or default) version is already installed, only a success message should be shown:
+#+name: Should only output success message if version is already installed
+#+begin_src bats
+  @test "Should only output success message if version is already installed" {
+      . $SPT_SCRIPT
+      assert_line "Adding $HOME/opt/node-v20.14.0-linux-x64/bin to PATH"
+      assert_line "Install version: v20.14.0"
+      assert_line "TMPL successfully installed"
+
+      run . $SPT_SCRIPT
+
+      refute_line -p "Adding $HOME/opt/"
+      refute_line -p "Install version: "
+      assert_line "TMPL successfully installed"
+
+      assert_file_not_exists  /tmp/installation.file
+  }
+#+end_src
+
+*** Should not set variables, if version is already installed
+**** Using Linux
+If the given (or default) version is already installed, the environment should not be altered:
+#+name: Should not set variables if version is already installed using Linux
+#+begin_src bats
+  @test "Should not set variables if version is already installed using Linux" {
+      . $SPT_SCRIPT
+      assert_equal $OPTIND 1
+      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $VERSION ]
+      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
+
+      . $SPT_SCRIPT
+
+      assert_equal $OPTIND 1
+      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $VERSION ]
+      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
+
+      assert_file_not_exists  /tmp/installation.file
   }
 #+end_src

@@ -25,3 +25,22 @@ teardown() {
 
     rm /tmp/installation.file
 }
+
+
+
+@test "Should not set variables if version is already installed using Linux" {
+    . $SPT_SCRIPT
+    assert_equal $OPTIND 1
+    assert [ -z $INSTALLATION_BASE_DIR ]
+    assert [ -z $VERSION ]
+    assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
+
+    . $SPT_SCRIPT
+
+    assert_equal $OPTIND 1
+    assert [ -z $INSTALLATION_BASE_DIR ]
+    assert [ -z $VERSION ]
+    assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
+
+    assert_file_not_exists  /tmp/installation.file
+}
