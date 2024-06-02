@@ -8,8 +8,8 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  test_scripts:
-    name: Test setup-scripts
+  test_scripts_linux:
+    name: Test setup-scripts on Linux
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,5 +22,25 @@ jobs:
           file-path: ${{ github.workspace }}/test/test_helper/bats-file
       - name: Run tests for Template
         run: bats -t test/test-template.bats
-      - name: Run tests for Node.js
+      - name: Run OS indenpendent tests for Node.js
         run: bats -t test/test-nodejs.bats
+      - name: Run Linux specific tests for Node.js
+        run: bats -t test/test-nodejs.linux.bats
+
+  test_scripts_windows:
+    name: Test setup-scripts on Windows with MinGW
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Run tests for Template
+        run: test/bats/bin/bats -t test/test-template.bats
+      - name: Run OS indenpendent tests for Node.js
+        run: test/bats/bin/bats -t test/test-nodejs.bats
+      - name: Run Linux specific tests for Node.js
+        run: test/bats/bin/bats -t test/test-nodejs.linux.bats
