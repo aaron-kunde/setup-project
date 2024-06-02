@@ -28,7 +28,7 @@ teardown() {
 @test "Environment must be clean after execution if succeeds with default version" {
     . $SPT_SCRIPT
 
-    assert [ $OPTIND -eq 1 ]
+    assert_equal $OPTIND 1
     assert [ -z $INSTALLATION_BASE_DIR ]
     assert [ -z $VERSION ]
 
