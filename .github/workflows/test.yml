@@ -42,5 +42,5 @@ jobs:
         run: test/bats/bin/bats -t test/test-template.bats
       - name: Run OS indenpendent tests for Node.js
         run: test/bats/bin/bats -t test/test-nodejs.bats
-      - name: Run Linux specific tests for Node.js
-        run: test/bats/bin/bats -t test/test-nodejs.linux.bats
+      - name: Run Windows specific tests for Node.js
+        run: test/bats/bin/bats -t test/test-nodejs.win.bats
