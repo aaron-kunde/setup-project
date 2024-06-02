@@ -9,11 +9,13 @@ Use to install [[https://nodejs.org][Node.js]].
 ** Version
 The version you want to install. Defaults to the [[*Default version][default version]].
 
-
 * Implementation
 #+begin_src shell :tangle src/setup-nodejs.sh :mkdirp yes :noweb yes :shebang #!/bin/sh :tangle-mode '#o644 :exports none
   <<template.org:lib()>>
   <<default_version>>
+  <<export_vars>>
+  <<restore_exported_vars>>
+  <<installation_path>>
 
   main ${@}
 #+end_src
@@ -29,6 +31,45 @@ Use the current LTS:
   }
 #+end_src
 
+*** Exported variables
+The ~PATH~ variable is exported must be saved and restored, if something goes wrong:
+#+name: export_vars
+#+begin_src shell
+  export_vars() {
+      echo "Adding $(installation_path) to PATH"
+      SETUP_NODEJS_ORIGINAL_PATH="${PATH}"
+
+      export PATH="$(installation_path):${PATH}"
+  }
+#+end_src
+
+The corresponding reset function restores the ~PATH~ and deletes the backup, to clean up the environment:
+#+name: restore_exported_vars
+#+begin_src shell
+  restore_exported_vars() {
+      if [ -v SETUP_TMPL_ORIGINAL_PATH ]; then
+	  export PATH="${SETUP_NODEJS_ORIGINAL_PATH}"
+	  unset SETUP_NODEJS_ORIGINAL_PATH
+      fi
+  }
+#+end_src
+
+*** Installation path
+The installation differs, depending on the target OS. Windows with MingW and Linux are supported:
+#+name: installation_path
+#+begin_src shell
+  installation_path() {
+      case "$(uname -s)" in
+	  CYGWIN*|MINGW*|MSYS*)
+	      echo $INSTALLATION_BASE_DIR/node-$VERSION-win-x64
+	      ;;
+	  ,*)
+	      echo $INSTALLATION_BASE_DIR/node-$VERSION-linux-x64/bin
+	      ;;
+      esac
+  }
+#+end_src
+
 * Tests
 ** Execute
 #+begin_src shell
@@ -41,25 +82,46 @@ Use the current LTS:
   <<setup>>
   <<teardown>>
 
-  <<Must print success message>>
   <<Must print versions to install with default version>>
   <<Must print versions to install with given version>>
-  <<Must print error message if remote installation file not found>>
   <<Environment must be clean after execution if succeeds with default version>>
   <<Environment must be clean after execution if succeeds with given version>>
+
+  <<Must print success message>>
+  <<Must print error message if remote installation file not found>>
   <<Environment must be clean after execution if installation fails>>
+  <<Exported variables must not be set if installation fails>>
   <<Should not set variables if version is already installed>>
   <<Should only output success message if version is already installedinstalled>>
   <<Should try download if local installation file not exists>>
   <<Should not try download if local installation file exists>>
   <<Should try download if remote installation file exists>>
 #+end_src
+#+begin_src bats :tangle test/test-nodejs.linux.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
+  SPT_SCRIPT=src/setup-nodejs.sh
+
+  <<setup>>
+  <<teardown>>
+
+  <<Exported variables must be set if succeeds with default version using Linux>>
+  <<Exported variables must be set if succeeds with given version using Linux>>
+#+end_src
+#+begin_src bats :tangle test/test-nodejs.win.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
+  SPT_SCRIPT=src/setup-nodejs.sh
+
+  <<setup>>
+  <<teardown>>
+
+  <<Exported variables must be set if succeeds with default version using Windows>>
+  <<Exported variables must be set if succeeds with given version using Windows>>
+#+end_src
+
 
 Each test needs a setup, which loads the necessary Bats libraries:
 - [[https://github.com/bats-core/bats-support][bats-support]]
 - [[https://github.com/bats-core/bats-assert][bats-assert]]
 
-Furthermore, the exported variables are backed up. In this case at least the ~PATH~.
+Furthermore, the exported variables are backed up. In this case at least the ~PATH~:
 #+name: setup
 #+begin_src bats
   setup() {
@@ -78,11 +140,11 @@ To clean up, the exported variables are reset to its saved values after each tes
   }
 #+end_src
 
-*** Test cases
+** Test cases
 
-**** Must print versions to install
+*** Must print versions to install
 
-***** With default version
+**** With default version
 #+name: Must print versions to install with default version
 #+begin_src bats
   @test "Must print versions to install with default version" {
@@ -94,13 +156,100 @@ To clean up, the exported variables are reset to its saved values after each tes
   }
 #+end_src
 
-***** With given version
+**** With given version
 #+name: Must print versions to install with given version
 #+begin_src bats
   @test "Must print versions to install with given version" {
       run .  $SPT_SCRIPT -v v18.20.3
 
       assert_line 'Install version: v18.20.3'
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+*** Environment must be clean after execution
+
+**** If succeeds with default version
+After the script has run without a given version, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~:
+#+name: Environment must be clean after execution if succeeds with default version
+#+begin_src bats
+  @test "Environment must be clean after execution if succeeds with default version" {
+      . $SPT_SCRIPT
+
+      assert [ $OPTIND -eq 1 ]
+      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $VERSION ]
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+**** If succeeds with given version
+After the script has run with a given version, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~:
+#+name: Environment must be clean after execution with if succeeds given version
+#+begin_src bats
+  @test "Environment must be clean after execution if succeeds with given version" {
+      . $SPT_SCRIPT -v v18.20.3
+
+      assert [ $OPTIND -eq 1 ]
+      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $VERSION ]
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+*** Exported variables must be set
+The exported ~$PATH~ must be extended with the wanted version.
+
+**** If succeeds with default version
+
+***** Using Linux
+#+name: Exported variables must be set if succeeds with default version using Linux
+#+begin_src bats
+  @test "Exported variables must be set if succeeds with default version using Linux" {
+      . $SPT_SCRIPT
+
+      assert [ $PATH == "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH" ]
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+***** Using Windows
+#+name: Exported variables must be set if succeeds with default version using Windows
+#+begin_src bats
+  @test "Exported variables must be set if succeeds with default version using Windows" {
+      . $SPT_SCRIPT
+
+      assert [ $PATH == "$HOME/opt/node-v20.14.0-win-x64:$SPT_ORIGINAL_PATH" ]
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+**** If succeeds with given version
+
+***** Using Linux
+#+name: Exported variables must be set if succeeds with given version using Linux
+#+begin_src bats
+  @test "Exported variables must be set if succeeds with given version using Linux" {
+      . $SPT_SCRIPT -v v18.20.3
+
+      assert [ $PATH == "$HOME/opt/node-v18.20.3-linux-x64/bin:$SPT_ORIGINAL_PATH" ]
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+***** Using Windows
+#+name: Exported variables must be set if succeeds with given version using Windows
+#+begin_src bats
+  @test "Exported variables must be set if succeeds with given version using Windows" {
+      . $SPT_SCRIPT -v v18.20.3
+
+      assert [ $PATH == "$HOME/opt/node-v18.20.3-win-x64:$SPT_ORIGINAL_PATH" ]
 
       rm /tmp/installation.file
   }
