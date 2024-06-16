@@ -1,5 +1,5 @@
 #+title: Node.js
-Use to install [[https://nodejs.org][Node.js]].
+Use to install [[https://nodejs.org][Node.js]] (based on the global [[file:template.org][template]]).
 
 * Usage
 #+begin_example
@@ -12,6 +12,7 @@ The version you want to install. Defaults to the [[*Default version][default ver
 * Implementation
 #+begin_src shell :tangle src/setup-nodejs.sh :mkdirp yes :noweb yes :shebang #!/bin/sh :tangle-mode '#o644 :exports none
   <<template.org:lib()>>
+
   <<default_version>>
   <<export_vars>>
   <<restore_exported_vars>>
@@ -26,7 +27,6 @@ The version you want to install. Defaults to the [[*Default version][default ver
 #+end_src
 
 ** Global variables
-
 *** Default version
 Use the current LTS:
 #+name: default_version
@@ -37,7 +37,7 @@ Use the current LTS:
 #+end_src
 
 *** Exported variables
-The ~PATH~ variable is exported must be saved and restored, if something goes wrong:
+The ~PATH~ variable is exported. It must be saved and restored, if something goes wrong:
 #+name: export_vars
 #+begin_src shell
   export_vars() {
@@ -87,6 +87,7 @@ Before starting the installation, check if the wanted version is already install
 
 ** Install wanted version
 The installation file is specific to the target OS:
+
 *** Installation file
 #+name: installation_file
 #+begin_src shell

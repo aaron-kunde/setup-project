@@ -63,6 +63,7 @@ main() {
     reset_global_vars
     print_success_message
 }
+
 default_version() {
     echo tmpl_default-version
 }
