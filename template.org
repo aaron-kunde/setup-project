@@ -1,4 +1,6 @@
 #+title: Template
+This is the template, which defines some common functions for all scripts.
+
 * Usage
 #+begin_example
   $ . setup-template.sh [-v VERSION]
@@ -49,13 +51,16 @@ The template can be included into the software specific scripts, where specific 
 #+end_src
 
 * Implementation
-1. Set global variables.
+In general, the execution of all scripts follows these common steps:
+1. Initialize global variables.
 2. Override global variables given by options.
-3. Reset PATH and other installation relevant exported variables.
-4. Check, whether the wanted version is already installed.
-5. If not, install the wanted version
-6. Clean up the global variables after installation, but not the exported ones.
-7. Print success message
+3. Check, whether the wanted version is already installed.
+4. If not:
+   1. Restore PATH and other installation relevant exported variables, which may have been set by a previous installation.
+   2. Export PATH and other relevant variables.
+   3. Install the wanted version.
+5. Clean up the global variables after installation, but not the exported ones.
+6. Print success message.
 
 If something goes wrong, abort. This means, restore the PATH and other global variables:
 #+name: main
@@ -89,6 +94,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
 #+end_src
 #+begin_src shell :tangle src/setup-template.sh :mkdirp yes :noweb yes :shebang #!/bin/sh :tangle-mode '#o644 :exports none
   <<lib>>
+
   <<default_version>>
   <<export_vars>>
   <<restore_exported_vars>>
@@ -199,7 +205,8 @@ Before starting the installation, check if the wanted version is already install
 ** Install wanted version
 If the wanted version is not installed, start the installation. This includes the following steps:
 1. Check if an installation file for the current OS is present.
-   1. If not, download correct installation file and proceed with next step. If no download file could be found, abort installation with an error message.
+   1. If not, download correct installation file and proceed with next step.
+      1. If no download file could be found, abort installation with an error message.
 2. Install version with this installation file.
 #+name: install
 #+begin_src shell
