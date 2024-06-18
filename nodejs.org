@@ -140,6 +140,7 @@ The success message prints the version of the current Node.js installation:
 
 * Tests
 ** Execute
+Execute OS independent tests:
 #+begin_src shell
   test/bats/bin/bats -t test/test-nodejs.bats
 #+end_src
@@ -162,24 +163,28 @@ The success message prints the version of the current Node.js installation:
 
 
 
-  <<Should only output success message if version is already installed>>
 #+end_src
+
+Execute tests specific for Linux:
+#+begin_src shell
+  test/bats/bin/bats -t test/test-nodejs.linux.bats
+#+end_example
 #+begin_src bats :tangle test/test-nodejs.linux.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
   SPT_SCRIPT=src/setup-nodejs.sh
 
   <<setup>>
   <<teardown>>
 
-  <<Environment must be clean after execution if succeeds with default version using Linux>>
-  <<Environment must be clean after execution if succeeds with given version using Linux>>
-  <<Must print versions to install with default version using Linux>>
-  <<Must print versions to install with given version using Linux>>
-  <<Exported variables must be set if succeeds with default version using Linux>>
-  <<Exported variables must be set if succeeds with given version using Linux>>
-
+  <<Should export variables if succeeds with default version using Linux>>
+  <<Should export variables if succeeds with given version using Linux>>
 
 
   <<Should not set variables if version is already installed using Linux>>
+#+end_src
+
+Execute tests specific for Windows:
+#+begin_src shell
+  test/bats/bin/bats -t test/test-nodejs.win.bats
 #+end_src
 #+begin_src bats :tangle test/test-nodejs.win.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
   SPT_SCRIPT=src/setup-nodejs.sh
