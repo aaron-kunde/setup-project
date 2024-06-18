@@ -315,10 +315,9 @@ The success message dependes of the installed software and must be implmenented 
 
 * Tests
 ** Execute
-#+begin_example
-  $ test/bats/bin/bats -t test/test-template.bats
-#+end_example
-
+#+begin_src shell
+  test/bats/bin/bats -t test/test-template.bats
+#+end_shell
 #+begin_src bats :tangle test/test-template.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
   SPT_SCRIPT=src/setup-template.sh
 
