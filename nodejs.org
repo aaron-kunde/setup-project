@@ -52,7 +52,7 @@ The corresponding reset function restores the ~PATH~ and deletes the backup, to 
 #+name: restore_exported_vars
 #+begin_src shell
   restore_exported_vars() {
-      if [ -v SETUP_TMPL_ORIGINAL_PATH ]; then
+      if [ -v SETUP_NODEJS_ORIGINAL_PATH ]; then
 	  export PATH="${SETUP_NODEJS_ORIGINAL_PATH}"
 	  unset SETUP_NODEJS_ORIGINAL_PATH
       fi

@@ -74,7 +74,7 @@ export_vars() {
     export PATH="$(installation_path):${PATH}"
 }
 restore_exported_vars() {
-    if [ -v SETUP_TMPL_ORIGINAL_PATH ]; then
+    if [ -v SETUP_NODEJS_ORIGINAL_PATH ]; then
 	export PATH="${SETUP_NODEJS_ORIGINAL_PATH}"
 	unset SETUP_NODEJS_ORIGINAL_PATH
     fi
