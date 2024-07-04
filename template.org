@@ -317,7 +317,7 @@ The success message dependes of the installed software and must be implmenented 
 ** Execute
 #+begin_src shell
   test/bats/bin/bats -t test/test-template.bats
-#+end_shell
+#+end_src
 #+begin_src bats :tangle test/test-template.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
   SPT_SCRIPT=src/setup-template.sh
 
@@ -328,22 +328,19 @@ The success message dependes of the installed software and must be implmenented 
   <<Must print versions to install with given version>>
   <<Environment must be clean after execution if succeeds with default version>>
   <<Environment must be clean after execution if succeeds with given version>>
-  <<Exported variables must be set if succeeds with default version>>
-  <<Exported variables must be set if succeeds with given version>>
-
-  <<Must print success message>>
-  <<Must print error message if remote installation file not found>>
   <<Environment must be clean after execution if installation fails>>
-  <<Exported variables must not be set if installation fails>>
-
+  <<Should only print success message if version is already installed>>
+  <<Should not alter environment if installation fails>>
+  <<Must print error message if remote installation file not found>>
   <<Should try download if local installation file not exists>>
-  <<Should not try download if local installation file exists>>
   <<Should try download if remote installation file exists>>
 
-
-
-  <<Should only output success message if version is already installed>>
-  <<Should not set variables if version is already installed>>
+  # OS specific
+  <<Should export variables if succeeds with default version>>
+  <<Should export variables if succeeds with given version>>
+  <<Should not alter environment if version is already installed>>
+  <<Must print success message if installation succeeds>>
+  <<Should not try download if local installation file exists>>
 #+end_src
 
 Each test needs a setup, which loads the necessary Bats libraries:
@@ -418,7 +415,7 @@ After the script has run without a given version, the newly introduced global va
 
 **** If succeeds with given version
 After the script has run with a given version, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~:
-#+name: Environment must be clean after execution with if succeeds given version
+#+name: Environment must be clean after execution if succeeds with given version
 #+begin_src bats
   @test "Environment must be clean after execution if succeeds with given version" {
       . $SPT_SCRIPT -v some_other-version
@@ -446,14 +443,14 @@ After the script failed, the newly introduced global variables shall not be set 
   }
 #+end_src
 
-*** Exported variables must be set
+*** Should export variables
 The exported ~$PATH~ must be extended with the wanted version.
 
 **** If succeeds with default version
 
-#+name: Exported variables must be set if succeeds with default version
+#+name: Should export variables if succeeds with default version
 #+begin_src bats
-  @test "Exported variables must be set if succeeds with default version" {
+  @test "Should export variables if succeeds with default version" {
       . $SPT_SCRIPT
 
       assert_equal "$PATH" "$HOME/opt/tmpl-tmpl_default-version:$SPT_ORIGINAL_PATH"
@@ -464,9 +461,9 @@ The exported ~$PATH~ must be extended with the wanted version.
 
 **** If succeeds with given version
 
-#+name: Exported variables must be set if succeeds with given version
+#+name: Should export variables if succeeds with given version
 #+begin_src bats
-  @test "Exported variables must be set if succeeds with given version" {
+  @test "Should export variables if succeeds with given version" {
       . $SPT_SCRIPT -v some_other-version
 
       assert_equal "$PATH" "$HOME/opt/tmpl-some_other-version:$SPT_ORIGINAL_PATH"
@@ -475,26 +472,26 @@ The exported ~$PATH~ must be extended with the wanted version.
   }
 #+end_src
 
-*** Should only output success message, if version is already installed
+*** Should only print success message, if version is already installed
 If the given (or default) version is already installed, only a success message should be shown:
-#+name: Should only output success message if version is already installed
+#+name: Should only print success message if version is already installed
 #+begin_src bats
-  @test "Should only output success message if version is already installed" {
+  @test "Should only print success message if version is already installed" {
       run . $SPT_SCRIPT -v installed
 
-      refute_line "Adding $HOME/opt/tmpl-tmpl_default-version to PATH"
-      refute_line "Install version: tmpl_default-version"
-      assert_line "TMPL successfully installed"
+      refute_line -p 'Adding $HOME/opt/'
+      refute_line -p 'Install version: '
+      assert_line 'TMPL successfully installed'
 
-      assert_file_not_exists  /tmp/installation.file
+      assert_file_not_exists /tmp/installation.file
   }
 #+end_src
 
-*** Should not set variables, if version is already installed
+*** Should not alter environment, if version is already installed
 If the given (or default) version is already installed, the environment should not be altered:
-#+name: Should not set variables if version is already installed
+#+name: Should not alter environment if version is already installed
 #+begin_src bats
-  @test "Should not set variables if version is already installed" {
+  @test "Should not alter environment if version is already installed" {
       PATH="/some/new/path:$SPT_ORIGINAL_PATH"
 
       . $SPT_SCRIPT -v installed
@@ -503,15 +500,15 @@ If the given (or default) version is already installed, the environment should n
       assert [ -z $INSTALLATION_BASE_DIR ]
       assert [ -z $VERSION ]
       assert_equal "$PATH" "/some/new/path:$SPT_ORIGINAL_PATH"
-      assert_file_not_exists  /tmp/installation.file
+      assert_file_not_exists /tmp/installation.file
   }
 #+end_src
 
-*** Exported variables must not be set if installation fails
+*** Should not alter environment, if installation fails
 After the script failed, the exported ~$PATH~ must not be altered:
-#+name: Exported variables must not be set if installation fails
+#+name: Should not alter environment if installation fails
 #+begin_src bats
-  @test "Exported variables must not be set if installation fails" {
+  @test "Should not alter environment if installation fails" {
       . $SPT_SCRIPT -v installation_fail
 
       assert_equal "$PATH" "$SPT_ORIGINAL_PATH"
@@ -520,11 +517,11 @@ After the script failed, the exported ~$PATH~ must not be altered:
   }
 #+end_src
 
-*** Must print success message
+*** Must print success message if installation succeeds
 If successful, a success message must be printed:
-#+name: Must print success message
+#+name: Must print success message if installation succeeds
 #+begin_src bats
-  @test "Must print success message" {
+  @test "Must print success message if installation succeeds" {
       run . $SPT_SCRIPT
 
       assert_line 'TMPL successfully installed'
@@ -539,19 +536,38 @@ If successful, a success message must be printed:
   @test "Must print error message if remote installation file not found" {
       run . $SPT_SCRIPT -v download_fail
 
-      assert_line "ERROR: No remote installation file found. Abort"
-      assert_file_not_exists  /tmp/installation.file
+      assert_line 'Install version: download_fail'
+      assert_line 'Local installation file not found: /tmp/installation.file. Try, download new one'
+      assert_line 'ERROR: No remote installation file found. Abort'
+      # TODO: Should not be shown in real scripts
+      # refute_line 'TMPL successfully installed'
+
+      assert_file_not_exists /tmp/installation.file
   }
 #+end_src
 
-*** Should try download, if local installation file not exists
+*** Should try download
+
+**** If local installation file not exists
 #+name: Should try download if local installation file not exists
 #+begin_src bats
   @test "Should try download if local installation file not exists" {
       run . $SPT_SCRIPT
 
-      assert_line "Local installation file not found: /tmp/installation.file. Try, download new one"
-      assert_line "Download installation file"
+      assert_line 'Local installation file not found: /tmp/installation.file. Try, download new one'
+      assert_line 'Download installation file'
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+**** If remote installation file exists
+#+name: Should try download if remote installation file exists
+#+begin_src bats
+  @test "Should try download if remote installation file exists" {
+      run . $SPT_SCRIPT
+
+      assert_line 'Download installation file'
 
       rm /tmp/installation.file
   }
@@ -565,20 +581,9 @@ If successful, a success message must be printed:
 
       run . $SPT_SCRIPT
 
-      refute_line "Local installation file not found: /tmp/installation.file. Try, download new one"
+      refute_line 'Local installation file not found: /tmp/installation.file. Try, download new one'
+      refute_line 'Download installation file'
 
       rm /tmp/installation.file
   }
-#+end_src
-
-*** Should download, if remote installation file found
-#+name: Should try download if remote installation file exists
-#+begin_src bats
-  @test "Should try download if remote installation file found" {
-      run . $SPT_SCRIPT
-
-      assert_line "Download installation file"
-
-      rm /tmp/installation.file
-   }
 #+end_src
