@@ -22,6 +22,10 @@ jobs:
           file-path: ${{ github.workspace }}/test/test_helper/bats-file
       - name: Run tests for Template
         run: bats -t test/test-template.bats
+      - name: Set Node.js version
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16'
       - name: Run OS indenpendent tests for Node.js
         run: bats -t test/test-nodejs.bats
       - name: Run Linux specific tests for Node.js
@@ -40,6 +44,10 @@ jobs:
           submodules: true
       - name: Run tests for Template
         run: test/bats/bin/bats -t test/test-template.bats
+      - name: Set Node.js version
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16'
       - name: Run OS indenpendent tests for Node.js
         run: test/bats/bin/bats -t test/test-nodejs.bats
       - name: Run Windows specific tests for Node.js
