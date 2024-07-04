@@ -22,6 +22,8 @@ jobs:
           file-path: ${{ github.workspace }}/test/test_helper/bats-file
       - name: Run tests for Template
         run: bats -t test/test-template.bats
+      - name: Create target directory
+        run: mkdir ${{ github.workspace }}/../opt
       - name: Set Node.js version
         uses: actions/setup-node@v4
         with:
@@ -42,6 +44,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: true
+      - name: Create target directory
+        run: mkdir ${{ github.workspace }}/../opt
       - name: Run tests for Template
         run: test/bats/bin/bats -t test/test-template.bats
       - name: Set Node.js version
