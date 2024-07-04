@@ -144,31 +144,28 @@ Execute OS independent tests:
 #+begin_src shell
   test/bats/bin/bats -t test/test-nodejs.bats
 #+end_src
-
 #+begin_src bats :tangle test/test-nodejs.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
   SPT_SCRIPT=src/setup-nodejs.sh
 
   <<setup>>
   <<teardown>>
 
-
-  <<Must print success message>>
-  <<Must print error message if remote installation file not found>>
+  <<Must print versions to install with default version>>
+  <<Must print versions to install with given version>>
+  <<Environment must be clean after execution if succeeds with default version>>
+  <<Environment must be clean after execution if succeeds with given version>>
   <<Environment must be clean after execution if installation fails>>
-  <<Exported variables must not be set if installation fails>>
-
+  <<Should only print success message if version is already installed>>
+  <<Should not alter environment if installation fails>>
+  <<Must print error message if remote installation file not found>>
   <<Should try download if local installation file not exists>>
-  <<Should not try download if local installation file exists>>
   <<Should try download if remote installation file exists>>
-
-
-
 #+end_src
 
 Execute tests specific for Linux:
 #+begin_src shell
   test/bats/bin/bats -t test/test-nodejs.linux.bats
-#+end_example
+#+end_src
 #+begin_src bats :tangle test/test-nodejs.linux.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
   SPT_SCRIPT=src/setup-nodejs.sh
 
@@ -177,9 +174,10 @@ Execute tests specific for Linux:
 
   <<Should export variables if succeeds with default version using Linux>>
   <<Should export variables if succeeds with given version using Linux>>
-
-
-  <<Should not set variables if version is already installed using Linux>>
+  <<Should not alter environment if version is already installed using Linux>>
+  <<Must print success message if installation succeeds with default version using Linux>>
+  <<Must print success message if installation succeeds with given version using Linux>>
+  <<Should not try download if local installation file exists using Linux>>
 #+end_src
 
 Execute tests specific for Windows:
@@ -192,10 +190,13 @@ Execute tests specific for Windows:
   <<setup>>
   <<teardown>>
 
-  <<Exported variables must be set if succeeds with default version using Windows>>
-  <<Exported variables must be set if succeeds with given version using Windows>>
+  <<Should export variables if succeeds with default version using Windows>>
+  <<Should export variables if succeeds with given version using Windows>>
+  <<Should not alter environment if version is already installed using Windows>>
+  <<Must print success message if installation succeeds with default version using Windows>>
+  <<Must print success message if installation succeeds with given version using Windows>>
+  <<Should not try download if local installation file exists using Windows>>
 #+end_src
-
 
 Each test needs a setup, which loads the necessary Bats libraries:
 - [[https://github.com/bats-core/bats-support][bats-support]]
@@ -226,27 +227,27 @@ To clean up, the exported variables are reset to its saved values after each tes
 
 *** Must print versions to install
 
-**** With default version using Linux
-#+name: Must print versions to install with default version using Linux
+**** With default version
+#+name: Must print versions to install with default version
 #+begin_src bats
-  @test "Must print versions to install with default version using Linux" {
+  @test "Must print versions to install with default version" {
       run . $SPT_SCRIPT
 
       assert_line 'Install version: v20.14.0'
 
-      rm /tmp/node-v20.14.0-linux-x64.tar.xz
+      rm /tmp/node-v20.14.0-*
   }
 #+end_src
 
-**** With given version using Linux
-#+name: Must print versions to install with given version using Linux
+**** With given version
+#+name: Must print versions to install with given version
 #+begin_src bats
   @test "Must print versions to install with given version" {
       run .  $SPT_SCRIPT -v v18.20.3
 
       assert_line 'Install version: v18.20.3'
 
-      rm /tmp/node-v18.20.3-linux-x64.tar.xz
+      rm /tmp/node-v18.20.3-*
   }
 #+end_src
 
@@ -254,43 +255,56 @@ To clean up, the exported variables are reset to its saved values after each tes
 
 **** If succeeds with default version
 After the script has run without a given version, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~:
-#+name: Environment must be clean after execution if succeeds with default version using Linux
+#+name: Environment must be clean after execution if succeeds with default version
 #+begin_src bats
-  @test "Environment must be clean after execution if succeeds with default version using Linux" {
+  @test "Environment must be clean after execution if succeeds with default version" {
       . $SPT_SCRIPT
 
       assert_equal $OPTIND 1
       assert [ -z $INSTALLATION_BASE_DIR ]
       assert [ -z $VERSION ]
 
-      rm /tmp/node-v20.14.0-linux-x64.tar.xz
+      rm /tmp/node-v20.14.0-*
   }
 #+end_src
 
 **** If succeeds with given version
 After the script has run with a given version, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~:
-#+name: Environment must be clean after execution if succeeds with given version using Linux
+#+name: Environment must be clean after execution if succeeds with given version
 #+begin_src bats
-  @test "Environment must be clean after execution if succeeds with given version using Linux" {
+  @test "Environment must be clean after execution if succeeds with given version" {
       . $SPT_SCRIPT -v v18.20.3
 
       assert_equal $OPTIND 1
       assert [ -z $INSTALLATION_BASE_DIR ]
       assert [ -z $VERSION ]
 
-      rm /tmp/node-v18.20.3-linux-x64.tar.xz
+      rm /tmp/node-v18.20.3-*
   }
 #+end_src
 
-*** Exported variables must be set
+**** If installation fails
+After the script failed, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~:
+#+name: Environment must be clean after execution if installation fails
+#+begin_src bats
+  @test "Environment must be clean after execution if installation fails" {
+      . $SPT_SCRIPT -v installation_fail || assert_equal $? 127
+
+      assert_equal $OPTIND 1
+      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $VERSION ]
+  }
+#+end_src
+
+*** Should export variables
 The exported ~$PATH~ must be extended with the wanted version.
 
 **** If succeeds with default version
 
 ***** Using Linux
-#+name: Exported variables must be set if succeeds with default version using Linux
+#+name: Should export variables if succeeds with default version using Linux
 #+begin_src bats
-  @test "Exported variables must be set if succeeds with default version using Linux" {
+  @test "Should export variables if succeeds with default version using Linux" {
       . $SPT_SCRIPT
 
       assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
@@ -300,9 +314,9 @@ The exported ~$PATH~ must be extended with the wanted version.
 #+end_src
 
 ***** Using Windows
-#+name: Exported variables must be set if succeeds with default version using Windows
+#+name: Should export variables if succeeds with default version using Windows
 #+begin_src bats
-  @test "Exported variables must be set if succeeds with default version using Windows" {
+  @test "Should export variables if succeeds with default version using Windows" {
       . $SPT_SCRIPT
 
       assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64:$SPT_ORIGINAL_PATH"
@@ -314,9 +328,9 @@ The exported ~$PATH~ must be extended with the wanted version.
 **** If succeeds with given version
 
 ***** Using Linux
-#+name: Exported variables must be set if succeeds with given version using Linux
+#+name: Should export variables if succeeds with given version using Linux
 #+begin_src bats
-  @test "Exported variables must be set if succeeds with given version using Linux" {
+  @test "Should export variables if succeeds with given version using Linux" {
       . $SPT_SCRIPT -v v18.20.3
 
       assert_equal "$PATH" "$HOME/opt/node-v18.20.3-linux-x64/bin:$SPT_ORIGINAL_PATH"
@@ -326,9 +340,9 @@ The exported ~$PATH~ must be extended with the wanted version.
 #+end_src
 
 ***** Using Windows
-#+name: Exported variables must be set if succeeds with given version using Windows
+#+name: Should export variables if succeeds with given version using Windows
 #+begin_src bats
-  @test "Exported variables must be set if succeeds with given version using Windows" {
+  @test "Should export variables if succeeds with given version using Windows" {
       . $SPT_SCRIPT -v v18.20.3
 
       assert_equal "$PATH" "$HOME/opt/node-v18.20.3-win-x64:$SPT_ORIGINAL_PATH"
@@ -337,49 +351,203 @@ The exported ~$PATH~ must be extended with the wanted version.
   }
 #+end_src
 
-*** Should only output success message, if version is already installed
+*** Should only print success message, if version is already installed
 If the given (or default) version is already installed, only a success message should be shown:
-#+name: Should only output success message if version is already installed
+#+name: Should only print success message if version is already installed
 #+begin_src bats
-  @test "Should only output success message if version is already installed" {
+  @test "Should only print success message if version is already installed" {
       . $SPT_SCRIPT
-      # assert_line "Adding $HOME/opt/node-v20.14.0-linux-x64/bin to PATH"
-      # assert_line "Install version: v20.14.0"
-      # assert_line "v20.14.0"
-
-      rm /tmp/node-v20.14.0-linux-x64.tar.xz
+      rm /tmp/node-v20.14.0-*
 
       run . $SPT_SCRIPT
 
-      refute_line -p "Adding $HOME/opt/"
-      refute_line -p "Install version: "
-      assert_line "v20.14.0"
+      refute_line -p 'Adding $HOME/opt/'
+      refute_line -p 'Install version: '
+      assert_line 'v20.14.0'
+
+      assert_file_not_exists /tmp/node-v20.14.0-*
+  }
+#+end_src
+
+*** Should not alter environment, if version is already installed
+If the given (or default) version is already installed, the environment should not be altered:
+
+**** Using Linux
+#+name: Should not alter environment if version is already installed using Linux
+#+begin_src bats
+  @test "Should not alter environment if version is already installed using Linux" {
+      . $SPT_SCRIPT
+      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
+      rm /tmp/node-v20.14.0-linux-x64.tar.xz
+
+      . $SPT_SCRIPT
+
+      assert_equal $OPTIND 1
+      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $VERSION ]
+      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
 
       assert_file_not_exists /tmp/node-v20.14.0-linux-x64.tar.xz
   }
 #+end_src
 
-*** Should not set variables, if version is already installed
-**** Using Linux
-If the given (or default) version is already installed, the environment should not be altered:
-#+name: Should not set variables if version is already installed using Linux
+**** Using Windows
+#+name: Should not alter environment if version is already installed using Windows
 #+begin_src bats
-  @test "Should not set variables if version is already installed using Linux" {
+  @test "Should not alter environment if version is already installed using Windows" {
       . $SPT_SCRIPT
+      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64/bin:$SPT_ORIGINAL_PATH"
+      rm /tmp/node-v20.14.0-win-x64.zip
+
+      . $SPT_SCRIPT
+
       assert_equal $OPTIND 1
       assert [ -z $INSTALLATION_BASE_DIR ]
       assert [ -z $VERSION ]
-      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
+      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64/bin:$SPT_ORIGINAL_PATH"
+
+      assert_file_not_exists /tmp/node-v20.14.0-win-x64.zip
+  }
+#+end_src
+
+*** Should not alter environment, if installation fails
+After the script failed, the exported ~$PATH~ must not be altered:
+#+name: Should not alter environment if installation fails
+#+begin_src bats
+  @test "Should not alter environment if installation fails" {
+      . $SPT_SCRIPT -v installation_fail || assert_equal $? 127
+
+      assert_equal "$PATH" "$SPT_ORIGINAL_PATH"
+  }
+#+end_src
+
+*** Must print success message, if installation succeeds
+If successful, a success message must be printed.
+
+**** With default version
+
+***** Using Linux
+#+name: Must print success message if installation succeeds with default version using Linux
+#+begin_src bats
+  @test "Must print success message if installation succeeds with default version using Linux" {
+      run . $SPT_SCRIPT
+
+      assert_line 'v20.14.0'
 
       rm /tmp/node-v20.14.0-linux-x64.tar.xz
+  }
+#+end_src
 
-      . $SPT_SCRIPT
+***** Using Windows
+#+name: Must print success message if installation succeeds with default version using Windows
+#+begin_src bats
+  @test "Must print success message if installation succeeds with default version using Windows" {
+      run . $SPT_SCRIPT
 
-      assert_equal $OPTIND 1
-      assert [ -z $INSTALLATION_BASE_DIR ]
-      assert [ -z $VERSION ]
-      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
+      assert_line v20.14.0'
 
-      assert_file_not_exists /tmp/node-v20.14.0-linux-x64.tar.xz
+      rm /tmp/node-v20.14.0-win-x64.zip
+  }
+#+end_src
+
+**** With given version
+
+***** Using Linux
+#+name: Must print success message if installation succeeds with given version using Linux
+#+begin_src bats
+  @test "Must print success message if installation succeeds with given version using Linux" {
+      run . $SPT_SCRIPT -v v18.20.3
+
+      assert_line 'v18.20.3'
+
+      rm /tmp/node-v18.20.3-linux-x64.tar.xz
+  }
+#+end_src
+
+***** Using Windows
+#+name: Must print success message if installation succeeds with given version using Windows
+#+begin_src bats
+  @test "Must print success message if installation succeeds with given version using Windows" {
+      run . $SPT_SCRIPT -v v18.20.3
+
+      assert_line 'v18.20.3'
+
+      rm /tmp/node-v18.20.3-win-x64.zip
+  }
+#+end_src
+
+*** Must print error message, if remote installation file not found
+#+name: Must print error message if remote installation file not found
+#+begin_src bats
+  @test "Must print error message if remote installation file not found" {
+      run . $SPT_SCRIPT -v download_fail
+
+      assert_line 'Install version: download_fail'
+      assert_line -e 'Local installation file not found: /tmp/node-download_fail-.*\. Try, download new one'
+      assert_line 'ERROR: No remote installation file found. Abort'
+      refute_line 'v20.14.0'
+      refute_line 'v18.20.3'
+      assert_file_not_exists /tmp/node-download_fail-*
+      assert_file_not_exists /tmp/node-v20.14.0-*
+      assert_file_not_exists /tmp/node-v18.20.3-*
+  }
+#+end_src
+
+*** Should try download
+
+**** If local installation file not exists
+#+name: Should try download if local installation file not exists
+#+begin_src bats
+  @test "Should try download if local installation file not exists" {
+      run . $SPT_SCRIPT
+
+      assert_line -e 'Local installation file not found: /tmp/node-v20\.14\.0-.*\. Try, download new one'
+      assert_line 'Download installation file'
+
+      rm /tmp/node-v20.14.0-*
+  }
+#+end_src
+
+**** If remote installation file exists
+#+name: Should try download if remote installation file exists
+#+begin_src bats
+  @test "Should try download if remote installation file exists" {
+      run . $SPT_SCRIPT
+
+      assert_line 'Download installation file'
+
+      rm /tmp/node-v20.14.0-*
+   }
+#+end_src
+
+*** Should not try download, if local installation file exists
+
+**** Using Linux
+#+name: Should not try download if local installation file exists using Linux
+#+begin_src bats
+  @test "Should not try download if local installation file exists using Linux" {
+      touch /tmp/node-v20.14.0-linux-x64.tar.xz
+
+      run . $SPT_SCRIPT
+
+      refute_line 'Local installation file not found: /tmp/node-v20.14.0-linux-x64.tar.xz. Try, download new one'
+      refute_line 'Download installation file'
+
+      rm /tmp/node-v20.14.0-linux-x64.tar.xz
+  }
+#+end_src
+
+**** Using Windows
+#+name: Should not try download if local installation file exists using Windows
+#+begin_src bats
+  @test "Should not try download if local installation file exists using Windows" {
+      touch /tmp/node-v20.14.0-win-x64.zip
+
+      run . $SPT_SCRIPT
+
+      refute_line 'Local installation file not found: /tmp/node-v20.14.0-win-x64.zip. Try, download new one'
+      refute_line 'Download installation file'
+
+      rm /tmp/node-v20.14.0-win-x64.zip
   }
 #+end_src

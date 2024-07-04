@@ -35,34 +35,14 @@ teardown() {
 
     rm /tmp/installation.file
 }
-
-@test "Exported variables must be set if succeeds with default version" {
-    . $SPT_SCRIPT
-
-    assert_equal "$PATH" "$HOME/opt/tmpl-tmpl_default-version:$SPT_ORIGINAL_PATH"
-
-    rm /tmp/installation.file
-}
-@test "Exported variables must be set if succeeds with given version" {
+@test "Environment must be clean after execution if succeeds with given version" {
     . $SPT_SCRIPT -v some_other-version
 
-    assert_equal "$PATH" "$HOME/opt/tmpl-some_other-version:$SPT_ORIGINAL_PATH"
+    assert_equal $OPTIND 1
+    assert [ -z $INSTALLATION_BASE_DIR ]
+    assert [ -z $VERSION ]
 
     rm /tmp/installation.file
-}
-
-@test "Must print success message" {
-    run . $SPT_SCRIPT
-
-    assert_line 'TMPL successfully installed'
-
-    rm /tmp/installation.file
-}
-@test "Must print error message if remote installation file not found" {
-    run . $SPT_SCRIPT -v download_fail
-
-    assert_line "ERROR: No remote installation file found. Abort"
-    assert_file_not_exists  /tmp/installation.file
 }
 @test "Environment must be clean after execution if installation fails" {
     . $SPT_SCRIPT -v installation_fail
@@ -73,51 +53,65 @@ teardown() {
 
     rm /tmp/installation.file
 }
-@test "Exported variables must not be set if installation fails" {
+@test "Should only print success message if version is already installed" {
+    run . $SPT_SCRIPT -v installed
+
+    refute_line -p 'Adding $HOME/opt/'
+    refute_line -p 'Install version: '
+    assert_line 'TMPL successfully installed'
+
+    assert_file_not_exists /tmp/installation.file
+}
+@test "Should not alter environment if installation fails" {
     . $SPT_SCRIPT -v installation_fail
 
     assert_equal "$PATH" "$SPT_ORIGINAL_PATH"
 
     rm /tmp/installation.file
 }
+@test "Must print error message if remote installation file not found" {
+    run . $SPT_SCRIPT -v download_fail
 
+    assert_line 'Install version: download_fail'
+    assert_line 'Local installation file not found: /tmp/installation.file. Try, download new one'
+    assert_line 'ERROR: No remote installation file found. Abort'
+    # TODO: Should not be shown in real scripts
+    # refute_line 'TMPL successfully installed'
+
+    assert_file_not_exists /tmp/installation.file
+}
 @test "Should try download if local installation file not exists" {
     run . $SPT_SCRIPT
 
-    assert_line "Local installation file not found: /tmp/installation.file. Try, download new one"
-    assert_line "Download installation file"
+    assert_line 'Local installation file not found: /tmp/installation.file. Try, download new one'
+    assert_line 'Download installation file'
 
     rm /tmp/installation.file
 }
-@test "Should not try download if local installation file exists" {
-    touch /tmp/installation.file
-
+@test "Should try download if remote installation file exists" {
     run . $SPT_SCRIPT
 
-    refute_line "Local installation file not found: /tmp/installation.file. Try, download new one"
+    assert_line 'Download installation file'
 
     rm /tmp/installation.file
 }
-@test "Should try download if remote installation file found" {
-    run . $SPT_SCRIPT
 
-    assert_line "Download installation file"
+# OS specific
+@test "Should export variables if succeeds with default version" {
+    . $SPT_SCRIPT
+
+    assert_equal "$PATH" "$HOME/opt/tmpl-tmpl_default-version:$SPT_ORIGINAL_PATH"
 
     rm /tmp/installation.file
- }
-
-
-
-@test "Should only output success message if version is already installed" {
-    run . $SPT_SCRIPT -v installed
-
-    refute_line "Adding $HOME/opt/tmpl-tmpl_default-version to PATH"
-    refute_line "Install version: tmpl_default-version"
-    assert_line "TMPL successfully installed"
-
-    assert_file_not_exists  /tmp/installation.file
 }
-@test "Should not set variables if version is already installed" {
+@test "Should export variables if succeeds with given version" {
+    . $SPT_SCRIPT -v some_other-version
+
+    assert_equal "$PATH" "$HOME/opt/tmpl-some_other-version:$SPT_ORIGINAL_PATH"
+
+    rm /tmp/installation.file
+}
+@test "Should not alter environment if version is already installed" {
     PATH="/some/new/path:$SPT_ORIGINAL_PATH"
 
     . $SPT_SCRIPT -v installed
@@ -126,5 +120,22 @@ teardown() {
     assert [ -z $INSTALLATION_BASE_DIR ]
     assert [ -z $VERSION ]
     assert_equal "$PATH" "/some/new/path:$SPT_ORIGINAL_PATH"
-    assert_file_not_exists  /tmp/installation.file
+    assert_file_not_exists /tmp/installation.file
+}
+@test "Must print success message if installation succeeds" {
+    run . $SPT_SCRIPT
+
+    assert_line 'TMPL successfully installed'
+
+    rm /tmp/installation.file
+}
+@test "Should not try download if local installation file exists" {
+    touch /tmp/installation.file
+
+    run . $SPT_SCRIPT
+
+    refute_line 'Local installation file not found: /tmp/installation.file. Try, download new one'
+    refute_line 'Download installation file'
+
+    rm /tmp/installation.file
 }
