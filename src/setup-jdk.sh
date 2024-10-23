@@ -95,7 +95,7 @@ short_version() {
     local major_version=$(major_version)
 
     if [ $major_version -gt 8 ]; then
-	echo $VERSION | sed -ne 's/\+/_/gp'
+	echo $VERSION | tr '+' '_'
     else
 	echo $VERSION | tr -d '-'
     fi
