@@ -192,7 +192,7 @@ install() {
     echo "Install version: $VERSION"
 
     if ! local_installation_file_exists; then
-	echo "Local installation file not found: $(installation_file). Try, download new one"
+	echo "Local installation file not found: $(local_installation_file). Try, download new one"
 	if remote_installation_file_exists; then
 	    download_installation_file
 	else
