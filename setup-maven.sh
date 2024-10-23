@@ -3,7 +3,7 @@
 lib_dir=$(dirname ${BASH_SOURCE})
 test $JAVA_HOME || . $lib_dir/setup-java.sh
 
-version=3.6.3
+version=3.9.8
 
 while getopts v:j: opt; do
     case $opt in
@@ -21,7 +21,7 @@ if [ ! -d $M2_HOME ]; then
     install_file="/tmp/apache-maven-$version-bin.tar.gz"
 
     if [ ! -f $install_file ]; then
-	url=http://ftp.halifax.rwth-aachen.de/apache/maven/maven-3/$version/binaries/apache-maven-$version-bin.tar.gz
+	url=https://dlcdn.apache.org/maven/maven-3/$version/binaries/apache-maven-$version-bin.tar.gz
 	curl $url -o $install_file
     fi
     tar zxf $install_file -C "$HOME/opt"
