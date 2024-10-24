@@ -43,7 +43,7 @@ teardown() {
 @test "Must print success message if installation succeeds with default version using Windows" {
     run . $SPT_SCRIPT
 
-    assert_line v20.14.0'
+    assert_line 'v20.14.0'
 
     rm /tmp/node-v20.14.0-win-x64.zip
 }
