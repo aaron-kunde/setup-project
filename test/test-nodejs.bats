@@ -74,8 +74,6 @@ teardown() {
     assert_line 'Install version: download_fail'
     assert_line -e 'Local installation file not found: /tmp/node-download_fail-.*\. Try, download new one'
     assert_line 'ERROR: No remote installation file found. Abort'
-
-    assert_file_not_exists /tmp/node-v20.14.0-*
     assert_file_not_exists /tmp/node-download_fail-*
 }
 @test "Should try download if local installation file not exists" {

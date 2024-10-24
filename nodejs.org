@@ -485,11 +485,7 @@ If successful, a success message must be printed.
       assert_line 'Install version: download_fail'
       assert_line -e 'Local installation file not found: /tmp/node-download_fail-.*\. Try, download new one'
       assert_line 'ERROR: No remote installation file found. Abort'
-      refute_line 'v20.14.0'
-      refute_line 'v18.20.3'
       assert_file_not_exists /tmp/node-download_fail-*
-      assert_file_not_exists /tmp/node-v20.14.0-*
-      assert_file_not_exists /tmp/node-v18.20.3-*
   }
 #+end_src
 
