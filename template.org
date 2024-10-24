@@ -160,7 +160,7 @@ The ~PATH~ variable and every other global variable, which is exported by the sc
 #+name: export_vars
 #+begin_src shell
   export_vars() {
-      echo "Adding $(installation_path) to PATH"
+      echo "Add $(installation_path) to PATH"
       SETUP_TMPL_ORIGINAL_PATH="${PATH}"
 
       export PATH="$(installation_path):${PATH}"
@@ -370,8 +370,8 @@ To clean up, the exported variables are reset to its saved values after each tes
 
 ** Test cases
 
-*** Must print versions to install
-
+*** Must print version and path to install
+If wanted version is not the current, print the version to be installed and the path to be added.
 **** With default version
 #+name: Must print versions to install with default version
 #+begin_src bats
@@ -379,6 +379,7 @@ To clean up, the exported variables are reset to its saved values after each tes
       run . $SPT_SCRIPT
 
       assert_line 'Install version: tmpl_default-version'
+      assert_line "Add $HOME/opt/tmpl-tmpl_default-version to PATH"
 
       rm /tmp/installation.file
   }
@@ -391,6 +392,7 @@ To clean up, the exported variables are reset to its saved values after each tes
       run . $SPT_SCRIPT -v some_other-version
 
       assert_line 'Install version: some_other-version'
+      assert_line "Add $HOME/opt/tmpl-some_other-version to PATH"
 
       rm /tmp/installation.file
   }
@@ -479,7 +481,7 @@ If the given (or default) version is already installed, only a success message s
   @test "Should only print success message if version is already installed" {
       run . $SPT_SCRIPT -v installed
 
-      refute_line -p 'Adding $HOME/opt/'
+      refute_line -p "Add $HOME/opt/"
       refute_line -p 'Install version: '
       assert_line 'TMPL successfully installed'
 

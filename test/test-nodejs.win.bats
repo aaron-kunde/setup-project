@@ -12,6 +12,22 @@ teardown() {
     PATH="$SPT_ORIGINAL_PATH"
 }
 
+@test "Must print versions to install with default version using Windows" {
+    run . $SPT_SCRIPT
+
+    assert_line 'Install version: v20.14.0'
+    assert_line "Add $HOME/opt/node-v20.14.0-win-x64 to PATH"
+
+    rm /tmp/node-v20.14.0-*
+}
+@test "Must print versions to install with given version using Windows" {
+    run .  $SPT_SCRIPT -v v18.20.3
+
+    assert_line 'Install version: v18.20.3'
+    assert_line "Add $HOME/opt/node-v18.20.3-win-x64 to PATH"
+
+    rm /tmp/node-v18.20.3-*
+}
 @test "Should export variables if succeeds with default version using Windows" {
     . $SPT_SCRIPT
 
