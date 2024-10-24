@@ -144,7 +144,7 @@ Execute OS independent tests:
 #+begin_src shell
   test/bats/bin/bats -t test/test-nodejs.bats
 #+end_src
-#+begin_src bats :tangle test/test-nodejs.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
+#+begin_src bats :tangle test/test-nodejs.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :tangle-mode '#o644 :exports none
   SPT_SCRIPT=src/setup-nodejs.sh
 
   <<setup>>
@@ -164,7 +164,7 @@ Execute tests specific for Linux:
 #+begin_src shell
   test/bats/bin/bats -t test/test-nodejs.linux.bats
 #+end_src
-#+begin_src bats :tangle test/test-nodejs.linux.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
+#+begin_src bats :tangle test/test-nodejs.linux.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :tangle-mode '#o644 :exports none
   SPT_SCRIPT=src/setup-nodejs.sh
 
   <<setup>>
@@ -184,7 +184,7 @@ Execute tests specific for Windows:
 #+begin_src shell
   test/bats/bin/bats -t test/test-nodejs.win.bats
 #+end_src
-#+begin_src bats :tangle test/test-nodejs.win.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :exports none
+#+begin_src bats :tangle test/test-nodejs.win.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :tangle-mode '#o644 :exports none
   SPT_SCRIPT=src/setup-nodejs.sh
 
   <<setup>>
