@@ -108,7 +108,7 @@ install_installation_file() {
 
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    unzip -q $(local_installation_file_path) -d $trgt_dir
+	    unzip -oq $(local_installation_file_path) -d $trgt_dir
 	    ;;
 	*)
 	    tar Jxf $(local_installation_file_path) -C $INSTALLATION_BASE_DIR
