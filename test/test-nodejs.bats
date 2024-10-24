@@ -12,20 +12,6 @@ teardown() {
     PATH="$SPT_ORIGINAL_PATH"
 }
 
-@test "Must print versions to install with default version" {
-    run . $SPT_SCRIPT
-
-    assert_line 'Install version: v20.14.0'
-
-    rm /tmp/node-v20.14.0-*
-}
-@test "Must print versions to install with given version" {
-    run .  $SPT_SCRIPT -v v18.20.3
-
-    assert_line 'Install version: v18.20.3'
-
-    rm /tmp/node-v18.20.3-*
-}
 @test "Environment must be clean after execution if succeeds with default version" {
     . $SPT_SCRIPT
 
@@ -57,7 +43,7 @@ teardown() {
 
     run . $SPT_SCRIPT
 
-    refute_line -p 'Adding $HOME/opt/'
+    refute_line -p "Add $HOME/opt/"
     refute_line -p 'Install version: '
     assert_line 'v20.14.0'
 

@@ -16,6 +16,7 @@ teardown() {
     run . $SPT_SCRIPT
 
     assert_line 'Install version: tmpl_default-version'
+    assert_line "Add $HOME/opt/tmpl-tmpl_default-version to PATH"
 
     rm /tmp/installation.file
 }
@@ -23,6 +24,7 @@ teardown() {
     run . $SPT_SCRIPT -v some_other-version
 
     assert_line 'Install version: some_other-version'
+    assert_line "Add $HOME/opt/tmpl-some_other-version to PATH"
 
     rm /tmp/installation.file
 }
@@ -56,7 +58,7 @@ teardown() {
 @test "Should only print success message if version is already installed" {
     run . $SPT_SCRIPT -v installed
 
-    refute_line -p 'Adding $HOME/opt/'
+    refute_line -p "Add $HOME/opt/"
     refute_line -p 'Install version: '
     assert_line 'TMPL successfully installed'
 

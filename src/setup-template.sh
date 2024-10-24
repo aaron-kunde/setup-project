@@ -68,7 +68,7 @@ default_version() {
     echo tmpl_default-version
 }
 export_vars() {
-    echo "Adding $(installation_path) to PATH"
+    echo "Add $(installation_path) to PATH"
     SETUP_TMPL_ORIGINAL_PATH="${PATH}"
 
     export PATH="$(installation_path):${PATH}"

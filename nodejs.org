@@ -41,7 +41,7 @@ The ~PATH~ variable is exported. It must be saved and restored, if something goe
 #+name: export_vars
 #+begin_src shell
   export_vars() {
-      echo "Adding $(installation_path) to PATH"
+      echo "Add $(installation_path) to PATH"
       SETUP_NODEJS_ORIGINAL_PATH="${PATH}"
 
       export PATH="$(installation_path):${PATH}"
@@ -150,8 +150,6 @@ Execute OS independent tests:
   <<setup>>
   <<teardown>>
 
-  <<Must print versions to install with default version>>
-  <<Must print versions to install with given version>>
   <<Environment must be clean after execution if succeeds with default version>>
   <<Environment must be clean after execution if succeeds with given version>>
   <<Environment must be clean after execution if installation fails>>
@@ -172,6 +170,8 @@ Execute tests specific for Linux:
   <<setup>>
   <<teardown>>
 
+  <<Must print versions to install with default version using Linux>>
+  <<Must print versions to install with given version using Linux>>
   <<Should export variables if succeeds with default version using Linux>>
   <<Should export variables if succeeds with given version using Linux>>
   <<Should not alter environment if version is already installed using Linux>>
@@ -190,6 +190,8 @@ Execute tests specific for Windows:
   <<setup>>
   <<teardown>>
 
+  <<Must print versions to install with default version using Windows>>
+  <<Must print versions to install with given version using Windows>>
   <<Should export variables if succeeds with default version using Windows>>
   <<Should export variables if succeeds with given version using Windows>>
   <<Should not alter environment if version is already installed using Windows>>
@@ -225,27 +227,58 @@ To clean up, the exported variables are reset to its saved values after each tes
 
 ** Test cases
 
-*** Must print versions to install
-
+*** Must print version and path to install
+If wanted version is not the current, print the version to be installed and the path to be added.
 **** With default version
-#+name: Must print versions to install with default version
+***** Using Linux
+#+name: Must print versions to install with default version using Linux
 #+begin_src bats
-  @test "Must print versions to install with default version" {
+  @test "Must print versions to install with default version using Linux" {
       run . $SPT_SCRIPT
 
       assert_line 'Install version: v20.14.0'
+      assert_line "Add $HOME/opt/node-v20.14.0-linux-x64/bin to PATH"
+
+      rm /tmp/node-v20.14.0-*
+  }
+#+end_src
+
+***** Using Windows
+#+name: Must print versions to install with default version using Windows
+#+begin_src bats
+  @test "Must print versions to install with default version using Windows" {
+      run . $SPT_SCRIPT
+
+      assert_line 'Install version: v20.14.0'
+      assert_line "Add $HOME/opt/node-v20.14.0-win-x64 to PATH"
 
       rm /tmp/node-v20.14.0-*
   }
 #+end_src
 
 **** With given version
-#+name: Must print versions to install with given version
+
+***** Using Linux
+#+name: Must print versions to install with given version using Linux
 #+begin_src bats
-  @test "Must print versions to install with given version" {
+  @test "Must print versions to install with given version using Linux" {
       run .  $SPT_SCRIPT -v v18.20.3
 
       assert_line 'Install version: v18.20.3'
+      assert_line "Add $HOME/opt/node-v18.20.3-linux-x64/bin to PATH"
+
+      rm /tmp/node-v18.20.3-*
+  }
+#+end_src
+
+***** Using Windows
+#+name: Must print versions to install with given version using Windows
+#+begin_src bats
+  @test "Must print versions to install with given version using Windows" {
+      run .  $SPT_SCRIPT -v v18.20.3
+
+      assert_line 'Install version: v18.20.3'
+      assert_line "Add $HOME/opt/node-v18.20.3-win-x64 to PATH"
 
       rm /tmp/node-v18.20.3-*
   }
@@ -361,7 +394,7 @@ If the given (or default) version is already installed, only a success message s
 
       run . $SPT_SCRIPT
 
-      refute_line -p 'Adding $HOME/opt/'
+      refute_line -p "Add $HOME/opt/"
       refute_line -p 'Install version: '
       assert_line 'v20.14.0'
 
