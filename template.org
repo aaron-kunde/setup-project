@@ -113,7 +113,7 @@ Each script uses some global variables, like the version to install. These have 
 #+name: init_global_vars
 #+begin_src shell
   init_global_vars() {
-      VERSION=$(default_version)
+      __sp_version=$(default_version)
       INSTALLATION_BASE_DIR=$HOME/opt
       # Reset OPTIND, if getopts was used before
       OPTIND=1
@@ -124,7 +124,7 @@ The reset of global variables depends on the initialization. It is necessary to 
 #+name: reset_global_vars
 #+begin_src shell
   reset_global_vars() {
-      unset VERSION
+      unset __sp_version
       unset INSTALLATION_BASE_DIR
       # Reset OPTIND for future use of getopts
       OPTIND=1
@@ -147,7 +147,7 @@ To pass options (like the version to be installed) to the scripts /getopts/ is u
   set_vars_from_opts() {
       while getopts v: opt; do
 	  case $opt in
-	      v) VERSION=$OPTARG
+	      v) __sp_version=$OPTARG
 		 ;;
 	  esac
       done
@@ -184,7 +184,7 @@ Since the installation path might be different, depending on the target OS and t
 #+name: installation_path
 #+begin_src shell
   installation_path() {
-      echo $INSTALLATION_BASE_DIR/tmpl-$VERSION
+      echo $INSTALLATION_BASE_DIR/tmpl-$__sp_version
   }
 #+end_src
 
@@ -193,7 +193,7 @@ Before starting the installation, check if the wanted version is already install
 #+name: is_installed
 #+begin_src shell
   is_installed() {
-      case "$VERSION" in
+      case "$__sp_version" in
 	  installed) return 0
 	      ;;
 	  ,*) return 1
@@ -211,7 +211,7 @@ If the wanted version is not installed, start the installation. This includes th
 #+name: install
 #+begin_src shell
   install() {
-      echo "Install version: $VERSION"
+      echo "Install version: $__sp_version"
 
       if [ ! -f $(local_installation_file_path) ]; then
 	  echo "Local installation file not found: $(local_installation_file_path). Try, download new one"
@@ -250,7 +250,7 @@ The installation of the local installation file is specific to the software. For
 #+begin_src shell
   install_installation_file() {
       echo "Install installation file"
-	  case "$VERSION" in
+	  case "$__sp_version" in
 	  installation_fail) return 1
 	     ;;
 	  ,*) return 0
@@ -273,7 +273,7 @@ The download URL is specific to the software. For the template a dummy implement
 #+name: download_url
 #+begin_src shell
   download_url() {
-      case "$VERSION" in
+      case "$__sp_version" in
 	  download_fail) echo https://github.com/aaron-kunde/setup-project/blob/main/non-existing.file
 	     ;;
 	  ,*) echo https://github.com/aaron-kunde/setup-project/blob/main/README.org
@@ -409,7 +409,7 @@ After the script has run without a given version, the newly introduced global va
 
       assert_equal $OPTIND 1
       assert [ -z $INSTALLATION_BASE_DIR ]
-      assert [ -z $VERSION ]
+      assert [ -z $__sp_version ]
 
       rm /tmp/installation.file
   }
@@ -424,7 +424,7 @@ After the script has run with a given version, the newly introduced global varia
 
       assert_equal $OPTIND 1
       assert [ -z $INSTALLATION_BASE_DIR ]
-      assert [ -z $VERSION ]
+      assert [ -z $__sp_version ]
 
       rm /tmp/installation.file
   }
@@ -439,7 +439,7 @@ After the script failed, the newly introduced global variables shall not be set 
 
       assert_equal $OPTIND 1
       assert [ -z $INSTALLATION_BASE_DIR ]
-      assert [ -z $VERSION ]
+      assert [ -z $__sp_version ]
 
       rm /tmp/installation.file
   }
@@ -500,7 +500,7 @@ If the given (or default) version is already installed, the environment should n
 
       assert_equal $OPTIND 1
       assert [ -z $INSTALLATION_BASE_DIR ]
-      assert [ -z $VERSION ]
+      assert [ -z $__sp_version ]
       assert_equal "$PATH" "/some/new/path:$SPT_ORIGINAL_PATH"
       assert_file_not_exists /tmp/installation.file
   }

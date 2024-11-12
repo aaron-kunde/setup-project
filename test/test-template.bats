@@ -33,7 +33,7 @@ teardown() {
 
     assert_equal $OPTIND 1
     assert [ -z $INSTALLATION_BASE_DIR ]
-    assert [ -z $VERSION ]
+    assert [ -z $__sp_version ]
 
     rm /tmp/installation.file
 }
@@ -42,7 +42,7 @@ teardown() {
 
     assert_equal $OPTIND 1
     assert [ -z $INSTALLATION_BASE_DIR ]
-    assert [ -z $VERSION ]
+    assert [ -z $__sp_version ]
 
     rm /tmp/installation.file
 }
@@ -51,7 +51,7 @@ teardown() {
 
     assert_equal $OPTIND 1
     assert [ -z $INSTALLATION_BASE_DIR ]
-    assert [ -z $VERSION ]
+    assert [ -z $__sp_version ]
 
     rm /tmp/installation.file
 }
@@ -120,7 +120,7 @@ teardown() {
 
     assert_equal $OPTIND 1
     assert [ -z $INSTALLATION_BASE_DIR ]
-    assert [ -z $VERSION ]
+    assert [ -z $__sp_version ]
     assert_equal "$PATH" "/some/new/path:$SPT_ORIGINAL_PATH"
     assert_file_not_exists /tmp/installation.file
 }

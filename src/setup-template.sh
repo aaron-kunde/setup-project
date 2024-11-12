@@ -1,12 +1,12 @@
 #!/bin/sh
 init_global_vars() {
-    VERSION=$(default_version)
+    __sp_version=$(default_version)
     INSTALLATION_BASE_DIR=$HOME/opt
     # Reset OPTIND, if getopts was used before
     OPTIND=1
 }
 reset_global_vars() {
-    unset VERSION
+    unset __sp_version
     unset INSTALLATION_BASE_DIR
     # Reset OPTIND for future use of getopts
     OPTIND=1
@@ -14,7 +14,7 @@ reset_global_vars() {
 set_vars_from_opts() {
     while getopts v: opt; do
 	case $opt in
-	    v) VERSION=$OPTARG
+	    v) __sp_version=$OPTARG
 	       ;;
 	esac
     done
@@ -36,7 +36,7 @@ download_installation_file() {
     curl $(download_url) -o $(local_installation_file_path)
 }
 install() {
-    echo "Install version: $VERSION"
+    echo "Install version: $__sp_version"
 
     if [ ! -f $(local_installation_file_path) ]; then
 	echo "Local installation file not found: $(local_installation_file_path). Try, download new one"
@@ -80,10 +80,10 @@ restore_exported_vars() {
     fi
 }
 installation_path() {
-    echo $INSTALLATION_BASE_DIR/tmpl-$VERSION
+    echo $INSTALLATION_BASE_DIR/tmpl-$__sp_version
 }
 is_installed() {
-    case "$VERSION" in
+    case "$__sp_version" in
 	installed) return 0
 	    ;;
 	*) return 1
@@ -95,7 +95,7 @@ installation_file() {
 }
 install_installation_file() {
     echo "Install installation file"
-	case "$VERSION" in
+	case "$__sp_version" in
 	installation_fail) return 1
 	   ;;
 	*) return 0
@@ -103,7 +103,7 @@ install_installation_file() {
     esac
 }
 download_url() {
-    case "$VERSION" in
+    case "$__sp_version" in
 	download_fail) echo https://github.com/aaron-kunde/setup-project/blob/main/non-existing.file
 	   ;;
 	*) echo https://github.com/aaron-kunde/setup-project/blob/main/README.org
