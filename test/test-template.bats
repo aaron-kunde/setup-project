@@ -32,7 +32,7 @@ teardown() {
     . $SPT_SCRIPT
 
     assert_equal $OPTIND 1
-    assert [ -z $INSTALLATION_BASE_DIR ]
+    assert [ -z $__sp_installation_base_dir ]
     assert [ -z $__sp_version ]
 
     rm /tmp/installation.file
@@ -41,7 +41,7 @@ teardown() {
     . $SPT_SCRIPT -v some_other-version
 
     assert_equal $OPTIND 1
-    assert [ -z $INSTALLATION_BASE_DIR ]
+    assert [ -z $__sp_installation_base_dir ]
     assert [ -z $__sp_version ]
 
     rm /tmp/installation.file
@@ -50,7 +50,7 @@ teardown() {
     . $SPT_SCRIPT -v installation_fail
 
     assert_equal $OPTIND 1
-    assert [ -z $INSTALLATION_BASE_DIR ]
+    assert [ -z $__sp_installation_base_dir ]
     assert [ -z $__sp_version ]
 
     rm /tmp/installation.file
@@ -119,7 +119,7 @@ teardown() {
     . $SPT_SCRIPT -v installed
 
     assert_equal $OPTIND 1
-    assert [ -z $INSTALLATION_BASE_DIR ]
+    assert [ -z $__sp_installation_base_dir ]
     assert [ -z $__sp_version ]
     assert_equal "$PATH" "/some/new/path:$SPT_ORIGINAL_PATH"
     assert_file_not_exists /tmp/installation.file

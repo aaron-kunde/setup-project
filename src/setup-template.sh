@@ -1,13 +1,13 @@
 #!/bin/sh
 init_global_vars() {
     __sp_version=$(default_version)
-    INSTALLATION_BASE_DIR=$HOME/opt
+    __sp_installation_base_dir=$HOME/opt
     # Reset OPTIND, if getopts was used before
     OPTIND=1
 }
 reset_global_vars() {
     unset __sp_version
-    unset INSTALLATION_BASE_DIR
+    unset __sp_installation_base_dir
     # Reset OPTIND for future use of getopts
     OPTIND=1
 }
@@ -80,7 +80,7 @@ restore_exported_vars() {
     fi
 }
 installation_path() {
-    echo $INSTALLATION_BASE_DIR/tmpl-$__sp_version
+    echo $__sp_installation_base_dir/tmpl-$__sp_version
 }
 is_installed() {
     case "$__sp_version" in
