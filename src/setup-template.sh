@@ -49,7 +49,7 @@ install() {
     fi
     install_installation_file
  }
-main() {
+__sp_main() {
     init_global_vars
     set_vars_from_opts ${@}
 
@@ -114,4 +114,4 @@ print_success_message() {
     echo "TMPL successfully installed"
 }
 
-main ${@}
+__sp_main ${@}
