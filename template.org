@@ -65,7 +65,7 @@ In general, the execution of all scripts follows these common steps:
 If something goes wrong, abort. This means, restore the PATH and other global variables:
 #+name: main
 #+begin_src shell
-  main() {
+  __sp_main() {
       init_global_vars
       set_vars_from_opts ${@}
 
@@ -105,7 +105,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
   <<download_url>>
   <<print_success_message>>
 
-  main ${@}
+  __sp_main ${@}
 #+end_src
 
 ** Global variables
