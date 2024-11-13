@@ -30,7 +30,7 @@ __sp_local_installation_file_path() {
 __sp_remote_installation_file_exists() {
     curl -sIf $(download_url) >/dev/null
 }
-download_installation_file() {
+__sp_download_installation_file() {
     echo "Download installation file"
     curl $(download_url) -o $(__sp_local_installation_file_path)
 }
@@ -40,7 +40,7 @@ __sp_install() {
     if [ ! -f $(__sp_local_installation_file_path) ]; then
 	echo "Local installation file not found: $(__sp_local_installation_file_path). Try, download new one"
 	if __sp_remote_installation_file_exists; then
-	    download_installation_file
+	    __sp_download_installation_file
 	else
 	    echo "ERROR: No remote installation file found. Abort"
 	    __sp_abort

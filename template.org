@@ -215,7 +215,7 @@ If the wanted version is not installed, start the installation. This includes th
       if [ ! -f $(__sp_local_installation_file_path) ]; then
 	  echo "Local installation file not found: $(__sp_local_installation_file_path). Try, download new one"
 	  if __sp_remote_installation_file_exists; then
-	      download_installation_file
+	      __sp_download_installation_file
 	  else
 	      echo "ERROR: No remote installation file found. Abort"
 	      __sp_abort
@@ -285,7 +285,7 @@ The download URL is specific to the software. For the template a dummy implement
 If a remote installation file was found, download it:
 #+name: download_installation_file
 #+begin_src shell
-  download_installation_file() {
+  __sp_download_installation_file() {
       echo "Download installation file"
       curl $(download_url) -o $(__sp_local_installation_file_path)
   }
