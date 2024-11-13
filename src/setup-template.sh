@@ -55,7 +55,7 @@ __sp_main() {
     if ! __sp_is_installed; then
 	echo "Start installation"
 	__sp_restore_exported_vars
-	export_vars
+	__sp_export_vars
 	install || abort
     fi
 
@@ -66,7 +66,7 @@ __sp_main() {
 default_version() {
     echo tmpl_default-version
 }
-export_vars() {
+__sp_export_vars() {
     echo "Add $(installation_path) to PATH"
     __SP_TMPL_ORIGINAL_PATH="${PATH}"
 

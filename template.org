@@ -72,7 +72,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
       if ! __sp_is_installed; then
 	  echo "Start installation"
 	  __sp_restore_exported_vars
-	  export_vars
+	  __sp_export_vars
 	  install || abort
       fi
 
@@ -158,7 +158,7 @@ At least the version needs to be set, but other scripts might need additional op
 The ~PATH~ variable and every other global variable, which is exported by the scripts might exist before the script is run and therefore must be saved and restored, if something goes wrong. In the following example, the ~PATH~ is saved before the new one is exported:
 #+name: export_vars
 #+begin_src shell
-  export_vars() {
+  __sp_export_vars() {
       echo "Add $(installation_path) to PATH"
       __SP_TMPL_ORIGINAL_PATH="${PATH}"
 
