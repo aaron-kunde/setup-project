@@ -5,7 +5,7 @@ __sp_init_global_vars() {
     # Reset OPTIND, if getopts was used before
     OPTIND=1
 }
-reset_global_vars() {
+__sp_reset_custom_vars_and_funcs() {
     unset $(declare | grep '^__sp_' | tr '=' ' ' | cut -f1 -d ' ')
     # Reset OPTIND for future use of getopts
     OPTIND=1
@@ -20,7 +20,7 @@ __sp_set_vars_from_opts() {
 }
 __sp_abort() {
     __sp_restore_exported_vars
-    reset_global_vars
+    __sp_reset_custom_vars_and_funcs
 
     return 0
 }
@@ -59,7 +59,7 @@ __sp_main() {
 	__sp_install || __sp_abort
     fi
 
-    reset_global_vars
+    __sp_reset_custom_vars_and_funcs
     print_success_message
 }
 
