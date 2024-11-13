@@ -159,10 +159,10 @@ The ~PATH~ variable and every other global variable, which is exported by the sc
 #+name: export_vars
 #+begin_src shell
   __sp_export_vars() {
-      echo "Add $(installation_path) to PATH"
+      echo "Add $(__sp_installation_path) to PATH"
       __SP_TMPL_ORIGINAL_PATH="${PATH}"
 
-      export PATH="$(installation_path):${PATH}"
+      export PATH="$(__sp_installation_path):${PATH}"
   }
 #+end_src
 *NOTE*: It is important to have an unique name for the backup variables!
@@ -182,7 +182,7 @@ The corresponding reset function restores the ~PATH~ and deletes the backup, to 
 Since the installation path might be different, depending on the target OS and the software, it is declared as a function, which can be overridden:
 #+name: installation_path
 #+begin_src shell
-  installation_path() {
+  __sp_installation_path() {
       echo $__sp_installation_base_dir/tmpl-$__sp_version
   }
 #+end_src

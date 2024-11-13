@@ -67,10 +67,10 @@ __sp_default_version() {
     echo tmpl_default-version
 }
 __sp_export_vars() {
-    echo "Add $(installation_path) to PATH"
+    echo "Add $(__sp_installation_path) to PATH"
     __SP_TMPL_ORIGINAL_PATH="${PATH}"
 
-    export PATH="$(installation_path):${PATH}"
+    export PATH="$(__sp_installation_path):${PATH}"
 }
 __sp_restore_exported_vars() {
     if [ -v __SP_TMPL_ORIGINAL_PATH ]; then
@@ -78,7 +78,7 @@ __sp_restore_exported_vars() {
 	unset __SP_TMPL_ORIGINAL_PATH
     fi
 }
-installation_path() {
+__sp_installation_path() {
     echo $__sp_installation_base_dir/tmpl-$__sp_version
 }
 __sp_is_installed() {
