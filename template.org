@@ -229,7 +229,7 @@ If the wanted version is not installed, start the installation. This includes th
 The name of the installation file is specific to the software, its version and the target OS. Therefore a specific implementation is needed. For the template a dummy is used:
 #+name: installation_file
 #+begin_src shell
-  installation_file() {
+  __sp_installation_file() {
       echo installation.file
   }
 #+end_src
@@ -239,7 +239,7 @@ The path to the local installation file. The default location is in the ~/tmp/~ 
 #+name: local_installation_file_path
 #+begin_src shell
   __sp_local_installation_file_path() {
-      echo /tmp/$(installation_file)
+      echo /tmp/$(__sp_installation_file)
   }
 #+end_src
 
