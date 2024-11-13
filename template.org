@@ -73,7 +73,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
 	  echo "Start installation"
 	  __sp_restore_exported_vars
 	  __sp_export_vars
-	  install || abort
+	  __sp_install || abort
       fi
 
       reset_global_vars
@@ -209,7 +209,7 @@ If the wanted version is not installed, start the installation. This includes th
 2. Install version with this installation file.
 #+name: install
 #+begin_src shell
-  install() {
+  __sp_install() {
       echo "Install version: $__sp_version"
 
       if [ ! -f $(local_installation_file_path) ]; then
