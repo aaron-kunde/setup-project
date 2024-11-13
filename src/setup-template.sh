@@ -28,11 +28,11 @@ __sp_local_installation_file_path() {
     echo /tmp/$(__sp_installation_file)
 }
 __sp_remote_installation_file_exists() {
-    curl -sIf $(download_url) >/dev/null
+    curl -sIf $(__sp_download_url) >/dev/null
 }
 __sp_download_installation_file() {
     echo "Download installation file"
-    curl $(download_url) -o $(__sp_local_installation_file_path)
+    curl $(__sp_download_url) -o $(__sp_local_installation_file_path)
 }
 __sp_install() {
     echo "Install version: $__sp_version"
@@ -101,7 +101,7 @@ __sp_install_installation_file() {
 	   ;;
     esac
 }
-download_url() {
+__sp_download_url() {
     case "$__sp_version" in
 	download_fail) echo https://github.com/aaron-kunde/setup-project/blob/main/non-existing.file
 	   ;;
