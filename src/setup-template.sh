@@ -60,7 +60,7 @@ __sp_main() {
     fi
 
     __sp_reset_custom_vars_and_funcs
-    print_success_message
+    __sp_print_success_message
 }
 
 default_version() {
@@ -109,7 +109,7 @@ download_url() {
 	   ;;
     esac
 }
-print_success_message() {
+__sp_print_success_message() {
     echo "TMPL successfully installed"
 }
 
