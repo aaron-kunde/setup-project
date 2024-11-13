@@ -19,7 +19,7 @@ __sp_set_vars_from_opts() {
     done
 }
 abort() {
-    restore_exported_vars
+    __sp_restore_exported_vars
     reset_global_vars
 
     return 0
@@ -54,7 +54,7 @@ __sp_main() {
 
     if ! __sp_is_installed; then
 	echo "Start installation"
-	restore_exported_vars
+	__sp_restore_exported_vars
 	export_vars
 	install || abort
     fi
@@ -72,7 +72,7 @@ export_vars() {
 
     export PATH="$(installation_path):${PATH}"
 }
-restore_exported_vars() {
+__sp_restore_exported_vars() {
     if [ -v __SP_TMPL_ORIGINAL_PATH ]; then
 	export PATH="${__SP_TMPL_ORIGINAL_PATH}"
 	unset __SP_TMPL_ORIGINAL_PATH
