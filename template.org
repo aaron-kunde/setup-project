@@ -354,7 +354,7 @@ Furthermore, the exported variables are backed up. In this case at least the ~PA
     load 'test_helper/bats-assert/load'
     load 'test_helper/bats-file/load'
 
-    SPT_ORIGINAL_PATH="$PATH"
+    __SP_TEST_ORIGINAL_PATH="$PATH"
   }
 #+end_src
 
@@ -362,7 +362,7 @@ To clean up, the exported variables are reset to its saved values after each tes
 #+name: teardown
 #+begin_src bats
   teardown() {
-      PATH="$SPT_ORIGINAL_PATH"
+      PATH="$__SP_TEST_ORIGINAL_PATH"
 
       # Assert, no custom variable or function is set
       declare | grep -e '^__sp_'
@@ -451,7 +451,7 @@ The exported ~$PATH~ must be extended with the wanted version.
   @test "Should export variables if succeeds with default version" {
       . $__SP_TESTEE
 
-      assert_equal "$PATH" "$HOME/opt/tmpl-tmpl_default-version:$SPT_ORIGINAL_PATH"
+      assert_equal "$PATH" "$HOME/opt/tmpl-tmpl_default-version:$__SP_TEST_ORIGINAL_PATH"
 
       rm /tmp/installation.file
   }
@@ -464,7 +464,7 @@ The exported ~$PATH~ must be extended with the wanted version.
   @test "Should export variables if succeeds with given version" {
       . $__SP_TESTEE -v some_other-version
 
-      assert_equal "$PATH" "$HOME/opt/tmpl-some_other-version:$SPT_ORIGINAL_PATH"
+      assert_equal "$PATH" "$HOME/opt/tmpl-some_other-version:$__SP_TEST_ORIGINAL_PATH"
 
       rm /tmp/installation.file
   }
@@ -490,12 +490,12 @@ If the given (or default) version is already installed, the environment should n
 #+name: Should not alter environment if version is already installed
 #+begin_src bats
   @test "Should not alter environment if version is already installed" {
-      PATH="/some/new/path:$SPT_ORIGINAL_PATH"
+      PATH="/some/new/path:$__SP_TEST_ORIGINAL_PATH"
 
       . $__SP_TESTEE -v installed
 
       assert_equal $OPTIND 1
-      assert_equal "$PATH" "/some/new/path:$SPT_ORIGINAL_PATH"
+      assert_equal "$PATH" "/some/new/path:$__SP_TEST_ORIGINAL_PATH"
       assert_file_not_exists /tmp/installation.file
   }
 #+end_src
@@ -507,7 +507,7 @@ After the script failed, the exported ~$PATH~ must not be altered:
   @test "Should not alter environment if installation fails" {
       . $__SP_TESTEE -v installation_fail
 
-      assert_equal "$PATH" "$SPT_ORIGINAL_PATH"
+      assert_equal "$PATH" "$__SP_TEST_ORIGINAL_PATH"
 
       rm /tmp/installation.file
   }
