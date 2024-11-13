@@ -66,7 +66,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
 #+name: main
 #+begin_src shell
   __sp_main() {
-      init_global_vars
+      __sp_init_global_vars
       set_vars_from_opts ${@}
 
       if ! is_installed; then
@@ -112,7 +112,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
 Each script uses some custom global variables, like the version to install. These have to be initialized for each run of the script. The initialization of this variables might be the same for all scripts. The only exception is the definition of the [[Default version][default version]], which is described later:
 #+name: init_global_vars
 #+begin_src shell
-  init_global_vars() {
+  __sp_init_global_vars() {
       __sp_version=$(default_version)
       __sp_installation_base_dir=$HOME/opt
       # Reset OPTIND, if getopts was used before

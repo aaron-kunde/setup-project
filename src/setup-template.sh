@@ -1,5 +1,5 @@
 #!/bin/sh
-init_global_vars() {
+__sp_init_global_vars() {
     __sp_version=$(default_version)
     __sp_installation_base_dir=$HOME/opt
     # Reset OPTIND, if getopts was used before
@@ -49,7 +49,7 @@ install() {
     install_installation_file
  }
 __sp_main() {
-    init_global_vars
+    __sp_init_global_vars
     set_vars_from_opts ${@}
 
     if ! is_installed; then
