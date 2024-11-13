@@ -18,7 +18,7 @@ __sp_set_vars_from_opts() {
 	esac
     done
 }
-abort() {
+__sp_abort() {
     __sp_restore_exported_vars
     reset_global_vars
 
@@ -43,7 +43,7 @@ __sp_install() {
 	    download_installation_file
 	else
 	    echo "ERROR: No remote installation file found. Abort"
-	    abort
+	    __sp_abort
 	fi
     fi
     install_installation_file
@@ -56,7 +56,7 @@ __sp_main() {
 	echo "Start installation"
 	__sp_restore_exported_vars
 	__sp_export_vars
-	__sp_install || abort
+	__sp_install || __sp_abort
     fi
 
     reset_global_vars
