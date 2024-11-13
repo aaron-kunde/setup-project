@@ -113,7 +113,7 @@ Each script uses some custom global variables, like the version to install. Thes
 #+name: init_global_vars
 #+begin_src shell
   __sp_init_global_vars() {
-      __sp_version=$(default_version)
+      __sp_version=$(__sp_default_version)
       __sp_installation_base_dir=$HOME/opt
       # Reset OPTIND, if getopts was used before
       OPTIND=1
@@ -134,7 +134,7 @@ Reset all global custom variables and functions. It is necessary to clean up, af
 Since the strings for version (and therefore default version) are specific to the software, at least the function retrieving the default version has to be adapted in the particular scripts:
 #+name: default_version
 #+begin_src shell
-  default_version() {
+  __sp_default_version() {
       echo tmpl_default-version
   }
 #+end_src
