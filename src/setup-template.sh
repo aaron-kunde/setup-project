@@ -1,6 +1,6 @@
 #!/bin/sh
 __sp_init_global_vars() {
-    __sp_version=$(default_version)
+    __sp_version=$(__sp_default_version)
     __sp_installation_base_dir=$HOME/opt
     # Reset OPTIND, if getopts was used before
     OPTIND=1
@@ -63,7 +63,7 @@ __sp_main() {
     __sp_print_success_message
 }
 
-default_version() {
+__sp_default_version() {
     echo tmpl_default-version
 }
 __sp_export_vars() {
