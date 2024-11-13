@@ -6,8 +6,7 @@ init_global_vars() {
     OPTIND=1
 }
 reset_global_vars() {
-    unset __sp_version
-    unset __sp_installation_base_dir
+    unset $(declare | grep '^__sp_' | tr '=' ' ' | cut -f1 -d ' ')
     # Reset OPTIND for future use of getopts
     OPTIND=1
 }
