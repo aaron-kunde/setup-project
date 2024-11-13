@@ -52,7 +52,7 @@ __sp_main() {
     __sp_init_global_vars
     __sp_set_vars_from_opts ${@}
 
-    if ! is_installed; then
+    if ! __sp_is_installed; then
 	echo "Start installation"
 	restore_exported_vars
 	export_vars
@@ -81,7 +81,7 @@ restore_exported_vars() {
 installation_path() {
     echo $__sp_installation_base_dir/tmpl-$__sp_version
 }
-is_installed() {
+__sp_is_installed() {
     case "$__sp_version" in
 	installed) return 0
 	    ;;

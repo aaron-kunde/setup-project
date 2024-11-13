@@ -69,7 +69,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
       __sp_init_global_vars
       __sp_set_vars_from_opts ${@}
 
-      if ! is_installed; then
+      if ! __sp_is_installed; then
 	  echo "Start installation"
 	  restore_exported_vars
 	  export_vars
@@ -191,7 +191,7 @@ Since the installation path might be different, depending on the target OS and t
 Before starting the installation, check if the wanted version is already installed. This should usually execute the wanted command and check the output for the correct version. In this template this is just a mock, which returns true, if the given version is ~installed~:
 #+name: is_installed
 #+begin_src shell
-  is_installed() {
+  __sp_is_installed() {
       case "$__sp_version" in
 	  installed) return 0
 	      ;;
