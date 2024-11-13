@@ -10,6 +10,10 @@ setup() {
 }
 teardown() {
     PATH="$SPT_ORIGINAL_PATH"
+
+    # Assert, no custom variable or function is set
+    declare | grep -e '^__sp_'
+    assert_equal $? 1
 }
 
 @test "Must print versions to install with default version" {
@@ -32,8 +36,6 @@ teardown() {
     . $__SP_TESTEE
 
     assert_equal $OPTIND 1
-    assert [ -z $__sp_installation_base_dir ]
-    assert [ -z $__sp_version ]
 
     rm /tmp/installation.file
 }
@@ -41,8 +43,6 @@ teardown() {
     . $__SP_TESTEE -v some_other-version
 
     assert_equal $OPTIND 1
-    assert [ -z $__sp_installation_base_dir ]
-    assert [ -z $__sp_version ]
 
     rm /tmp/installation.file
 }
@@ -50,8 +50,6 @@ teardown() {
     . $__SP_TESTEE -v installation_fail
 
     assert_equal $OPTIND 1
-    assert [ -z $__sp_installation_base_dir ]
-    assert [ -z $__sp_version ]
 
     rm /tmp/installation.file
 }
@@ -119,8 +117,6 @@ teardown() {
     . $__SP_TESTEE -v installed
 
     assert_equal $OPTIND 1
-    assert [ -z $__sp_installation_base_dir ]
-    assert [ -z $__sp_version ]
     assert_equal "$PATH" "/some/new/path:$SPT_ORIGINAL_PATH"
     assert_file_not_exists /tmp/installation.file
 }
