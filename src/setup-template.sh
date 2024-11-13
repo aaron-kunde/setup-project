@@ -10,7 +10,7 @@ reset_global_vars() {
     # Reset OPTIND for future use of getopts
     OPTIND=1
 }
-set_vars_from_opts() {
+__sp_set_vars_from_opts() {
     while getopts v: opt; do
 	case $opt in
 	    v) __sp_version=$OPTARG
@@ -50,7 +50,7 @@ install() {
  }
 __sp_main() {
     __sp_init_global_vars
-    set_vars_from_opts ${@}
+    __sp_set_vars_from_opts ${@}
 
     if ! is_installed; then
 	echo "Start installation"
