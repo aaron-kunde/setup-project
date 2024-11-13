@@ -24,7 +24,7 @@ __sp_abort() {
 
     return 0
 }
-local_installation_file_path() {
+__sp_local_installation_file_path() {
     echo /tmp/$(installation_file)
 }
 remote_installation_file_exists() {
@@ -32,13 +32,13 @@ remote_installation_file_exists() {
 }
 download_installation_file() {
     echo "Download installation file"
-    curl $(download_url) -o $(local_installation_file_path)
+    curl $(download_url) -o $(__sp_local_installation_file_path)
 }
 __sp_install() {
     echo "Install version: $__sp_version"
 
-    if [ ! -f $(local_installation_file_path) ]; then
-	echo "Local installation file not found: $(local_installation_file_path). Try, download new one"
+    if [ ! -f $(__sp_local_installation_file_path) ]; then
+	echo "Local installation file not found: $(__sp_local_installation_file_path). Try, download new one"
 	if remote_installation_file_exists; then
 	    download_installation_file
 	else

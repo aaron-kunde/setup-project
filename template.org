@@ -212,8 +212,8 @@ If the wanted version is not installed, start the installation. This includes th
   __sp_install() {
       echo "Install version: $__sp_version"
 
-      if [ ! -f $(local_installation_file_path) ]; then
-	  echo "Local installation file not found: $(local_installation_file_path). Try, download new one"
+      if [ ! -f $(__sp_local_installation_file_path) ]; then
+	  echo "Local installation file not found: $(__sp_local_installation_file_path). Try, download new one"
 	  if remote_installation_file_exists; then
 	      download_installation_file
 	  else
@@ -238,7 +238,7 @@ The name of the installation file is specific to the software, its version and t
 The path to the local installation file. The default location is in the ~/tmp/~ directory:
 #+name: local_installation_file_path
 #+begin_src shell
-  local_installation_file_path() {
+  __sp_local_installation_file_path() {
       echo /tmp/$(installation_file)
   }
 #+end_src
@@ -287,7 +287,7 @@ If a remote installation file was found, download it:
 #+begin_src shell
   download_installation_file() {
       echo "Download installation file"
-      curl $(download_url) -o $(local_installation_file_path)
+      curl $(download_url) -o $(__sp_local_installation_file_path)
   }
 #+end_src
 
