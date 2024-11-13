@@ -25,7 +25,7 @@ __sp_abort() {
     return 0
 }
 __sp_local_installation_file_path() {
-    echo /tmp/$(installation_file)
+    echo /tmp/$(__sp_installation_file)
 }
 __sp_remote_installation_file_exists() {
     curl -sIf $(download_url) >/dev/null
@@ -89,7 +89,7 @@ __sp_is_installed() {
 	    ;;
     esac
 }
-installation_file() {
+__sp_installation_file() {
     echo installation.file
 }
 install_installation_file() {
