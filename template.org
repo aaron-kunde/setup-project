@@ -73,7 +73,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
 	  echo "Start installation"
 	  __sp_restore_exported_vars
 	  __sp_export_vars
-	  __sp_install || abort
+	  __sp_install || __sp_abort
       fi
 
       reset_global_vars
@@ -218,7 +218,7 @@ If the wanted version is not installed, start the installation. This includes th
 	      download_installation_file
 	  else
 	      echo "ERROR: No remote installation file found. Abort"
-	      abort
+	      __sp_abort
 	  fi
       fi
       install_installation_file
@@ -295,7 +295,7 @@ If a remote installation file was found, download it:
 During the installation process, several errors can occurs, which cause the need to abort the installation process. If the process needs to be aborted, all global variables need to be reset, as if the installation process never had been started:
 #+name: abort
 #+begin_src shell
-  abort() {
+  __sp_abort() {
       __sp_restore_exported_vars
       reset_global_vars
 
