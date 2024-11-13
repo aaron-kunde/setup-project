@@ -34,7 +34,7 @@ download_installation_file() {
     echo "Download installation file"
     curl $(download_url) -o $(local_installation_file_path)
 }
-install() {
+__sp_install() {
     echo "Install version: $__sp_version"
 
     if [ ! -f $(local_installation_file_path) ]; then
@@ -56,7 +56,7 @@ __sp_main() {
 	echo "Start installation"
 	__sp_restore_exported_vars
 	__sp_export_vars
-	install || abort
+	__sp_install || abort
     fi
 
     reset_global_vars
