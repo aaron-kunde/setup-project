@@ -6,10 +6,10 @@ setup() {
   load 'test_helper/bats-assert/load'
   load 'test_helper/bats-file/load'
 
-  SPT_ORIGINAL_PATH="$PATH"
+  __SP_TEST_ORIGINAL_PATH="$PATH"
 }
 teardown() {
-    PATH="$SPT_ORIGINAL_PATH"
+    PATH="$__SP_TEST_ORIGINAL_PATH"
 
     # Assert, no custom variable or function is set
     declare | grep -e '^__sp_'
@@ -65,7 +65,7 @@ teardown() {
 @test "Should not alter environment if installation fails" {
     . $__SP_TESTEE -v installation_fail
 
-    assert_equal "$PATH" "$SPT_ORIGINAL_PATH"
+    assert_equal "$PATH" "$__SP_TEST_ORIGINAL_PATH"
 
     rm /tmp/installation.file
 }
@@ -100,24 +100,24 @@ teardown() {
 @test "Should export variables if succeeds with default version" {
     . $__SP_TESTEE
 
-    assert_equal "$PATH" "$HOME/opt/tmpl-tmpl_default-version:$SPT_ORIGINAL_PATH"
+    assert_equal "$PATH" "$HOME/opt/tmpl-tmpl_default-version:$__SP_TEST_ORIGINAL_PATH"
 
     rm /tmp/installation.file
 }
 @test "Should export variables if succeeds with given version" {
     . $__SP_TESTEE -v some_other-version
 
-    assert_equal "$PATH" "$HOME/opt/tmpl-some_other-version:$SPT_ORIGINAL_PATH"
+    assert_equal "$PATH" "$HOME/opt/tmpl-some_other-version:$__SP_TEST_ORIGINAL_PATH"
 
     rm /tmp/installation.file
 }
 @test "Should not alter environment if version is already installed" {
-    PATH="/some/new/path:$SPT_ORIGINAL_PATH"
+    PATH="/some/new/path:$__SP_TEST_ORIGINAL_PATH"
 
     . $__SP_TESTEE -v installed
 
     assert_equal $OPTIND 1
-    assert_equal "$PATH" "/some/new/path:$SPT_ORIGINAL_PATH"
+    assert_equal "$PATH" "/some/new/path:$__SP_TEST_ORIGINAL_PATH"
     assert_file_not_exists /tmp/installation.file
 }
 @test "Must print success message if installation succeeds" {
