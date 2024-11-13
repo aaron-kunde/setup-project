@@ -71,7 +71,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
 
       if ! __sp_is_installed; then
 	  echo "Start installation"
-	  restore_exported_vars
+	  __sp_restore_exported_vars
 	  export_vars
 	  install || abort
       fi
@@ -170,7 +170,7 @@ The ~PATH~ variable and every other global variable, which is exported by the sc
 The corresponding reset function restores the ~PATH~ and deletes the backup, to clean up the environment:
 #+name: restore_exported_vars
 #+begin_src shell
-  restore_exported_vars() {
+  __sp_restore_exported_vars() {
       if [ -v __SP_TMPL_ORIGINAL_PATH ]; then
 	  export PATH="${__SP_TMPL_ORIGINAL_PATH}"
 	  unset __SP_TMPL_ORIGINAL_PATH
@@ -296,7 +296,7 @@ During the installation process, several errors can occurs, which cause the need
 #+name: abort
 #+begin_src shell
   abort() {
-      restore_exported_vars
+      __sp_restore_exported_vars
       reset_global_vars
 
       return 0
