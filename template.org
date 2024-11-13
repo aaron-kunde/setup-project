@@ -76,8 +76,8 @@ If something goes wrong, abort. This means, restore the PATH and other global va
 	  __sp_install || __sp_abort
       fi
 
-      __sp_reset_custom_vars_and_funcs
       __sp_print_success_message
+      __sp_reset_custom_vars_and_funcs
   }
 #+end_src
 #+name: lib
@@ -297,7 +297,6 @@ During the installation process, several errors can occurs, which cause the need
 #+begin_src shell
   __sp_abort() {
       __sp_restore_exported_vars
-      __sp_reset_custom_vars_and_funcs
 
       return 0
   }

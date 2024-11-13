@@ -20,7 +20,6 @@ __sp_set_vars_from_opts() {
 }
 __sp_abort() {
     __sp_restore_exported_vars
-    __sp_reset_custom_vars_and_funcs
 
     return 0
 }
@@ -59,8 +58,8 @@ __sp_main() {
 	__sp_install || __sp_abort
     fi
 
-    __sp_reset_custom_vars_and_funcs
     __sp_print_success_message
+    __sp_reset_custom_vars_and_funcs
 }
 
 __sp_default_version() {
