@@ -46,7 +46,7 @@ __sp_install() {
 	    __sp_abort
 	fi
     fi
-    install_installation_file
+    __sp_install_installation_file
  }
 __sp_main() {
     __sp_init_global_vars
@@ -92,7 +92,7 @@ __sp_is_installed() {
 __sp_installation_file() {
     echo installation.file
 }
-install_installation_file() {
+__sp_install_installation_file() {
     echo "Install installation file"
 	case "$__sp_version" in
 	installation_fail) return 1
