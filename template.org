@@ -77,7 +77,7 @@ If something goes wrong, abort. This means, restore the PATH and other global va
       fi
 
       __sp_reset_custom_vars_and_funcs
-      print_success_message
+      __sp_print_success_message
   }
 #+end_src
 #+name: lib
@@ -307,7 +307,7 @@ During the installation process, several errors can occurs, which cause the need
 The success message dependes of the installed software and must be implmenented specific:
 #+name: print_success_message
 #+begin_src shell
-  print_success_message() {
+  __sp_print_success_message() {
       echo "TMPL successfully installed"
   }
 #+end_src
