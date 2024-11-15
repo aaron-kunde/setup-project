@@ -51,7 +51,7 @@ teardown() {
 
     assert_equal $OPTIND 1
     assert [ -z $INSTALLATION_BASE_DIR ]
-    assert [ -z $VERSION ]
+    assert [ -z $__sp_version ]
     assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
 
     assert_file_not_exists /tmp/node-v20.14.0-linux-x64.tar.xz
