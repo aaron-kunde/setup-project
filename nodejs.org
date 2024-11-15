@@ -1,12 +1,14 @@
 #+title: Node.js
-Use to install [[https://nodejs.org][Node.js]] (based on the global [[file:template.org][template]]).
+Use to install [[https://nodejs.org][Node.js]]. This is based on the global [[file:template.org][template]].
 
 * Usage
-#+begin_example
-  $ . setup-nodejs.sh [-v VERSION]
-#+end_example
+The script can be used by executing:
+#+begin_src :tangle no
+  . setup-nodejs.sh [-v VERSION]
+#+end_src
 
-** Version
+** Parameters
+*** VERSION
 The version you want to install. Defaults to the [[*Default version][default version]].
 
 * Implementation
@@ -28,7 +30,7 @@ The version you want to install. Defaults to the [[*Default version][default ver
 
 ** Global variables
 *** Default version
-Use the current LTS:
+Use a LTS:
 #+name: default_version
 #+begin_src shell
   default_version() {
@@ -104,7 +106,7 @@ The installation file is specific to the target OS:
 #+end_src
 
 *** Install installation file
-The installation of the installation file is specific to the target OS:
+The installation of the local installation file is specific to the target OS:
 #+name: install_installation_file
 #+begin_src shell
   install_installation_file() {
