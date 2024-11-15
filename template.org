@@ -344,7 +344,8 @@ The following tests are specific for different OS:
   <<Should export variables if succeeds with default version>>
   <<Should export variables if succeeds with given version>>
   <<Should not alter environment if version is already installed>>
-  <<Must print success message if installation succeeds>>
+  <<Must print success message if installation succeeds with default version>>
+  <<Must print success message if installation succeeds with given version>>
   <<Should not try download if local installation file exists>>
 #+end_src
 
@@ -520,12 +521,26 @@ After the script failed, the exported ~$PATH~ must not be altered:
   }
 #+end_src
 
-*** Must print success message if installation succeeds
-If successful, a success message must be printed:
-#+name: Must print success message if installation succeeds
+*** Must print success message, if installation succeeds
+If successful, a success message must be printed.
+
+**** With default version
+#+name: Must print success message if installation succeeds with default version
 #+begin_src bats
-  @test "Must print success message if installation succeeds" {
+  @test "Must print success message if installation succeeds with default version" {
       run . $__SP_TESTEE
+
+      assert_line 'TMPL successfully installed'
+
+      rm /tmp/installation.file
+  }
+#+end_src
+
+**** With given version
+#+name: Must print success message if installation succeeds with given version
+#+begin_src bats
+  @test "Must print success message if installation succeeds with given version" {
+      run . $__SP_TESTEE -v some_other-version
 
       assert_line 'TMPL successfully installed'
 

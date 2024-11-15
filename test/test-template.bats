@@ -119,8 +119,15 @@ teardown() {
     assert_equal "$PATH" "/some/new/path:$__SP_TEST_ORIGINAL_PATH"
     assert_file_not_exists /tmp/installation.file
 }
-@test "Must print success message if installation succeeds" {
+@test "Must print success message if installation succeeds with default version" {
     run . $__SP_TESTEE
+
+    assert_line 'TMPL successfully installed'
+
+    rm /tmp/installation.file
+}
+@test "Must print success message if installation succeeds with given version" {
+    run . $__SP_TESTEE -v some_other-version
 
     assert_line 'TMPL successfully installed'
 
