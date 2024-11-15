@@ -87,7 +87,7 @@ __sp_installation_path() {
 	    ;;
     esac
 }
-is_installed() {
+__sp_is_installed() {
     node --version 2>/dev/null &&
 	(node --version 2>&1 | grep $VERSION)
 }
