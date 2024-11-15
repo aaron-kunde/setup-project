@@ -91,7 +91,7 @@ __sp_is_installed() {
     node --version 2>/dev/null &&
 	(node --version 2>&1 | grep $VERSION)
 }
-installation_file() {
+__sp_installation_file() {
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
 	    echo node-$VERSION-win-x64.zip
@@ -114,7 +114,7 @@ install_installation_file() {
     esac
 }
 download_url() {
-    echo https://nodejs.org/dist/$VERSION/$(installation_file)
+    echo https://nodejs.org/dist/$VERSION/$(__sp_installation_file)
 }
 print_success_message() {
     node -v
