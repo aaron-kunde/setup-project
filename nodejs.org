@@ -109,7 +109,7 @@ The installation file is specific to the target OS:
 The installation of the local installation file is specific to the target OS:
 #+name: install_installation_file
 #+begin_src shell
-  install_installation_file() {
+  __sp_install_installation_file() {
       local trgt_dir=$(dirname $(__sp_installation_path))
 
       case "$(uname -s)" in
