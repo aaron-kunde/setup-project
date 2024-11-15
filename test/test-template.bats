@@ -16,22 +16,6 @@ teardown() {
     assert_equal $? 1
 }
 
-@test "Must print versions to install with default version" {
-    run . $__SP_TESTEE
-
-    assert_line 'Install version: tmpl_default-version'
-    assert_line "Add $HOME/opt/tmpl-tmpl_default-version to PATH"
-
-    rm /tmp/installation.file
-}
-@test "Must print versions to install with given version" {
-    run . $__SP_TESTEE -v some_other-version
-
-    assert_line 'Install version: some_other-version'
-    assert_line "Add $HOME/opt/tmpl-some_other-version to PATH"
-
-    rm /tmp/installation.file
-}
 @test "Environment must be clean after execution if succeeds with default version" {
     . $__SP_TESTEE
 
@@ -96,7 +80,22 @@ teardown() {
     rm /tmp/installation.file
 }
 
-# OS specific
+@test "Must print versions to install with default version" {
+    run . $__SP_TESTEE
+
+    assert_line 'Install version: tmpl_default-version'
+    assert_line "Add $HOME/opt/tmpl-tmpl_default-version to PATH"
+
+    rm /tmp/installation.file
+}
+@test "Must print versions to install with given version" {
+    run . $__SP_TESTEE -v some_other-version
+
+    assert_line 'Install version: some_other-version'
+    assert_line "Add $HOME/opt/tmpl-some_other-version to PATH"
+
+    rm /tmp/installation.file
+}
 @test "Should export variables if succeeds with default version" {
     . $__SP_TESTEE
 

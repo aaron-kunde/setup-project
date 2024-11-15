@@ -319,14 +319,14 @@ The success message depends on the installed software and must be implemented sp
 #+begin_src shell
   test/bats/bin/bats -t test/test-template.bats
 #+end_src
+
+The following tests are OS independent:
 #+begin_src bats :tangle test/test-template.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :tangle-mode '#o644 :exports none
   __SP_TESTEE=src/setup-template.sh
 
   <<setup>>
   <<teardown>>
 
-  <<Must print versions to install with default version>>
-  <<Must print versions to install with given version>>
   <<Environment must be clean after execution if succeeds with default version>>
   <<Environment must be clean after execution if succeeds with given version>>
   <<Environment must be clean after execution if installation fails>>
@@ -335,8 +335,12 @@ The success message depends on the installed software and must be implemented sp
   <<Must print error message if remote installation file not found>>
   <<Should try download if local installation file not exists>>
   <<Should try download if remote installation file exists>>
+#+end_src
 
-  # OS specific
+The following tests are specific for different OS:
+#+begin_src bats :tangle test/test-template.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :tangle-mode '#o644 :exports none
+  <<Must print versions to install with default version>>
+  <<Must print versions to install with given version>>
   <<Should export variables if succeeds with default version>>
   <<Should export variables if succeeds with given version>>
   <<Should not alter environment if version is already installed>>
