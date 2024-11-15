@@ -43,10 +43,10 @@ The ~PATH~ variable is exported. It must be saved and restored, if something goe
 #+name: export_vars
 #+begin_src shell
   export_vars() {
-      echo "Add $(installation_path) to PATH"
+      echo "Add $(__sp_installation_path) to PATH"
       __SP_NODEJS_ORIGINAL_PATH="${PATH}"
 
-      export PATH="$(installation_path):${PATH}"
+      export PATH="$(__sp_installation_path):${PATH}"
   }
 #+end_src
 
@@ -65,7 +65,7 @@ The corresponding reset function restores the ~PATH~ and deletes the backup, to 
 The installation differs, depending on the target OS. Windows with MingW and Linux are supported:
 #+name: installation_path
 #+begin_src shell
-  installation_path() {
+  __sp_installation_path() {
       case "$(uname -s)" in
 	  CYGWIN*|MINGW*|MSYS*)
 	      echo $INSTALLATION_BASE_DIR/node-$VERSION-win-x64
@@ -110,7 +110,7 @@ The installation of the local installation file is specific to the target OS:
 #+name: install_installation_file
 #+begin_src shell
   install_installation_file() {
-      local trgt_dir=$(dirname $(installation_path))
+      local trgt_dir=$(dirname $(__sp_installation_path))
 
       case "$(uname -s)" in
 	  CYGWIN*|MINGW*|MSYS*)

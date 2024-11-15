@@ -66,10 +66,10 @@ __sp_default_version() {
     echo v20.14.0
 }
 export_vars() {
-    echo "Add $(installation_path) to PATH"
+    echo "Add $(__sp_installation_path) to PATH"
     __SP_NODEJS_ORIGINAL_PATH="${PATH}"
 
-    export PATH="$(installation_path):${PATH}"
+    export PATH="$(__sp_installation_path):${PATH}"
 }
 restore_exported_vars() {
     if [ -v __SP_NODEJS_ORIGINAL_PATH ]; then
@@ -77,7 +77,7 @@ restore_exported_vars() {
 	unset __SP_NODEJS_ORIGINAL_PATH
     fi
 }
-installation_path() {
+__sp_installation_path() {
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
 	    echo $INSTALLATION_BASE_DIR/node-$VERSION-win-x64
@@ -102,7 +102,7 @@ installation_file() {
     esac
 }
 install_installation_file() {
-    local trgt_dir=$(dirname $(installation_path))
+    local trgt_dir=$(dirname $(__sp_installation_path))
 
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
