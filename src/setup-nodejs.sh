@@ -120,4 +120,4 @@ print_success_message() {
     node -v
 }
 
-main ${@}
+__sp_main ${@}
