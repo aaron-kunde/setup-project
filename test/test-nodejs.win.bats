@@ -10,6 +10,10 @@ setup() {
 }
 teardown() {
     PATH="$__SP_TEST_ORIGINAL_PATH"
+
+    # Assert, no custom variable or function is set
+    declare | grep -e '^__sp_'
+    assert_equal $? 1
 }
 
 @test "Must print versions to install with default version using Windows" {
@@ -50,8 +54,6 @@ teardown() {
     . $__SP_TESTEE
 
     assert_equal $OPTIND 1
-    assert [ -z $__sp_installation_base_dir ]
-    assert [ -z $__sp_version ]
     assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64:$__SP_TEST_ORIGINAL_PATH"
 
     assert_file_not_exists /tmp/node-v20.14.0-win-x64.zip
