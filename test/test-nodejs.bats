@@ -6,10 +6,10 @@ setup() {
   load 'test_helper/bats-assert/load'
   load 'test_helper/bats-file/load'
 
-  SPT_ORIGINAL_PATH="$PATH"
+  __SP_TEST_ORIGINAL_PATH="$PATH"
 }
 teardown() {
-    PATH="$SPT_ORIGINAL_PATH"
+    PATH="$__SP_TEST_ORIGINAL_PATH"
 }
 
 @test "Environment must be clean after execution if succeeds with default version" {
@@ -52,7 +52,7 @@ teardown() {
 @test "Should not alter environment if installation fails" {
     . $__SP_TESTEE -v installation_fail || assert_equal $? 127
 
-    assert_equal "$PATH" "$SPT_ORIGINAL_PATH"
+    assert_equal "$PATH" "$__SP_TEST_ORIGINAL_PATH"
 }
 @test "Must print error message if remote installation file not found" {
     run . $__SP_TESTEE -v download_fail

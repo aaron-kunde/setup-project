@@ -6,10 +6,10 @@ setup() {
   load 'test_helper/bats-assert/load'
   load 'test_helper/bats-file/load'
 
-  SPT_ORIGINAL_PATH="$PATH"
+  __SP_TEST_ORIGINAL_PATH="$PATH"
 }
 teardown() {
-    PATH="$SPT_ORIGINAL_PATH"
+    PATH="$__SP_TEST_ORIGINAL_PATH"
 }
 
 @test "Must print versions to install with default version using Linux" {
@@ -31,20 +31,20 @@ teardown() {
 @test "Should export variables if succeeds with default version using Linux" {
     . $__SP_TESTEE
 
-    assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
+    assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$__SP_TEST_ORIGINAL_PATH"
 
     rm /tmp/node-v20.14.0-linux-x64.tar.xz
 }
 @test "Should export variables if succeeds with given version using Linux" {
     . $__SP_TESTEE -v v18.20.3
 
-    assert_equal "$PATH" "$HOME/opt/node-v18.20.3-linux-x64/bin:$SPT_ORIGINAL_PATH"
+    assert_equal "$PATH" "$HOME/opt/node-v18.20.3-linux-x64/bin:$__SP_TEST_ORIGINAL_PATH"
 
     rm /tmp/node-v18.20.3-linux-x64.tar.xz
 }
 @test "Should not alter environment if version is already installed using Linux" {
     . $__SP_TESTEE
-    assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
+    assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$__SP_TEST_ORIGINAL_PATH"
     rm /tmp/node-v20.14.0-linux-x64.tar.xz
 
     . $__SP_TESTEE
@@ -52,7 +52,7 @@ teardown() {
     assert_equal $OPTIND 1
     assert [ -z $__sp_installation_base_dir ]
     assert [ -z $__sp_version ]
-    assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
+    assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$__SP_TEST_ORIGINAL_PATH"
 
     assert_file_not_exists /tmp/node-v20.14.0-linux-x64.tar.xz
 }

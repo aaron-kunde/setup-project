@@ -215,7 +215,7 @@ Furthermore, the exported variables are backed up. In this case at least the ~PA
     load 'test_helper/bats-assert/load'
     load 'test_helper/bats-file/load'
 
-    SPT_ORIGINAL_PATH="$PATH"
+    __SP_TEST_ORIGINAL_PATH="$PATH"
   }
 #+end_src
 
@@ -223,7 +223,7 @@ To clean up, the exported variables are reset to its saved values after each tes
 #+name: teardown
 #+begin_src bats
   teardown() {
-      PATH="$SPT_ORIGINAL_PATH"
+      PATH="$__SP_TEST_ORIGINAL_PATH"
   }
 #+end_src
 
@@ -342,7 +342,7 @@ The exported ~$PATH~ must be extended with the wanted version.
   @test "Should export variables if succeeds with default version using Linux" {
       . $__SP_TESTEE
 
-      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
+      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$__SP_TEST_ORIGINAL_PATH"
 
       rm /tmp/node-v20.14.0-linux-x64.tar.xz
   }
@@ -354,7 +354,7 @@ The exported ~$PATH~ must be extended with the wanted version.
   @test "Should export variables if succeeds with default version using Windows" {
       . $__SP_TESTEE
 
-      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64:$SPT_ORIGINAL_PATH"
+      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64:$__SP_TEST_ORIGINAL_PATH"
 
       rm /tmp/node-v20.14.0-win-x64.zip
   }
@@ -368,7 +368,7 @@ The exported ~$PATH~ must be extended with the wanted version.
   @test "Should export variables if succeeds with given version using Linux" {
       . $__SP_TESTEE -v v18.20.3
 
-      assert_equal "$PATH" "$HOME/opt/node-v18.20.3-linux-x64/bin:$SPT_ORIGINAL_PATH"
+      assert_equal "$PATH" "$HOME/opt/node-v18.20.3-linux-x64/bin:$__SP_TEST_ORIGINAL_PATH"
 
       rm /tmp/node-v18.20.3-linux-x64.tar.xz
   }
@@ -380,7 +380,7 @@ The exported ~$PATH~ must be extended with the wanted version.
   @test "Should export variables if succeeds with given version using Windows" {
       . $__SP_TESTEE -v v18.20.3
 
-      assert_equal "$PATH" "$HOME/opt/node-v18.20.3-win-x64:$SPT_ORIGINAL_PATH"
+      assert_equal "$PATH" "$HOME/opt/node-v18.20.3-win-x64:$__SP_TEST_ORIGINAL_PATH"
 
       rm /tmp/node-v18.20.3-win-x64.zip
   }
@@ -412,7 +412,7 @@ If the given (or default) version is already installed, the environment should n
 #+begin_src bats
   @test "Should not alter environment if version is already installed using Linux" {
       . $__SP_TESTEE
-      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
+      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$__SP_TEST_ORIGINAL_PATH"
       rm /tmp/node-v20.14.0-linux-x64.tar.xz
 
       . $__SP_TESTEE
@@ -420,7 +420,7 @@ If the given (or default) version is already installed, the environment should n
       assert_equal $OPTIND 1
       assert [ -z $__sp_installation_base_dir ]
       assert [ -z $__sp_version ]
-      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
+      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$__SP_TEST_ORIGINAL_PATH"
 
       assert_file_not_exists /tmp/node-v20.14.0-linux-x64.tar.xz
   }
@@ -431,7 +431,7 @@ If the given (or default) version is already installed, the environment should n
 #+begin_src bats
   @test "Should not alter environment if version is already installed using Windows" {
       . $__SP_TESTEE
-      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64:$SPT_ORIGINAL_PATH"
+      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64:$__SP_TEST_ORIGINAL_PATH"
       rm /tmp/node-v20.14.0-win-x64.zip
 
       . $__SP_TESTEE
@@ -439,7 +439,7 @@ If the given (or default) version is already installed, the environment should n
       assert_equal $OPTIND 1
       assert [ -z $__sp_installation_base_dir ]
       assert [ -z $__sp_version ]
-      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64:$SPT_ORIGINAL_PATH"
+      assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64:$__SP_TEST_ORIGINAL_PATH"
 
       assert_file_not_exists /tmp/node-v20.14.0-win-x64.zip
   }
@@ -452,7 +452,7 @@ After the script failed, the exported ~$PATH~ must not be altered:
   @test "Should not alter environment if installation fails" {
       . $__SP_TESTEE -v installation_fail || assert_equal $? 127
 
-      assert_equal "$PATH" "$SPT_ORIGINAL_PATH"
+      assert_equal "$PATH" "$__SP_TEST_ORIGINAL_PATH"
   }
 #+end_src
 
