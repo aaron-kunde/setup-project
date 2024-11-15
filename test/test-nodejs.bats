@@ -10,14 +10,16 @@ setup() {
 }
 teardown() {
     PATH="$__SP_TEST_ORIGINAL_PATH"
+
+    # Assert, no custom variable or function is set
+    declare | grep -e '^__sp_'
+    assert_equal $? 1
 }
 
 @test "Environment must be clean after execution if succeeds with default version" {
     . $__SP_TESTEE
 
     assert_equal $OPTIND 1
-    assert [ -z $__sp_installation_base_dir ]
-    assert [ -z $__sp_version ]
 
     rm /tmp/node-v20.14.0-*
 }
@@ -25,8 +27,6 @@ teardown() {
     . $__SP_TESTEE -v v18.20.3
 
     assert_equal $OPTIND 1
-    assert [ -z $__sp_installation_base_dir ]
-    assert [ -z $__sp_version ]
 
     rm /tmp/node-v18.20.3-*
 }
@@ -34,8 +34,6 @@ teardown() {
     . $__SP_TESTEE -v installation_fail || assert_equal $? 127
 
     assert_equal $OPTIND 1
-    assert [ -z $__sp_installation_base_dir ]
-    assert [ -z $__sp_version ]
 }
 @test "Should only print success message if version is already installed" {
     . $__SP_TESTEE
@@ -60,6 +58,7 @@ teardown() {
     assert_line 'Install version: download_fail'
     assert_line -e 'Local installation file not found: /tmp/node-download_fail-.*\. Try, download new one'
     assert_line 'ERROR: No remote installation file found. Abort'
+
     assert_file_not_exists /tmp/node-download_fail-*
 }
 @test "Should try download if local installation file not exists" {

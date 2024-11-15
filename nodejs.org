@@ -224,6 +224,10 @@ To clean up, the exported variables are reset to its saved values after each tes
 #+begin_src bats
   teardown() {
       PATH="$__SP_TEST_ORIGINAL_PATH"
+
+      # Assert, no custom variable or function is set
+      declare | grep -e '^__sp_'
+      assert_equal $? 1
   }
 #+end_src
 
@@ -296,8 +300,6 @@ After the script has run without a given version, the newly introduced global va
       . $__SP_TESTEE
 
       assert_equal $OPTIND 1
-      assert [ -z $__sp_installation_base_dir ]
-      assert [ -z $__sp_version ]
 
       rm /tmp/node-v20.14.0-*
   }
@@ -311,8 +313,6 @@ After the script has run with a given version, the newly introduced global varia
       . $__SP_TESTEE -v v18.20.3
 
       assert_equal $OPTIND 1
-      assert [ -z $__sp_installation_base_dir ]
-      assert [ -z $__sp_version ]
 
       rm /tmp/node-v18.20.3-*
   }
@@ -326,8 +326,6 @@ After the script failed, the newly introduced global variables shall not be set 
       . $__SP_TESTEE -v installation_fail || assert_equal $? 127
 
       assert_equal $OPTIND 1
-      assert [ -z $__sp_installation_base_dir ]
-      assert [ -z $__sp_version ]
   }
 #+end_src
 
@@ -418,8 +416,6 @@ If the given (or default) version is already installed, the environment should n
       . $__SP_TESTEE
 
       assert_equal $OPTIND 1
-      assert [ -z $__sp_installation_base_dir ]
-      assert [ -z $__sp_version ]
       assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$__SP_TEST_ORIGINAL_PATH"
 
       assert_file_not_exists /tmp/node-v20.14.0-linux-x64.tar.xz
@@ -437,8 +433,6 @@ If the given (or default) version is already installed, the environment should n
       . $__SP_TESTEE
 
       assert_equal $OPTIND 1
-      assert [ -z $__sp_installation_base_dir ]
-      assert [ -z $__sp_version ]
       assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64:$__SP_TEST_ORIGINAL_PATH"
 
       assert_file_not_exists /tmp/node-v20.14.0-win-x64.zip
@@ -520,6 +514,7 @@ If successful, a success message must be printed.
       assert_line 'Install version: download_fail'
       assert_line -e 'Local installation file not found: /tmp/node-download_fail-.*\. Try, download new one'
       assert_line 'ERROR: No remote installation file found. Abort'
+
       assert_file_not_exists /tmp/node-download_fail-*
   }
 #+end_src
