@@ -81,7 +81,7 @@ The installation differs, depending on the target OS. Windows with MingW and Lin
 Before starting the installation, check if the wanted version is already installed:
 #+name: is_installed
 #+begin_src shell
-  is_installed() {
+  __sp_is_installed() {
       node --version 2>/dev/null &&
 	  (node --version 2>&1 | grep $VERSION)
   }
