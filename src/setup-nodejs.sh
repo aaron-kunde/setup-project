@@ -67,14 +67,14 @@ __sp_default_version() {
 }
 export_vars() {
     echo "Add $(installation_path) to PATH"
-    SETUP_NODEJS_ORIGINAL_PATH="${PATH}"
+    __SP_NODEJS_ORIGINAL_PATH="${PATH}"
 
     export PATH="$(installation_path):${PATH}"
 }
 restore_exported_vars() {
-    if [ -v SETUP_NODEJS_ORIGINAL_PATH ]; then
-	export PATH="${SETUP_NODEJS_ORIGINAL_PATH}"
-	unset SETUP_NODEJS_ORIGINAL_PATH
+    if [ -v __SP_NODEJS_ORIGINAL_PATH ]; then
+	export PATH="${__SP_NODEJS_ORIGINAL_PATH}"
+	unset __SP_NODEJS_ORIGINAL_PATH
     fi
 }
 installation_path() {
