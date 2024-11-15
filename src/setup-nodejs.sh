@@ -65,7 +65,7 @@ __sp_main() {
 __sp_default_version() {
     echo v20.14.0
 }
-export_vars() {
+__sp_export_vars() {
     echo "Add $(__sp_installation_path) to PATH"
     __SP_NODEJS_ORIGINAL_PATH="${PATH}"
 

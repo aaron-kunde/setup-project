@@ -42,7 +42,7 @@ Use a LTS:
 The ~PATH~ variable is exported. It must be saved and restored, if something goes wrong:
 #+name: export_vars
 #+begin_src shell
-  export_vars() {
+  __sp_export_vars() {
       echo "Add $(__sp_installation_path) to PATH"
       __SP_NODEJS_ORIGINAL_PATH="${PATH}"
 
