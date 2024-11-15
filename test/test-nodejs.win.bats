@@ -50,7 +50,7 @@ teardown() {
     . $__SP_TESTEE
 
     assert_equal $OPTIND 1
-    assert [ -z $INSTALLATION_BASE_DIR ]
+    assert [ -z $__sp_installation_base_dir ]
     assert [ -z $__sp_version ]
     assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64:$SPT_ORIGINAL_PATH"
 
