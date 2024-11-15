@@ -53,7 +53,7 @@ The ~PATH~ variable is exported. It must be saved and restored, if something goe
 The corresponding reset function restores the ~PATH~ and deletes the backup, to clean up the environment:
 #+name: restore_exported_vars
 #+begin_src shell
-  restore_exported_vars() {
+  __sp_restore_exported_vars() {
       if [ -v __SP_NODEJS_ORIGINAL_PATH ]; then
 	  export PATH="${__SP_NODEJS_ORIGINAL_PATH}"
 	  unset __SP_NODEJS_ORIGINAL_PATH

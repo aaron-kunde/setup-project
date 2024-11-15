@@ -71,7 +71,7 @@ __sp_export_vars() {
 
     export PATH="$(__sp_installation_path):${PATH}"
 }
-restore_exported_vars() {
+__sp_restore_exported_vars() {
     if [ -v __SP_NODEJS_ORIGINAL_PATH ]; then
 	export PATH="${__SP_NODEJS_ORIGINAL_PATH}"
 	unset __SP_NODEJS_ORIGINAL_PATH
