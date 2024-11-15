@@ -101,7 +101,7 @@ __sp_installation_file() {
 	    ;;
     esac
 }
-install_installation_file() {
+__sp_install_installation_file() {
     local trgt_dir=$(dirname $(__sp_installation_path))
 
     case "$(uname -s)" in
