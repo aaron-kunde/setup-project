@@ -126,7 +126,7 @@ The installation of the local installation file is specific to the target OS:
 *** Download URL
 #+name: download_url
 #+begin_src shell
-  download_url() {
+  __sp_download_url() {
       echo https://nodejs.org/dist/$VERSION/$(__sp_installation_file)
   }
 #+end_src
