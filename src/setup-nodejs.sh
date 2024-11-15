@@ -116,7 +116,7 @@ __sp_install_installation_file() {
 __sp_download_url() {
     echo https://nodejs.org/dist/$VERSION/$(__sp_installation_file)
 }
-print_success_message() {
+__sp_print_success_message() {
     node -v
 }
 
