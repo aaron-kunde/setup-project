@@ -113,7 +113,7 @@ __sp_install_installation_file() {
 	    ;;
     esac
 }
-download_url() {
+__sp_download_url() {
     echo https://nodejs.org/dist/$VERSION/$(__sp_installation_file)
 }
 print_success_message() {
