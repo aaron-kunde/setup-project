@@ -93,7 +93,7 @@ The installation file is specific to the target OS:
 *** Installation file
 #+name: installation_file
 #+begin_src shell
-  installation_file() {
+  __sp_installation_file() {
       case "$(uname -s)" in
 	  CYGWIN*|MINGW*|MSYS*)
 	      echo node-$VERSION-win-x64.zip
@@ -127,7 +127,7 @@ The installation of the local installation file is specific to the target OS:
 #+name: download_url
 #+begin_src shell
   download_url() {
-      echo https://nodejs.org/dist/$VERSION/$(installation_file)
+      echo https://nodejs.org/dist/$VERSION/$(__sp_installation_file)
   }
 #+end_src
 
