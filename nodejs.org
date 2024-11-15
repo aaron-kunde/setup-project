@@ -135,7 +135,7 @@ The installation of the local installation file is specific to the target OS:
 The success message prints the version of the current Node.js installation:
 #+name: print_success_message
 #+begin_src shell
-  print_success_message() {
+  __sp_print_success_message() {
       node -v
   }
 #+end_src
