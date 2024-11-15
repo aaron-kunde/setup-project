@@ -33,7 +33,7 @@ The version you want to install. Defaults to the [[*Default version][default ver
 Use a LTS:
 #+name: default_version
 #+begin_src shell
-  default_version() {
+  __sp_default_version() {
       echo v20.14.0
   }
 #+end_src

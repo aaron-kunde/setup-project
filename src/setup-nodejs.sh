@@ -62,7 +62,7 @@ __sp_main() {
     __sp_reset_custom_vars_and_funcs
 }
 
-default_version() {
+__sp_default_version() {
     echo v20.14.0
 }
 export_vars() {
