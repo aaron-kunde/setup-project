@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-SPT_SCRIPT=src/setup-nodejs.sh
+__SP_TESTEE=src/setup-nodejs.sh
 
 setup() {
   load 'test_helper/bats-support/load'
@@ -13,7 +13,7 @@ teardown() {
 }
 
 @test "Environment must be clean after execution if succeeds with default version" {
-    . $SPT_SCRIPT
+    . $__SP_TESTEE
 
     assert_equal $OPTIND 1
     assert [ -z $INSTALLATION_BASE_DIR ]
@@ -22,7 +22,7 @@ teardown() {
     rm /tmp/node-v20.14.0-*
 }
 @test "Environment must be clean after execution if succeeds with given version" {
-    . $SPT_SCRIPT -v v18.20.3
+    . $__SP_TESTEE -v v18.20.3
 
     assert_equal $OPTIND 1
     assert [ -z $INSTALLATION_BASE_DIR ]
@@ -31,17 +31,17 @@ teardown() {
     rm /tmp/node-v18.20.3-*
 }
 @test "Environment must be clean after execution if installation fails" {
-    . $SPT_SCRIPT -v installation_fail || assert_equal $? 127
+    . $__SP_TESTEE -v installation_fail || assert_equal $? 127
 
     assert_equal $OPTIND 1
     assert [ -z $INSTALLATION_BASE_DIR ]
     assert [ -z $VERSION ]
 }
 @test "Should only print success message if version is already installed" {
-    . $SPT_SCRIPT
+    . $__SP_TESTEE
     rm /tmp/node-v20.14.0-*
 
-    run . $SPT_SCRIPT
+    run . $__SP_TESTEE
 
     refute_line -p "Add $HOME/opt/"
     refute_line -p 'Install version: '
@@ -50,12 +50,12 @@ teardown() {
     assert_file_not_exists /tmp/node-v20.14.0-*
 }
 @test "Should not alter environment if installation fails" {
-    . $SPT_SCRIPT -v installation_fail || assert_equal $? 127
+    . $__SP_TESTEE -v installation_fail || assert_equal $? 127
 
     assert_equal "$PATH" "$SPT_ORIGINAL_PATH"
 }
 @test "Must print error message if remote installation file not found" {
-    run . $SPT_SCRIPT -v download_fail
+    run . $__SP_TESTEE -v download_fail
 
     assert_line 'Install version: download_fail'
     assert_line -e 'Local installation file not found: /tmp/node-download_fail-.*\. Try, download new one'
@@ -63,7 +63,7 @@ teardown() {
     assert_file_not_exists /tmp/node-download_fail-*
 }
 @test "Should try download if local installation file not exists" {
-    run . $SPT_SCRIPT
+    run . $__SP_TESTEE
 
     assert_line -e 'Local installation file not found: /tmp/node-v20\.14\.0-.*\. Try, download new one'
     assert_line 'Download installation file'
@@ -71,7 +71,7 @@ teardown() {
     rm /tmp/node-v20.14.0-*
 }
 @test "Should try download if remote installation file exists" {
-    run . $SPT_SCRIPT
+    run . $__SP_TESTEE
 
     assert_line 'Download installation file'
 
