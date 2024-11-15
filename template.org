@@ -2,15 +2,18 @@
 This is the template, which defines some common functions for all scripts.
 
 * Usage
-#+begin_example
-  $ . setup-template.sh [-v VERSION]
-#+end_example
+The script can be used by executing:
+#+begin_src shell :tangle no
+  . setup-template.sh [-v VERSION]
+#+end_src
 
-** Version
+** Parameters
+*** VERSION
 The version you want to install. Defaults to the [[*Default version][default version]].
 
 ** Overriding of functions
 The template can be included into the software specific scripts, where specific functions can be overridden.
+
 *NOTE*: By including scripts, you have to be careful, with execution of scripts, since these are executed during the inclusion and therefore before anything else!
 
 #+begin_src shell :tangle no
@@ -155,7 +158,7 @@ To pass options (like the version to be installed) to the scripts /getopts/ is u
 At least the version needs to be set, but other scripts might need additional options. Therefore this method might be overridden.
 
 *** Exported variables
-The ~PATH~ variable and every other global variable, which is exported by the scripts might exist before the script is run and therefore must be saved and restored, if something goes wrong. In the following example, the ~PATH~ is saved before the new one is exported:
+The ~PATH~ variable and every other global variable, which is exported by the scripts might exist before the script is run. If something goes wrong during execution, these variables and restored. Therefore, the original values are stored for recovery. At least the variable ~PATH~ must be saved before the new one is exported:
 #+name: export_vars
 #+begin_src shell
   __sp_export_vars() {
@@ -303,7 +306,7 @@ During the installation process, several errors can occurs, which cause the need
 #+end_src
 
 ** Print success message
-The success message dependes of the installed software and must be implmenented specific:
+The success message depends on the installed software and must be implemented specific:
 #+name: print_success_message
 #+begin_src shell
   __sp_print_success_message() {
