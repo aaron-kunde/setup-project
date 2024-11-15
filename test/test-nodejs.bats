@@ -17,7 +17,7 @@ teardown() {
 
     assert_equal $OPTIND 1
     assert [ -z $INSTALLATION_BASE_DIR ]
-    assert [ -z $VERSION ]
+    assert [ -z $__sp_version ]
 
     rm /tmp/node-v20.14.0-*
 }
@@ -26,7 +26,7 @@ teardown() {
 
     assert_equal $OPTIND 1
     assert [ -z $INSTALLATION_BASE_DIR ]
-    assert [ -z $VERSION ]
+    assert [ -z $__sp_version ]
 
     rm /tmp/node-v18.20.3-*
 }
@@ -35,7 +35,7 @@ teardown() {
 
     assert_equal $OPTIND 1
     assert [ -z $INSTALLATION_BASE_DIR ]
-    assert [ -z $VERSION ]
+    assert [ -z $__sp_version ]
 }
 @test "Should only print success message if version is already installed" {
     . $__SP_TESTEE

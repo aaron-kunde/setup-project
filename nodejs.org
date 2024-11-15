@@ -68,10 +68,10 @@ The installation differs, depending on the target OS. Windows with MingW and Lin
   __sp_installation_path() {
       case "$(uname -s)" in
 	  CYGWIN*|MINGW*|MSYS*)
-	      echo $INSTALLATION_BASE_DIR/node-$VERSION-win-x64
+	      echo $INSTALLATION_BASE_DIR/node-$__sp_version-win-x64
 	      ;;
 	  ,*)
-	      echo $INSTALLATION_BASE_DIR/node-$VERSION-linux-x64/bin
+	      echo $INSTALLATION_BASE_DIR/node-$__sp_version-linux-x64/bin
 	      ;;
       esac
   }
@@ -83,7 +83,7 @@ Before starting the installation, check if the wanted version is already install
 #+begin_src shell
   __sp_is_installed() {
       node --version 2>/dev/null &&
-	  (node --version 2>&1 | grep $VERSION)
+	  (node --version 2>&1 | grep $__sp_version)
   }
 #+end_src
 
@@ -96,10 +96,10 @@ The installation file is specific to the target OS:
   __sp_installation_file() {
       case "$(uname -s)" in
 	  CYGWIN*|MINGW*|MSYS*)
-	      echo node-$VERSION-win-x64.zip
+	      echo node-$__sp_version-win-x64.zip
 	      ;;
 	  ,*)
-	      echo node-$VERSION-linux-x64.tar.xz
+	      echo node-$__sp_version-linux-x64.tar.xz
 	      ;;
       esac
   }
@@ -127,7 +127,7 @@ The installation of the local installation file is specific to the target OS:
 #+name: download_url
 #+begin_src shell
   __sp_download_url() {
-      echo https://nodejs.org/dist/$VERSION/$(__sp_installation_file)
+      echo https://nodejs.org/dist/$__sp_version/$(__sp_installation_file)
   }
 #+end_src
 
@@ -297,7 +297,7 @@ After the script has run without a given version, the newly introduced global va
 
       assert_equal $OPTIND 1
       assert [ -z $INSTALLATION_BASE_DIR ]
-      assert [ -z $VERSION ]
+      assert [ -z $__sp_version ]
 
       rm /tmp/node-v20.14.0-*
   }
@@ -312,7 +312,7 @@ After the script has run with a given version, the newly introduced global varia
 
       assert_equal $OPTIND 1
       assert [ -z $INSTALLATION_BASE_DIR ]
-      assert [ -z $VERSION ]
+      assert [ -z $__sp_version ]
 
       rm /tmp/node-v18.20.3-*
   }
@@ -327,7 +327,7 @@ After the script failed, the newly introduced global variables shall not be set 
 
       assert_equal $OPTIND 1
       assert [ -z $INSTALLATION_BASE_DIR ]
-      assert [ -z $VERSION ]
+      assert [ -z $__sp_version ]
   }
 #+end_src
 
@@ -419,7 +419,7 @@ If the given (or default) version is already installed, the environment should n
 
       assert_equal $OPTIND 1
       assert [ -z $INSTALLATION_BASE_DIR ]
-      assert [ -z $VERSION ]
+      assert [ -z $__sp_version ]
       assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
 
       assert_file_not_exists /tmp/node-v20.14.0-linux-x64.tar.xz
@@ -438,7 +438,7 @@ If the given (or default) version is already installed, the environment should n
 
       assert_equal $OPTIND 1
       assert [ -z $INSTALLATION_BASE_DIR ]
-      assert [ -z $VERSION ]
+      assert [ -z $__sp_version ]
       assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64:$SPT_ORIGINAL_PATH"
 
       assert_file_not_exists /tmp/node-v20.14.0-win-x64.zip

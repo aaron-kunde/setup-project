@@ -80,24 +80,24 @@ __sp_restore_exported_vars() {
 __sp_installation_path() {
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    echo $INSTALLATION_BASE_DIR/node-$VERSION-win-x64
+	    echo $INSTALLATION_BASE_DIR/node-$__sp_version-win-x64
 	    ;;
 	*)
-	    echo $INSTALLATION_BASE_DIR/node-$VERSION-linux-x64/bin
+	    echo $INSTALLATION_BASE_DIR/node-$__sp_version-linux-x64/bin
 	    ;;
     esac
 }
 __sp_is_installed() {
     node --version 2>/dev/null &&
-	(node --version 2>&1 | grep $VERSION)
+	(node --version 2>&1 | grep $__sp_version)
 }
 __sp_installation_file() {
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    echo node-$VERSION-win-x64.zip
+	    echo node-$__sp_version-win-x64.zip
 	    ;;
 	*)
-	    echo node-$VERSION-linux-x64.tar.xz
+	    echo node-$__sp_version-linux-x64.tar.xz
 	    ;;
     esac
 }
@@ -114,7 +114,7 @@ __sp_install_installation_file() {
     esac
 }
 __sp_download_url() {
-    echo https://nodejs.org/dist/$VERSION/$(__sp_installation_file)
+    echo https://nodejs.org/dist/$__sp_version/$(__sp_installation_file)
 }
 __sp_print_success_message() {
     node -v
