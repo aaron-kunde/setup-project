@@ -1,67 +1,65 @@
 #!/bin/sh
-init_global_vars() {
-    VERSION=$(default_version)
-    INSTALLATION_BASE_DIR=$HOME/opt
+__sp_init_global_vars() {
+    __sp_version=$(__sp_default_version)
+    __sp_installation_base_dir=$HOME/opt
     # Reset OPTIND, if getopts was used before
     OPTIND=1
 }
-reset_global_vars() {
-    unset VERSION
-    unset INSTALLATION_BASE_DIR
+__sp_reset_custom_vars_and_funcs() {
+    unset $(declare | grep '^__sp_' | tr '=' ' ' | cut -f1 -d ' ')
     # Reset OPTIND for future use of getopts
     OPTIND=1
 }
-set_vars_from_opts() {
+__sp_set_vars_from_opts() {
     while getopts v: opt; do
 	case $opt in
-	    v) VERSION=$OPTARG
+	    v) __sp_version=$OPTARG
 	       ;;
 	esac
     done
 }
-abort() {
-    restore_exported_vars
-    reset_global_vars
+__sp_abort() {
+    __sp_restore_exported_vars
 
     return 0
 }
-local_installation_file_path() {
-    echo /tmp/$(installation_file)
+__sp_local_installation_file_path() {
+    echo /tmp/$(__sp_installation_file)
 }
-remote_installation_file_exists() {
-    curl -sIf $(download_url) >/dev/null
+__sp_remote_installation_file_exists() {
+    curl -sIf $(__sp_download_url) >/dev/null
 }
-download_installation_file() {
+__sp_download_installation_file() {
     echo "Download installation file"
-    curl $(download_url) -o $(local_installation_file_path)
+    curl $(__sp_download_url) -o $(__sp_local_installation_file_path)
 }
-install() {
-    echo "Install version: $VERSION"
+__sp_install() {
+    echo "Install version: $__sp_version"
 
-    if [ ! -f $(local_installation_file_path) ]; then
-	echo "Local installation file not found: $(local_installation_file_path). Try, download new one"
-	if remote_installation_file_exists; then
-	    download_installation_file
+    if [ ! -f $(__sp_local_installation_file_path) ]; then
+	echo "Local installation file not found: $(__sp_local_installation_file_path). Try, download new one"
+	if __sp_remote_installation_file_exists; then
+	    __sp_download_installation_file
 	else
 	    echo "ERROR: No remote installation file found. Abort"
-	    abort
+	    __sp_abort
 	fi
     fi
-    install_installation_file
+    __sp_install_installation_file
  }
-main() {
-    init_global_vars
-    set_vars_from_opts ${@}
+__sp_main() {
+    __sp_init_global_vars
+    __sp_set_vars_from_opts ${@}
 
-    if ! is_installed; then
+    if ! __sp_is_installed; then
 	echo "Start installation"
-	restore_exported_vars
-	export_vars
-	install || abort
+	__sp_restore_exported_vars
+	__sp_export_vars
+	__sp_install || __sp_abort
     fi
 
-    reset_global_vars
-    print_success_message
+    __sp_print_success_message
+    __sp_reset_custom_vars_and_funcs
 }
 
 default_version() {
