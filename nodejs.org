@@ -25,7 +25,7 @@ The version you want to install. Defaults to the [[*Default version][default ver
   <<download_url>>
   <<print_success_message>>
 
-  main ${@}
+  __sp_main ${@}
 #+end_src
 
 ** Global variables
