@@ -68,10 +68,10 @@ The installation differs, depending on the target OS. Windows with MingW and Lin
   __sp_installation_path() {
       case "$(uname -s)" in
 	  CYGWIN*|MINGW*|MSYS*)
-	      echo $INSTALLATION_BASE_DIR/node-$__sp_version-win-x64
+	      echo $__sp_installation_base_dir/node-$__sp_version-win-x64
 	      ;;
 	  ,*)
-	      echo $INSTALLATION_BASE_DIR/node-$__sp_version-linux-x64/bin
+	      echo $__sp_installation_base_dir/node-$__sp_version-linux-x64/bin
 	      ;;
       esac
   }
@@ -117,7 +117,7 @@ The installation of the local installation file is specific to the target OS:
 	      unzip -oq $(local_installation_file_path) -d $trgt_dir
 	      ;;
 	  ,*)
-	      tar Jxf $(local_installation_file_path) -C $INSTALLATION_BASE_DIR
+	      tar Jxf $(local_installation_file_path) -C $__sp_installation_base_dir
 	      ;;
       esac
   }
@@ -296,7 +296,7 @@ After the script has run without a given version, the newly introduced global va
       . $__SP_TESTEE
 
       assert_equal $OPTIND 1
-      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $__sp_installation_base_dir ]
       assert [ -z $__sp_version ]
 
       rm /tmp/node-v20.14.0-*
@@ -311,7 +311,7 @@ After the script has run with a given version, the newly introduced global varia
       . $__SP_TESTEE -v v18.20.3
 
       assert_equal $OPTIND 1
-      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $__sp_installation_base_dir ]
       assert [ -z $__sp_version ]
 
       rm /tmp/node-v18.20.3-*
@@ -326,7 +326,7 @@ After the script failed, the newly introduced global variables shall not be set 
       . $__SP_TESTEE -v installation_fail || assert_equal $? 127
 
       assert_equal $OPTIND 1
-      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $__sp_installation_base_dir ]
       assert [ -z $__sp_version ]
   }
 #+end_src
@@ -418,7 +418,7 @@ If the given (or default) version is already installed, the environment should n
       . $__SP_TESTEE
 
       assert_equal $OPTIND 1
-      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $__sp_installation_base_dir ]
       assert [ -z $__sp_version ]
       assert_equal "$PATH" "$HOME/opt/node-v20.14.0-linux-x64/bin:$SPT_ORIGINAL_PATH"
 
@@ -437,7 +437,7 @@ If the given (or default) version is already installed, the environment should n
       . $__SP_TESTEE
 
       assert_equal $OPTIND 1
-      assert [ -z $INSTALLATION_BASE_DIR ]
+      assert [ -z $__sp_installation_base_dir ]
       assert [ -z $__sp_version ]
       assert_equal "$PATH" "$HOME/opt/node-v20.14.0-win-x64:$SPT_ORIGINAL_PATH"
 

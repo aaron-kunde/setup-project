@@ -80,10 +80,10 @@ __sp_restore_exported_vars() {
 __sp_installation_path() {
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    echo $INSTALLATION_BASE_DIR/node-$__sp_version-win-x64
+	    echo $__sp_installation_base_dir/node-$__sp_version-win-x64
 	    ;;
 	*)
-	    echo $INSTALLATION_BASE_DIR/node-$__sp_version-linux-x64/bin
+	    echo $__sp_installation_base_dir/node-$__sp_version-linux-x64/bin
 	    ;;
     esac
 }
@@ -109,7 +109,7 @@ __sp_install_installation_file() {
 	    unzip -oq $(local_installation_file_path) -d $trgt_dir
 	    ;;
 	*)
-	    tar Jxf $(local_installation_file_path) -C $INSTALLATION_BASE_DIR
+	    tar Jxf $(local_installation_file_path) -C $__sp_installation_base_dir
 	    ;;
     esac
 }
