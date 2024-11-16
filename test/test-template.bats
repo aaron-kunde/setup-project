@@ -117,6 +117,7 @@ teardown() {
 
     assert_equal $OPTIND 1
     assert_equal "$PATH" "/some/new/path:$__SP_TEST_ORIGINAL_PATH"
+
     assert_file_not_exists /tmp/installation.file
 }
 @test "Must print success message if installation succeeds with default version" {
