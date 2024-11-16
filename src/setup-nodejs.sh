@@ -106,10 +106,10 @@ __sp_install_installation_file() {
 
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    unzip -oq $(local_installation_file_path) -d $trgt_dir
+	    unzip -oq $(__sp_local_installation_file_path) -d $trgt_dir
 	    ;;
 	*)
-	    tar Jxf $(local_installation_file_path) -C $__sp_installation_base_dir
+	    tar Jxf $(__sp_local_installation_file_path) -C $__sp_installation_base_dir
 	    ;;
     esac
 }
