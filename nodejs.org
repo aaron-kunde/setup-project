@@ -3,7 +3,7 @@ Use to install [[https://nodejs.org][Node.js]]. This is based on the global [[fi
 
 * Usage
 The script can be used by executing:
-#+begin_src :tangle no
+#+begin_src shell :tangle no
   . setup-nodejs.sh [-v VERSION]
 #+end_src
 
