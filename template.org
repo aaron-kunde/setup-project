@@ -290,7 +290,7 @@ If a remote installation file was found, download it:
 #+begin_src shell
   __sp_download_installation_file() {
       echo "Download installation file"
-      curl $(__sp_download_url) -o $(__sp_local_installation_file_path)
+      curl -L $(__sp_download_url) -o $(__sp_local_installation_file_path)
   }
 #+end_src
 

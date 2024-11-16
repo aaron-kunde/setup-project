@@ -31,7 +31,7 @@ __sp_remote_installation_file_exists() {
 }
 __sp_download_installation_file() {
     echo "Download installation file"
-    curl $(__sp_download_url) -o $(__sp_local_installation_file_path)
+    curl -L $(__sp_download_url) -o $(__sp_local_installation_file_path)
 }
 __sp_install() {
     echo "Install version: $__sp_version"
