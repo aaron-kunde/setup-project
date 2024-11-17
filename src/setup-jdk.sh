@@ -99,15 +99,6 @@ __sp_installation_path() {
     else
 	echo $__sp_installation_base_dir/jdk$__sp_version
     fi
-
-    #     case "$(uname -s)" in
-    # 	CYGWIN*|MINGW*|MSYS*)
-    # 	    echo $__sp_installation_base_dir/node-$__sp_version-win-x64
-    # 	    ;;
-    # 	*)
-    # 	    echo $__sp_installation_base_dir/node-$__sp_version-linux-x64/bin
-    # 	    ;;
-    #     esac
 }
 __sp_is_installed() {
     java -version 2>/dev/null &&

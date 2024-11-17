@@ -106,15 +106,6 @@ The installation differs, depending on the major version:
       else
 	  echo $__sp_installation_base_dir/jdk$__sp_version
       fi
-
-      #     case "$(uname -s)" in
-      # 	CYGWIN*|MINGW*|MSYS*)
-      # 	    echo $__sp_installation_base_dir/node-$__sp_version-win-x64
-      # 	    ;;
-      # 	*)
-      # 	    echo $__sp_installation_base_dir/node-$__sp_version-linux-x64/bin
-      # 	    ;;
-      #     esac
   }
 #+end_src
 
