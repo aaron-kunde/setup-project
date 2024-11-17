@@ -32,6 +32,10 @@ jobs:
         run: bats -t test/test-nodejs.bats
       - name: Run Linux specific tests for Node.js
         run: bats -t test/test-nodejs.linux.bats
+      - name: Run OS indenpendent tests for JDK
+        run: bats -t test/test-jdk.bats
+      - name: Run Linux specific tests for JDK
+        run: bats -t test/test-jdk.linux.bats
 
   test_scripts_windows:
     name: Test setup-scripts on Windows with MinGW
@@ -54,3 +58,7 @@ jobs:
         run: test/bats/bin/bats -t test/test-nodejs.bats
       - name: Run Windows specific tests for Node.js
         run: test/bats/bin/bats -t test/test-nodejs.win.bats
+      - name: Run OS indenpendent tests for JDK
+        run: test/bats/bin/bats -t test/test-jdk.bats
+      - name: Run Windows specific tests for JDK
+        run: test/bats/bin/bats -t test/test-jdk.win.bats
