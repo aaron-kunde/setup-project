@@ -147,7 +147,7 @@ __sp_check_installation_file() {
     local local_installation_sha256_file=/tmp/$(__sp_installation_file).sha256
 
     if [ ! -f $local_installation_sha256_file ]; then
-	curl -L $(download_url).sha256.txt -o $local_installation_sha256_file
+	curl -L $(__sp_download_url).sha256.txt -o $local_installation_sha256_file
     fi
 
     local pwd=$PWD
