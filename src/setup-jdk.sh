@@ -66,7 +66,7 @@ __sp_default_version() {
     echo 21.0.1+12
 }
 __sp_jdk_major_version() {
-    echo $__sp_version | sed -ne "s/^\([0-9]\+\).*/\1/p"
+    echo $__sp_version | sed -ne 's/^\([0-9]\+\).*/\1/p'
 }
 __sp_jdk_short_version() {
     if [ $(__sp_jdk_major_version) -gt 8 ]; then

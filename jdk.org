@@ -49,9 +49,9 @@ The version formarts in JDKs are not straight forward and depend higly on the di
 The following function extracts the major version from the given version:
 #+name: major_version
 #+begin_src shell
-    __sp_jdk_major_version() {
-	echo $__sp_version | sed -ne "s/^\([0-9]\+\).*/\1/p"
-    }
+  __sp_jdk_major_version() {
+      echo $__sp_version | sed -ne 's/^\([0-9]\+\).*/\1/p'
+  }
 #+end_src
 
 **** Short version
