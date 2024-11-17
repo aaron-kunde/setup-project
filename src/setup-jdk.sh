@@ -114,15 +114,12 @@ __sp_is_installed() {
 	(java -version 2>&1 | grep $__sp_version)
 }
 __sp_installation_file() {
-    local major_version=$(__sp_jdk_major_version)
-    local short_version=$(__sp_jdk_short_version)
-
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    echo OpenJDK${__sp_jdk_major_version}U-jdk_x64_windows_hotspot_$__sp_jdk_short_version.zip
+	    echo OpenJDK$(__sp_jdk_major_version)U-jdk_x64_windows_hotspot_$(__sp_jdk_short_version).zip
 	    ;;
 	*)
-	    echo OpenJDK${__sp_jdk_major_version}U-jdk_x64_linux_hotspot_$__sp_jdk_short_version.tar.gz
+	    echo OpenJDK$(__sp_jdk_major_version)U-jdk_x64_linux_hotspot_$(__sp_jdk_short_version).tar.gz
 	    ;;
     esac
 }
