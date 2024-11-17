@@ -1,217 +1,179 @@
-init_global_vars() {
-    DEFAULT_VERSION=21.0.1+12
-    VERSION=$DEFAULT_VERSION
-    INSTALLATION_BASE_DIR=$HOME/opt
+#!/bin/sh
+__sp_init_global_vars() {
+    __sp_version=$(__sp_default_version)
+    __sp_installation_base_dir=$HOME/opt
     # Reset OPTIND, if getopts was used before
     OPTIND=1
 }
-
-# Specific implementation needed
-print_usage() {
-    cat <<EOM
-${0} [-v VERSION]
-     -v VERSION Version of JDK to install.
-     	Default: $DEFAULT_VERSION
-EOM
+__sp_reset_custom_vars_and_funcs() {
+    unset $(declare | grep '^__sp_' | tr '=' ' ' | cut -f1 -d ' ')
+    # Reset OPTIND for future use of getopts
+    OPTIND=1
 }
-
-# Specific implementation needed
-set_vars_from_opts() {
+__sp_set_vars_from_opts() {
     while getopts v: opt; do
 	case $opt in
-	    v) VERSION=$OPTARG
+	    v) __sp_version=$OPTARG
 	       ;;
 	esac
     done
 }
-
-major_version() {
-    local ret=$(echo $VERSION | sed -ne "s/^\([0-9]\+\).*/\1/p")
-
-    if [ -z $ret ]; then
-	echo -1
-    else
-	echo $ret
-    fi 
-}
-
-# Specific implementation
-installation_path() {
-    local major_version=$(major_version)
-
-    if [ $major_version -gt 8 ]; then
-	echo $INSTALLATION_BASE_DIR/jdk-$VERSION
-    else
-	echo $INSTALLATION_BASE_DIR/jdk$VERSION
-    fi
-}
-
-# TODO: Rename to export_vars?
-# Specific implementation
-export_path_vars() {
-    echo "Adding $(installation_path) to PATH"
-    SETUP_JDK_ORIGINAL_PATH="${PATH}"
-    SETUP_JDK_ORIGINAL_JAVA_HOME="${JAVA_HOME}"
-    
-    export JAVA_HOME=$(installation_path)
-    export PATH="$JAVA_HOME/bin:${PATH}"
-}
-
-# TODO: Rename to reset_vars?
-# Specific implementation
-reset_path_vars() {
-    if [ -v SETUP_JDK_ORIGINAL_PATH ]; then
-	export PATH="${SETUP_JDK_ORIGINAL_PATH}"
-	unset SETUP_JDK_ORIGINAL_PATH
-    fi
-    if [ -v SETUP_JDK_ORIGINAL_JAVA_HOME ]; then
-	export JAVA_HOME="${SETUP_JDK_ORIGINAL_JAVA_HOME}"
-	unset SETUP_JDK_ORIGINAL_JAVA_HOME
-    fi
-}
-
-reset_global_vars() {
-    unset DEFAULT_VERSION
-    unset VERSION
-    unset INSTALLATION_BASE_DIR
-    # Reset OPTIND for future use of getopts
-    OPTIND=1
-}
-
-abort() {
-    reset_path_vars
-    reset_global_vars
+__sp_abort() {
+    __sp_restore_exported_vars
 
     return 0
 }
+__sp_local_installation_file_path() {
+    echo /tmp/$(__sp_installation_file)
+}
+__sp_remote_installation_file_exists() {
+    curl -sIf $(__sp_download_url) >/dev/null
+}
+__sp_download_installation_file() {
+    echo "Download installation file"
+    curl -L $(__sp_download_url) -o $(__sp_local_installation_file_path)
+}
+__sp_install() {
+    echo "Install version: $__sp_version"
 
-# Specific implementation
-is_installed() {
-    java -version 2>/dev/null &&
-	(java -version 2>&1 | grep $VERSION)
+    if [ ! -f $(__sp_local_installation_file_path) ]; then
+	echo "Local installation file not found: $(__sp_local_installation_file_path). Try, download new one"
+	if __sp_remote_installation_file_exists; then
+	    __sp_download_installation_file
+	else
+	    echo "ERROR: No remote installation file found. Abort"
+	    __sp_abort
+	fi
+    fi
+    __sp_install_installation_file
+ }
+__sp_main() {
+    __sp_init_global_vars
+    __sp_set_vars_from_opts ${@}
+
+    if ! __sp_is_installed; then
+	echo "Start installation"
+	__sp_restore_exported_vars
+	__sp_export_vars
+	__sp_install || __sp_abort
+    fi
+
+    __sp_print_success_message
+    __sp_reset_custom_vars_and_funcs
 }
 
-short_version() {
-    local major_version=$(major_version)
-
-    if [ $major_version -gt 8 ]; then
-	echo $VERSION | tr '+' '_'
+__sp_default_version() {
+    echo 21.0.1+12
+}
+__sp_jdk_major_version() {
+    echo $__sp_version | sed -ne "s/^\([0-9]\+\).*/\1/p"
+}
+__sp_jdk_short_version() {
+    if [ $(__sp_jdk_major_version) -gt 8 ]; then
+	echo $__sp_version | tr '+' '_'
     else
-	echo $VERSION | tr -d '-'
+	echo $__sp_version | tr -d '-'
     fi
 }
+__sp_export_vars() {
+    echo "Add $(__sp_installation_path) to PATH"
+    __SP_JDK_ORIGINAL_PATH="${PATH}"
+    __SP_JDK_ORIGINAL_JAVA_HOME="${JAVA_HOME}"
 
-# Specific implementation
-installation_file() {
-    local major_version=$(major_version)
-    local short_version=$(short_version)
+    export PATH="$(__sp_installation_path):${PATH}"
+    export JAVA_HOME=$(__sp_installation_path)
+}
+__sp_restore_exported_vars() {
+    if [ -v __SP_JDK_ORIGINAL_PATH ]; then
+	export PATH="${__SP_JDK_ORIGINAL_PATH}"
+	unset __SP_JDK_ORIGINAL_PATH
+    fi
+    if [ -v __SP_JDK_ORIGINAL_JAVA_HOME ]; then
+      export JAVA_HOME="${__SP_JDK_ORIGINAL_JAVA_HOME}"
+      unset __SP_JDK_ORIGINAL_JAVA_HOME
+    fi
+}
+__sp_installation_path() {
+    if [ $(__sp_jdk_major_version) -gt 8 ]; then
+	echo $__sp_installation_base_dir/jdk-$VERSION
+    else
+	echo $__sp_installation_base_dir/jdk$VERSION
+    fi
+
+    #     case "$(uname -s)" in
+    # 	CYGWIN*|MINGW*|MSYS*)
+    # 	    echo $__sp_installation_base_dir/node-$__sp_version-win-x64
+    # 	    ;;
+    # 	*)
+    # 	    echo $__sp_installation_base_dir/node-$__sp_version-linux-x64/bin
+    # 	    ;;
+    #     esac
+}
+__sp_is_installed() {
+    java -version 2>/dev/null &&
+	(java -version 2>&1 | grep $__sp_version)
+}
+__sp_installation_file() {
+    local major_version=$(__sp_jdk_major_version)
+    local short_version=$(__sp_jdk_short_version)
 
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    echo OpenJDK${major_version}U-jdk_x64_windows_hotspot_$short_version.zip
+	    echo OpenJDK${__sp_jdk_major_version}U-jdk_x64_windows_hotspot_$__sp_jdk_short_version.zip
 	    ;;
 	*)
-	    echo OpenJDK${major_version}U-jdk_x64_linux_hotspot_$short_version.tar.gz
+	    echo OpenJDK${__sp_jdk_major_version}U-jdk_x64_linux_hotspot_$__sp_jdk_short_version.tar.gz
 	    ;;
     esac
 }
-
-local_installation_file() {
-    echo /tmp/$(installation_file)
-}
-
-local_installation_file_exists() {
-    test -f $(local_installation_file)
-}
-
-# Specifc implermentation
-download_url() {
-    local major_version=$(major_version)
-    local base_url=https://github.com/adoptium/temurin$major_version-binaries/releases/download
-    local installation_file=$(installation_file)
-    
-    if [ $major_version -gt 8 ]; then
-	echo $base_url/jdk-${VERSION}/$installation_file
-    else
-	echo $base_url/jdk${VERSION}/$installation_file
-    fi
-}
-
-remote_installation_file_exists() {    
-    curl -sIf $(download_url) >/dev/null
-}
-
-download_installation_file() {
-    echo "Download installation file" 
-    curl -L $(download_url) -o $(local_installation_file)
-}
-
-# Specific implementation
-install_binaries() {
+__sp_install_binaries() {
     echo "Install installation binaries"
 
-    local local_installation_file=$(local_installation_file)
-    mkdir -p $JAVA_HOME
-    
+    local trgt_dir=$(dirname $(__sp_installation_path))
+
     case "$(uname -s)" in
 	CYGWIN*|MINGW*|MSYS*)
-	    unzip $local_installation_file -d $(dirname $JAVA_HOME)
+	    unzip -oq $(__sp_local_installation_file_path) -d $trgt_dir
 	    ;;
-	*)
-	    tar zxf $local_installation_file -C $(dirname $JAVA_HOME)
+	,*)
+	    tar Jxf $(__sp_local_installation_file_path) -C $__sp_installation_base_dir
 	    ;;
     esac
 }
 
-# Specific implmenetation
-check_installation_file() {
+__sp_check_installation_file() {
     echo "Check installation file"
 
-    local installation_file=$(installation_file)
-    local local_installation_sha256_file=/tmp/$installation_file.sha256
+    local local_installation_sha256_file=/tmp/$(__sp_installation_file).sha256
 
     if [ ! -f $local_installation_sha256_file ]; then
-	curl -L $(download_url).sha256.txt \
-	     -o $local_installation_sha256_file
+	curl -L $(download_url).sha256.txt -o $local_installation_sha256_file
     fi
+
     local pwd=$PWD
     cd /tmp
     sha256sum -c $local_installation_sha256_file
     cd $pwd
 }
 
-# Specific implementation
-install_installation_file() {
+__sp_install_installation_file() {
     echo "Install installation file"
 
-    check_installation_file
-    install_binaries
+    __sp_check_installation_file
+    __sp_install_binaries
 }
+__sp_download_url() {
+    local remote_installation_dir=jdk$__sp_version
 
-install() {
-    echo "Install version: $VERSION"
-
-    if ! local_installation_file_exists; then
-	echo "Local installation file not found: $(local_installation_file). Try, download new one"
-	if remote_installation_file_exists; then
-	    download_installation_file
-	else
-	    echo "ERROR: No installation file found. Abort"
-	    abort
-	fi
+    if [ $(__sp_jdk_major_version) -gt 8 ]; then
+	local remote_installation_dir=jdk$__sp_version
     fi
-    install_installation_file
+
+    echo https://github.com/adoptium/temurin$__sp_jdk_major_version-binaries/\
+	 releases/download/$remote_installation_dir/$(__sp_installation_file)
+}
+__sp_print_success_message() {
+    java -version
 }
 
-init_global_vars
-reset_path_vars
-set_vars_from_opts ${@}
-export_path_vars
-
-if ! is_installed; then
-    install || abort
-fi
-
-echo "JDK installed"
-
-reset_global_vars
+__sp_main ${@}

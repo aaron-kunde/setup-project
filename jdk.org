@@ -1,0 +1,655 @@
+#+title: Java Development Kit (JDK)
+Use to install a Java Development Kit (JDK). This is based on the global [[file:template.org][template]].
+Since there are several distributions https://sdkman.io/jdks, the default will be [[https://adoptium.net/temurin/releases/][Adoptium Eclipse Temurin]], which is also the only currently supported one.
+
+
+* Usage
+The script can be used by executing:
+#+begin_src shell :tangle no
+  . setup-nodejs.sh [-v VERSION]
+#+end_src
+
+** Parameters
+*** VERSION
+The version you want to install. Defaults to the [[*Default version][default version]].
+
+* Implementation
+#+begin_src shell :tangle src/setup-jdk.sh :mkdirp yes :noweb yes :shebang #!/bin/sh :tangle-mode '#o644 :exports none
+  <<template.org:lib()>>
+
+  <<default_version>>
+  <<major_version>>
+  <<short_version>>
+  <<export_vars>>
+  <<restore_exported_vars>>
+  <<installation_path>>
+  <<is_installed>>
+  <<installation_file>>
+  <<install_installation_file>>
+  <<download_url>>
+  <<print_success_message>>
+
+  __sp_main ${@}
+#+end_src
+
+** Global variables
+*** Default version
+Use a LTS:
+#+name: default_version
+#+begin_src shell
+  __sp_default_version() {
+      echo 21.0.1+12
+  }
+#+end_src
+
+*** Version handling
+The version formarts in JDKs are not straight forward and depend higly on the distributions. Functions for parsing and extracting major and minor versions are needed.
+
+**** Major version
+The following function extracts the major version from the given version:
+#+name: major_version
+#+begin_src shell
+    __sp_jdk_major_version() {
+	echo $__sp_version | sed -ne "s/^\([0-9]\+\).*/\1/p"
+    }
+#+end_src
+
+**** Short version
+The short version of the version string is used in some installation files und depends on the major version:
+#+name: short_version
+#+begin_src shell
+  __sp_jdk_short_version() {
+      if [ $(__sp_jdk_major_version) -gt 8 ]; then
+	  echo $__sp_version | tr '+' '_'
+      else
+	  echo $__sp_version | tr -d '-'
+      fi
+  }
+#+end_src
+
+*** Exported variables
+The variables ~PATH~ and ~JAVA_HOME~ are exported. They must be saved and restored, if something goes wrong:
+#+name: export_vars
+#+begin_src shell
+  __sp_export_vars() {
+      echo "Add $(__sp_installation_path) to PATH"
+      __SP_JDK_ORIGINAL_PATH="${PATH}"
+      __SP_JDK_ORIGINAL_JAVA_HOME="${JAVA_HOME}"
+
+      export PATH="$(__sp_installation_path):${PATH}"
+      export JAVA_HOME=$(__sp_installation_path)
+  }
+#+end_src
+
+The corresponding reset function restores the variables ~PATH~ and ~JAVA_HOME~ and deletes the backup, to clean up the environment:
+#+name: restore_exported_vars
+#+begin_src shell
+  __sp_restore_exported_vars() {
+      if [ -v __SP_JDK_ORIGINAL_PATH ]; then
+	  export PATH="${__SP_JDK_ORIGINAL_PATH}"
+	  unset __SP_JDK_ORIGINAL_PATH
+      fi
+      if [ -v __SP_JDK_ORIGINAL_JAVA_HOME ]; then
+	export JAVA_HOME="${__SP_JDK_ORIGINAL_JAVA_HOME}"
+	unset __SP_JDK_ORIGINAL_JAVA_HOME
+      fi
+  }
+#+end_src
+
+*** Installation path
+The installation differs, depending on the major version:
+#+name: installation_path
+#+begin_src shell
+  __sp_installation_path() {
+      if [ $(__sp_jdk_major_version) -gt 8 ]; then
+	  echo $__sp_installation_base_dir/jdk-$VERSION
+      else
+	  echo $__sp_installation_base_dir/jdk$VERSION
+      fi
+
+      #     case "$(uname -s)" in
+      # 	CYGWIN*|MINGW*|MSYS*)
+      # 	    echo $__sp_installation_base_dir/node-$__sp_version-win-x64
+      # 	    ;;
+      # 	*)
+      # 	    echo $__sp_installation_base_dir/node-$__sp_version-linux-x64/bin
+      # 	    ;;
+      #     esac
+  }
+#+end_src
+
+** Check, if wanted version is installed
+Before starting the installation, check if the wanted version is already installed:
+#+name: is_installed
+#+begin_src shell
+  __sp_is_installed() {
+      java -version 2>/dev/null &&
+	  (java -version 2>&1 | grep $__sp_version)
+  }
+#+end_src
+
+** Install wanted version
+The installation depends on the target OS:
+
+*** Installation file
+The installation file is specific to the target OS:
+#+name: installation_file
+#+begin_src shell
+  __sp_installation_file() {
+      local major_version=$(__sp_jdk_major_version)
+      local short_version=$(__sp_jdk_short_version)
+
+      case "$(uname -s)" in
+	  CYGWIN*|MINGW*|MSYS*)
+	      echo OpenJDK${__sp_jdk_major_version}U-jdk_x64_windows_hotspot_$__sp_jdk_short_version.zip
+	      ;;
+	  ,*)
+	      echo OpenJDK${__sp_jdk_major_version}U-jdk_x64_linux_hotspot_$__sp_jdk_short_version.tar.gz
+	      ;;
+      esac
+  }
+#+end_src
+
+*** Install installation file
+The installation of the local installation file is specific to the target OS:
+#+name: install_installation_file
+#+begin_src shell
+  __sp_install_binaries() {
+      echo "Install installation binaries"
+    
+      local trgt_dir=$(dirname $(__sp_installation_path))
+    
+      case "$(uname -s)" in
+	  CYGWIN*|MINGW*|MSYS*)
+	      unzip -oq $(__sp_local_installation_file_path) -d $trgt_dir
+	      ;;
+	  ,,*)
+	      tar Jxf $(__sp_local_installation_file_path) -C $__sp_installation_base_dir
+	      ;;
+      esac
+  }
+
+  __sp_check_installation_file() {
+      echo "Check installation file"
+
+      local local_installation_sha256_file=/tmp/$(__sp_installation_file).sha256
+
+      if [ ! -f $local_installation_sha256_file ]; then
+	  curl -L $(download_url).sha256.txt -o $local_installation_sha256_file
+      fi
+
+      local pwd=$PWD
+      cd /tmp
+      sha256sum -c $local_installation_sha256_file
+      cd $pwd
+  }
+
+  __sp_install_installation_file() {
+      echo "Install installation file"
+
+      __sp_check_installation_file
+      __sp_install_binaries
+  }
+#+end_src
+
+*** Download URL
+#+name: download_url
+#+begin_src shell
+  __sp_download_url() {
+      local remote_installation_dir=jdk$__sp_version
+
+      if [ $(__sp_jdk_major_version) -gt 8 ]; then
+	  local remote_installation_dir=jdk$__sp_version
+      fi
+
+      echo https://github.com/adoptium/temurin$__sp_jdk_major_version-binaries/\
+	   releases/download/$remote_installation_dir/$(__sp_installation_file)
+  }
+#+end_src
+
+** Print success message
+The success message prints the version of the current JDK installation:
+#+name: print_success_message
+#+begin_src shell
+  __sp_print_success_message() {
+      java -version
+  }
+#+end_src
+
+* Tests
+** Execute
+Execute OS independent tests:
+#+begin_src shell
+  test/bats/bin/bats -t test/test-jdk.bats
+#+end_src
+#+begin_src bats :tangle test/test-jdk.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :tangle-mode '#o644 :exports none
+  __SP_TESTEE=src/setup-jdk.sh
+
+  <<setup>>
+  <<teardown>>
+
+  <<Environment must be clean after execution if succeeds with default version>>
+  <<Environment must be clean after execution if succeeds with given version>>
+  <<Environment must be clean after execution if installation fails>>
+  <<Should only print success message if version is already installed>>
+  <<Should not alter environment if installation fails>>
+  <<Must print error message if remote installation file not found>>
+  <<Should try download if local installation file not exists>>
+  <<Should try download if remote installation file exists>>
+#+end_src
+
+Execute tests specific for Linux:
+#+begin_src shell
+  test/bats/bin/bats -t test/test-nodejs.linux.bats
+#+end_src
+#+begin_src bats :tangle test/test-jdk.linux.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :tangle-mode '#o644 :exports none
+  __SP_TESTEE=src/setup-jdk.sh
+
+  <<setup>>
+  <<teardown>>
+
+  <<Must print versions to install with default version using Linux>>
+  <<Must print versions to install with given version using Linux>>
+  <<Should export variables if succeeds with default version using Linux>>
+  <<Should export variables if succeeds with given version using Linux>>
+  <<Should not alter environment if version is already installed using Linux>>
+  <<Must print success message if installation succeeds with default version using Linux>>
+  <<Must print success message if installation succeeds with given version using Linux>>
+  <<Should not try download if local installation file exists using Linux>>
+#+end_src
+
+Execute tests specific for Windows:
+#+begin_src shell
+  test/bats/bin/bats -t test/test-nodejs.win.bats
+#+end_src
+#+begin_src bats :tangle test/test-jdk.win.bats :mkdirp yes :noweb strip-export :shebang #!/usr/bin/env bats :tangle-mode '#o644 :exports none
+  __SP_TESTEE=src/setup-jdk.sh
+
+  <<setup>>
+  <<teardown>>
+
+  <<Must print versions to install with default version using Windows>>
+  <<Must print versions to install with given version using Windows>>
+  <<Should export variables if succeeds with default version using Windows>>
+  <<Should export variables if succeeds with given version using Windows>>
+  <<Should not alter environment if version is already installed using Windows>>
+  <<Must print success message if installation succeeds with default version using Windows>>
+  <<Must print success message if installation succeeds with given version using Windows>>
+  <<Should not try download if local installation file exists using Windows>>
+#+end_src
+
+Each test needs a setup, which loads the necessary Bats libraries:
+- [[https://github.com/bats-core/bats-support][bats-support]]
+- [[https://github.com/bats-core/bats-assert][bats-assert]]
+- [[https://github.com/bats-core/bats-file][bats-file]]
+
+Furthermore, the exported variables are backed up. In this case at least the ~PATH~:
+#+name: setup
+#+begin_src bats
+  setup() {
+    load 'test_helper/bats-support/load'
+    load 'test_helper/bats-assert/load'
+    load 'test_helper/bats-file/load'
+
+    __SP_TEST_ORIGINAL_PATH="$PATH"
+  }
+#+end_src
+
+To clean up, the exported variables are reset to its saved values after each test:
+#+name: teardown
+#+begin_src bats
+  teardown() {
+      PATH="$__SP_TEST_ORIGINAL_PATH"
+
+      # Assert, no custom variable or function is set
+      declare | grep -e '^__sp_'
+      assert_equal $? 1
+  }
+#+end_src
+
+** Test cases
+
+*** Must print version and path to install
+If wanted version is not the current, print the version to be installed and the path to be added.
+**** With default version
+***** Using Linux
+#+name: Must print versions to install with default version using Linux
+#+begin_src bats
+  @test "Must print versions to install with default version using Linux" {
+      run . $__SP_TESTEE
+
+      assert_line 'Install version: v20.14.0'
+      assert_line "Add $HOME/opt/jdk-v20.14.0-linux-x64/bin to PATH"
+
+      rm /tmp/jdk-v20.14.0-*
+  }
+#+end_src
+
+***** Using Windows
+#+name: Must print versions to install with default version using Windows
+#+begin_src bats
+  @test "Must print versions to install with default version using Windows" {
+      run . $__SP_TESTEE
+
+      assert_line 'Install version: v20.14.0'
+      assert_line "Add $HOME/opt/jdk-v20.14.0-win-x64 to PATH"
+
+      rm /tmp/jdk-v20.14.0-*
+  }
+#+end_src
+
+**** With given version
+
+***** Using Linux
+#+name: Must print versions to install with given version using Linux
+#+begin_src bats
+  @test "Must print versions to install with given version using Linux" {
+      run .  $__SP_TESTEE -v v18.20.3
+
+      assert_line 'Install version: v18.20.3'
+      assert_line "Add $HOME/opt/jdk-v18.20.3-linux-x64/bin to PATH"
+
+      rm /tmp/jdk-v18.20.3-*
+  }
+#+end_src
+
+***** Using Windows
+#+name: Must print versions to install with given version using Windows
+#+begin_src bats
+  @test "Must print versions to install with given version using Windows" {
+      run .  $__SP_TESTEE -v v18.20.3
+
+      assert_line 'Install version: v18.20.3'
+      assert_line "Add $HOME/opt/jdk-v18.20.3-win-x64 to PATH"
+
+      rm /tmp/jdk-v18.20.3-*
+  }
+#+end_src
+
+*** Environment must be clean after execution
+
+**** If succeeds with default version
+After the script has run without a given version, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~:
+#+name: Environment must be clean after execution if succeeds with default version
+#+begin_src bats
+  @test "Environment must be clean after execution if succeeds with default version" {
+      . $__SP_TESTEE
+
+      assert_equal $OPTIND 1
+
+      rm /tmp/jdk-v20.14.0-*
+  }
+#+end_src
+
+**** If succeeds with given version
+After the script has run with a given version, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~:
+#+name: Environment must be clean after execution if succeeds with given version
+#+begin_src bats
+  @test "Environment must be clean after execution if succeeds with given version" {
+      . $__SP_TESTEE -v v18.20.3
+
+      assert_equal $OPTIND 1
+
+      rm /tmp/jdk-v18.20.3-*
+  }
+#+end_src
+
+**** If installation fails
+After the script failed, the newly introduced global variables shall not be set and ~$OPTIND~ must be ~1~:
+#+name: Environment must be clean after execution if installation fails
+#+begin_src bats
+  @test "Environment must be clean after execution if installation fails" {
+      . $__SP_TESTEE -v installation_fail || assert_equal $? 127
+
+      assert_equal $OPTIND 1
+  }
+#+end_src
+
+*** Should export variables
+The exported ~$PATH~ must be extended with the wanted version.
+
+**** If succeeds with default version
+
+***** Using Linux
+#+name: Should export variables if succeeds with default version using Linux
+#+begin_src bats
+  @test "Should export variables if succeeds with default version using Linux" {
+      . $__SP_TESTEE
+
+      assert_equal "$PATH" "$HOME/opt/jdk-v20.14.0-linux-x64/bin:$__SP_TEST_ORIGINAL_PATH"
+
+      rm /tmp/jdk-v20.14.0-linux-x64.tar.xz
+  }
+#+end_src
+
+***** Using Windows
+#+name: Should export variables if succeeds with default version using Windows
+#+begin_src bats
+  @test "Should export variables if succeeds with default version using Windows" {
+      . $__SP_TESTEE
+
+      assert_equal "$PATH" "$HOME/opt/jdk-v20.14.0-win-x64:$__SP_TEST_ORIGINAL_PATH"
+
+      rm /tmp/jdk-v20.14.0-win-x64.zip
+  }
+#+end_src
+
+**** If succeeds with given version
+
+***** Using Linux
+#+name: Should export variables if succeeds with given version using Linux
+#+begin_src bats
+  @test "Should export variables if succeeds with given version using Linux" {
+      . $__SP_TESTEE -v v18.20.3
+
+      assert_equal "$PATH" "$HOME/opt/jdk-v18.20.3-linux-x64/bin:$__SP_TEST_ORIGINAL_PATH"
+
+      rm /tmp/jdk-v18.20.3-linux-x64.tar.xz
+  }
+#+end_src
+
+***** Using Windows
+#+name: Should export variables if succeeds with given version using Windows
+#+begin_src bats
+  @test "Should export variables if succeeds with given version using Windows" {
+      . $__SP_TESTEE -v v18.20.3
+
+      assert_equal "$PATH" "$HOME/opt/jdk-v18.20.3-win-x64:$__SP_TEST_ORIGINAL_PATH"
+
+      rm /tmp/jdk-v18.20.3-win-x64.zip
+  }
+#+end_src
+
+*** Should only print success message, if version is already installed
+If the given (or default) version is already installed, only a success message should be shown:
+#+name: Should only print success message if version is already installed
+#+begin_src bats
+  @test "Should only print success message if version is already installed" {
+      . $__SP_TESTEE
+      rm /tmp/jdk-v20.14.0-*
+
+      run . $__SP_TESTEE
+
+      refute_line -p "Add $HOME/opt/"
+      refute_line -p 'Install version: '
+      assert_line 'v20.14.0'
+
+      assert_file_not_exists /tmp/jdk-v20.14.0-*
+  }
+#+end_src
+
+*** Should not alter environment, if version is already installed
+If the given (or default) version is already installed, the environment should not be altered:
+
+**** Using Linux
+#+name: Should not alter environment if version is already installed using Linux
+#+begin_src bats
+  @test "Should not alter environment if version is already installed using Linux" {
+      . $__SP_TESTEE
+      assert_equal "$PATH" "$HOME/opt/jdk-v20.14.0-linux-x64/bin:$__SP_TEST_ORIGINAL_PATH"
+      rm /tmp/jdk-v20.14.0-linux-x64.tar.xz
+
+      . $__SP_TESTEE
+
+      assert_equal $OPTIND 1
+      assert_equal "$PATH" "$HOME/opt/jdk-v20.14.0-linux-x64/bin:$__SP_TEST_ORIGINAL_PATH"
+
+      assert_file_not_exists /tmp/jdk-v20.14.0-linux-x64.tar.xz
+  }
+#+end_src
+
+**** Using Windows
+#+name: Should not alter environment if version is already installed using Windows
+#+begin_src bats
+  @test "Should not alter environment if version is already installed using Windows" {
+      . $__SP_TESTEE
+      assert_equal "$PATH" "$HOME/opt/jdk-v20.14.0-win-x64:$__SP_TEST_ORIGINAL_PATH"
+      rm /tmp/jdk-v20.14.0-win-x64.zip
+
+      . $__SP_TESTEE
+
+      assert_equal $OPTIND 1
+      assert_equal "$PATH" "$HOME/opt/jdk-v20.14.0-win-x64:$__SP_TEST_ORIGINAL_PATH"
+
+      assert_file_not_exists /tmp/jdk-v20.14.0-win-x64.zip
+  }
+#+end_src
+
+*** Should not alter environment, if installation fails
+After the script failed, the exported ~$PATH~ must not be altered:
+#+name: Should not alter environment if installation fails
+#+begin_src bats
+  @test "Should not alter environment if installation fails" {
+      . $__SP_TESTEE -v installation_fail || assert_equal $? 127
+
+      assert_equal "$PATH" "$__SP_TEST_ORIGINAL_PATH"
+  }
+#+end_src
+
+*** Must print success message, if installation succeeds
+If successful, a success message must be printed.
+
+**** With default version
+
+***** Using Linux
+#+name: Must print success message if installation succeeds with default version using Linux
+#+begin_src bats
+  @test "Must print success message if installation succeeds with default version using Linux" {
+      run . $__SP_TESTEE
+
+      assert_line 'v20.14.0'
+
+      rm /tmp/jdk-v20.14.0-linux-x64.tar.xz
+  }
+#+end_src
+
+***** Using Windows
+#+name: Must print success message if installation succeeds with default version using Windows
+#+begin_src bats
+  @test "Must print success message if installation succeeds with default version using Windows" {
+      run . $__SP_TESTEE
+
+      assert_line 'v20.14.0'
+
+      rm /tmp/jdk-v20.14.0-win-x64.zip
+  }
+#+end_src
+
+**** With given version
+
+***** Using Linux
+#+name: Must print success message if installation succeeds with given version using Linux
+#+begin_src bats
+  @test "Must print success message if installation succeeds with given version using Linux" {
+      run . $__SP_TESTEE -v v18.20.3
+
+      assert_line 'v18.20.3'
+
+      rm /tmp/jdk-v18.20.3-linux-x64.tar.xz
+  }
+#+end_src
+
+***** Using Windows
+#+name: Must print success message if installation succeeds with given version using Windows
+#+begin_src bats
+  @test "Must print success message if installation succeeds with given version using Windows" {
+      run . $__SP_TESTEE -v v18.20.3
+
+      assert_line 'v18.20.3'
+
+      rm /tmp/jdk-v18.20.3-win-x64.zip
+  }
+#+end_src
+
+*** Must print error message, if remote installation file not found
+#+name: Must print error message if remote installation file not found
+#+begin_src bats
+  @test "Must print error message if remote installation file not found" {
+      run . $__SP_TESTEE -v download_fail
+
+      assert_line 'Install version: download_fail'
+      assert_line -e 'Local installation file not found: /tmp/jdk-download_fail-.*\. Try, download new one'
+      assert_line 'ERROR: No remote installation file found. Abort'
+
+      assert_file_not_exists /tmp/jdk-download_fail-*
+  }
+#+end_src
+
+*** Should try download
+
+**** If local installation file not exists
+#+name: Should try download if local installation file not exists
+#+begin_src bats
+  @test "Should try download if local installation file not exists" {
+      run . $__SP_TESTEE
+
+      assert_line -e 'Local installation file not found: /tmp/jdk-v20\.14\.0-.*\. Try, download new one'
+      assert_line 'Download installation file'
+
+      rm /tmp/jdk-v20.14.0-*
+  }
+#+end_src
+
+**** If remote installation file exists
+#+name: Should try download if remote installation file exists
+#+begin_src bats
+  @test "Should try download if remote installation file exists" {
+      run . $__SP_TESTEE
+
+      assert_line 'Download installation file'
+
+      rm /tmp/jdk-v20.14.0-*
+   }
+#+end_src
+
+*** Should not try download, if local installation file exists
+
+**** Using Linux
+#+name: Should not try download if local installation file exists using Linux
+#+begin_src bats
+  @test "Should not try download if local installation file exists using Linux" {
+      touch /tmp/jdk-v20.14.0-linux-x64.tar.xz
+
+      run . $__SP_TESTEE
+
+      refute_line 'Local installation file not found: /tmp/jdk-v20.14.0-linux-x64.tar.xz. Try, download new one'
+      refute_line 'Download installation file'
+
+      rm /tmp/jdk-v20.14.0-linux-x64.tar.xz
+  }
+#+end_src
+
+**** Using Windows
+#+name: Should not try download if local installation file exists using Windows
+#+begin_src bats
+  @test "Should not try download if local installation file exists using Windows" {
+      touch /tmp/jdk-v20.14.0-win-x64.zip
+
+      run . $__SP_TESTEE
+
+      refute_line 'Local installation file not found: /tmp/jdk-v20.14.0-win-x64.zip. Try, download new one'
+      refute_line 'Download installation file'
+
+      rm /tmp/jdk-v20.14.0-win-x64.zip
+  }
+#+end_src
