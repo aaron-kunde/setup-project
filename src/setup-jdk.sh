@@ -95,9 +95,9 @@ __sp_restore_exported_vars() {
 }
 __sp_installation_path() {
     if [ $(__sp_jdk_major_version) -gt 8 ]; then
-	echo $__sp_installation_base_dir/jdk-$VERSION
+	echo $__sp_installation_base_dir/jdk-$__sp_version
     else
-	echo $__sp_installation_base_dir/jdk$VERSION
+	echo $__sp_installation_base_dir/jdk$__sp_version
     fi
 
     #     case "$(uname -s)" in
