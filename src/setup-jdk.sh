@@ -132,7 +132,7 @@ __sp_install_binaries() {
 	CYGWIN*|MINGW*|MSYS*)
 	    unzip -oq $(__sp_local_installation_file_path) -d $trgt_dir
 	    ;;
-	,*)
+	*)
 	    tar Jxf $(__sp_local_installation_file_path) -C $__sp_installation_base_dir
 	    ;;
     esac
