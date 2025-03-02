@@ -1,4 +1,4 @@
-#+title: Setting up projects
+#+title: Setting up projects [ARCHIVED]
 #+author: Aaron Kunde
 #+email: aaron.kunde@web.de
 A collection of shell scripts, to set up work projects. The primary focus are projects for developing software, but can be anything. These scripts deal with tasks, like
@@ -8,6 +8,8 @@ A collection of shell scripts, to set up work projects. The primary focus are pr
 In general the scripts fulfill the tasks:
 1. [[* Installation of software][Installation of software]]
 2. [[* Setting up the environment][Setting up the environment]]
+
+*Note*: This project has been archived in favor of using [[https://asdf-vm.com/][asdf]].
 
 * Installation of software
 - Check, if the software in the wanted version is already installed.
